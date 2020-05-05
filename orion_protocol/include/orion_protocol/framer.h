@@ -26,4 +26,4 @@
 
 int DoSomething(int a, int b);
 
-#endif // ORION_PROTOCOL_FRAMER_H
+#endif  // ORION_PROTOCOL_FRAMER_H
