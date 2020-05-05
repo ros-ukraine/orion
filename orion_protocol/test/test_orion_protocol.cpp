@@ -26,10 +26,11 @@
 
 TEST(TestSuite, positiveTestCase)
 {
-    EXPECT_EQ(5, DoSomething(2, 3));
+  EXPECT_EQ(5, DoSomething(2, 3));
 }
 
-int main(int argc, char **argv){
+int main(int argc, char **argv)
+{
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
