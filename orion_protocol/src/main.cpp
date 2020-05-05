@@ -25,5 +25,6 @@
 
 int main()
 {
-   return 0;
+   int result = DoSomething(5, -5);
+   return result;
 }
