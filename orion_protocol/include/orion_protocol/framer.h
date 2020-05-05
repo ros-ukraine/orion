@@ -21,4 +21,9 @@
 *
 */
 
+#ifndef ORION_PROTOCOL_FRAMER_H
+#define ORION_PROTOCOL_FRAMER_H
+
 int DoSomething(int a, int b);
+
+#endif // ORION_PROTOCOL_FRAMER_H
