@@ -1,0 +1,12 @@
+@startuml
+
+participant Client as C
+participant "Application Layer" as AL
+participant "Transport Layer" as TL
+
+C -> AL: Send Message
+'note over C: hello
+Master -> "Data Link Layer": Send
+"Data Link Layer" -> UART: Send
+
+@enduml
