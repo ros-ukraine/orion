@@ -37,12 +37,14 @@ public:
   Master(uint32_t retry_timeout, uint8_t retry_count):default_timeout(retry_timeout),
     default_retry_count(retry_count) {};
 
-  template<class Command, class Result>  Result invoke(const Command &command);
+  template<class Command, class Result>
+  void invoke(const Command &command, Result *result);
 
-  template<class Command, class Result>  Result invoke(const Command &command, uint32_t retry_timeout);
+  template<class Command, class Result>
+  void invoke(const Command &command, Result *result, uint32_t retry_timeout);
 
-  template<class Command, class Result> Result invoke(const Command &command, uint32_t retry_timeout,
-    uint8_t retry_count);
+  template<class Command, class Result>
+  void invoke(const Command &command, Result *result, uint32_t retry_timeout, uint8_t retry_count);
 
 private:
 
