@@ -34,25 +34,37 @@ class Master
 public:
   Master() {};
 
-  Master(uint32_t retry_timeout, uint8_t retry_count):default_timeout(retry_timeout),
-    default_retry_count(retry_count) {};
+  Master(uint32_t retry_timeout, uint8_t retry_count):default_timeout_(retry_timeout),
+    default_retry_count_(retry_count) {};
 
   template<class Command, class Result>
-  void invoke(const Command &command, Result *result);
+  void invoke(const Command &command, Result *result)
+  {
+    this->invoke<Command, Result>(command, result, this->default_timeout_, this->default_retry_count_);
+  }
 
   template<class Command, class Result>
-  void invoke(const Command &command, Result *result, uint32_t retry_timeout);
+  void invoke(const Command &command, Result *result, uint32_t retry_timeout)
+  {
+    this->invoke<Command, Result>(command, result, retry_timeout, this->default_retry_count_);
+  }
 
   template<class Command, class Result>
-  void invoke(const Command &command, Result *result, uint32_t retry_timeout, uint8_t retry_count);
+  void invoke(const Command &command, Result *result, uint32_t retry_timeout, uint8_t retry_count)
+  {
+    this->sendAndReceive(reinterpret_cast<const uint8_t*>(&command), sizeof(command), retry_timeout, retry_count,
+      reinterpret_cast<uint8_t*>(result), sizeof(*result));
+  }
+
+  static const uint32_t ONE_SECOND_TIMEOUT = 1000000;
 
 private:
 
-  void sendAndReceive(uint8_t *input_buffer, uint32_t input_size, uint32_t retry_timeout, uint8_t retry_count,
+  void sendAndReceive(const uint8_t *input_buffer, uint32_t input_size, uint32_t retry_timeout, uint8_t retry_count,
     uint8_t *output_buffer, uint32_t output_size);
 
-  uint32_t default_timeout = 100000; // microseconds
-  uint8_t default_retry_count = 1;
+  uint32_t default_timeout_ = 100000; // microseconds
+  uint8_t default_retry_count_ = 1;
 
 };
 

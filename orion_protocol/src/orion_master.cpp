@@ -26,27 +26,8 @@
 namespace orion
 {
 
-template<class Command, class Result>
-void Master::invoke(const Command &command, Result *result)
-{
-  this->invoke<Command, Result>(command, result, this->default_timeout, this->default_retry_count);
-}
-
-template<class Command, class Result>
-void Master::invoke(const Command &command, Result *result, uint32_t retry_timeout)
-{
-  this->invoke<Command, Result>(command, result, retry_timeout, this->default_retry_count);
-}
-
-template<class Command, class Result>
-void Master::invoke(const Command &command, Result *result, uint32_t retry_timeout, uint8_t retry_count)
-{
-  this->sendAndReceive(static_cast<uint8_t*>(&command), sizeof(command), this->default_timeout,
-    this->default_retry_count, static_cast<uint8_t*>(&result), sizeof(result));
-}
-
-void Master::sendAndReceive(uint8_t *input_buffer, uint32_t input_size, uint32_t retry_timeout, uint8_t retry_count,
-  uint8_t *output_buffer, uint32_t output_size)
+void Master::sendAndReceive(const uint8_t *input_buffer, uint32_t input_size, uint32_t retry_timeout,
+  uint8_t retry_count, uint8_t *output_buffer, uint32_t output_size)
 {
   // TODO: Implement
 }
