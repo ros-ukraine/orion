@@ -56,14 +56,14 @@ public:
       reinterpret_cast<uint8_t*>(result), sizeof(*result));
   }
 
-  static const uint32_t ONE_SECOND_TIMEOUT = 1000000;
+  enum Timeout { Microsecond = 1, Millisecond = 1000 * Microsecond, Second = 1000 * Millisecond };
 
 private:
 
   void sendAndReceive(const uint8_t *input_buffer, uint32_t input_size, uint32_t retry_timeout, uint8_t retry_count,
     uint8_t *output_buffer, uint32_t output_size);
 
-  uint32_t default_timeout_ = 100000; // microseconds
+  uint32_t default_timeout_ = 100 * Timeout::Millisecond;
   uint8_t default_retry_count_ = 1;
 
 };
