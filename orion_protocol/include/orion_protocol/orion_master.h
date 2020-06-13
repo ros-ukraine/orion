@@ -65,7 +65,7 @@ public:
     ROS_ASSERT(sizeof(Command) >= sizeof(CommandHeader));
     ROS_ASSERT(sizeof(Result) >= sizeof(ResultHeader));
 
-    CommandHeader *command_header = reinterpret_cast<CommandHeader*>(&command);
+    const CommandHeader *command_header = reinterpret_cast<const CommandHeader*>(&command);
     ResultHeader *result_header = reinterpret_cast<ResultHeader*>(result);
 
     bool received = false;
@@ -95,7 +95,7 @@ public:
       }
       retry_count--;
     }
-    if (false = received)
+    if (false == received)
     {
       throw std::runtime_error("Timeout expired but result was not received");
     }
@@ -114,7 +114,7 @@ private:
 
   NetworkLayer *network_layer_;
 
-  const uinit32_t BUFFER_SIZE = 500;
+  static const uint32_t BUFFER_SIZE = 500;
   uint8_t result_buffer_[BUFFER_SIZE];
 };
 

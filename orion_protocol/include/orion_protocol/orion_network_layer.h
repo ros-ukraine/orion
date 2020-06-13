@@ -29,10 +29,11 @@ namespace orion
 
 class NetworkLayer
 {
+public:
   virtual size_t sendAndReceivePacket(const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout,
     uint8_t *output_buffer, uint32_t output_size) = 0;
   virtual ~NetworkLayer() = default;
-}
+};
 
 }  // orion
 

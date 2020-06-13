@@ -21,7 +21,6 @@
 *
 */
 
-#include <ros/ros.h>
 #include "orion_protocol/orion_timeout.h"
 
 namespace orion
@@ -29,20 +28,21 @@ namespace orion
 
 Timeout::Timeout(uint32_t timeout)
 {
-  this->till_time_ = timeout + ros::now();
+  this->till_time_ = ros::Time::now() + ros::Duration(0, timeout * 1000);
 }
 
 bool Timeout::hasTime()
 {
-  return (0 != this->timeoutLeft())
+  return (0 != this->timeLeft());
 }
 
 uint32_t Timeout::timeLeft()
 {
-  uint32_t time_now = ros::now();
+  ros::Time time_now = ros::Time::now();
   if (this->till_time_ > time_now)
   {
-    return this->till_time_ - time_now;
+    uint64_t time_left = this->till_time_.toNSec() - time_now.toNSec();
+    return static_cast<uint32_t>(time_left / 1000);
   }
   return 0;
 }
