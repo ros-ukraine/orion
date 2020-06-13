@@ -21,42 +21,19 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_HEADER_H
-#define ORION_PROTOCOL_ORION_HEADER_H
+#ifndef ORION_PROTOCOL_ORION_NETWORK_LAYER_H
+#define ORION_PROTOCOL_ORION_NETWORK_LAYER_H
 
 namespace orion
 {
 
-#pragma pack(push, 1)
-
-struct FrameHeader
+class NetworkLayer
 {
-  uint16_t size;
-  uint16_t crc;
-};
-
-struct PacketHeader
-{
-  uint16_t sequence_id;
-};
-
-struct CommandHeader
-{
-  uint8_t message_id;
-  uint8_t version;
-  uint8_t backward_compatible;
-};
-
-struct ResultHeader
-{
-  uint8_t message_id;
-  uint8_t version;
-  uint8_t backward_compatible;
-  uint8_t error_code;
-};
-
-#pragma pack(pop)
+  virtual size_t sendAndReceivePacket(const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout,
+    uint8_t *output_buffer, uint32_t output_size) = 0;
+  virtual ~NetworkLayer() = default;
+}
 
 }  // orion
 
-#endif  // ORION_PROTOCOL_ORION_HEADER_H
+#endif  // ORION_PROTOCOL_ORION_NETWORK_LAYER_H

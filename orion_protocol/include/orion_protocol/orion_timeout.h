@@ -21,42 +21,31 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_HEADER_H
-#define ORION_PROTOCOL_ORION_HEADER_H
+#ifndef ORION_PROTOCOL_ORION_TIMEOUT_H
+#define ORION_PROTOCOL_ORION_TIMEOUT_H
+
+#include <stdint.h>
 
 namespace orion
 {
 
-#pragma pack(push, 1)
-
-struct FrameHeader
+class Timeout
 {
-  uint16_t size;
-  uint16_t crc;
-};
+public:
+  /*
+    @timeout - time in microseconds
+  */
+  Timeout(uint32_t timeout);
 
-struct PacketHeader
-{
-  uint16_t sequence_id;
-};
+  bool hasTime();
 
-struct CommandHeader
-{
-  uint8_t message_id;
-  uint8_t version;
-  uint8_t backward_compatible;
-};
+  uint32_t timeLeft();
 
-struct ResultHeader
-{
-  uint8_t message_id;
-  uint8_t version;
-  uint8_t backward_compatible;
-  uint8_t error_code;
-};
+private:
+  uint32_t till_time_;
 
-#pragma pack(pop)
+};
 
 }  // orion
 
-#endif  // ORION_PROTOCOL_ORION_HEADER_H
+#endif  // ORION_PROTOCOL_ORION_TIMEOUT_H

@@ -21,15 +21,30 @@
 *
 */
 
-#include "orion_protocol/orion_master.h"
+#include <ros/ros.h>
+#include "orion_protocol/orion_timeout.h"
 
 namespace orion
 {
 
-void Master::sendAndReceive(const uint8_t *input_buffer, uint32_t input_size, uint32_t retry_timeout,
-  uint8_t retry_count, uint8_t *output_buffer, uint32_t output_size)
+Timeout::Timeout(uint32_t timeout)
 {
-  // TODO: Implement
+  this->till_time_ = timeout + ros::now();
 }
 
-}  // orion
+bool Timeout::hasTime()
+{
+  return (0 != this->timeoutLeft())
+}
+
+uint32_t Timeout::timeLeft()
+{
+  uint32_t time_now = ros::now();
+  if (this->till_time_ > time_now)
+  {
+    return this->till_time_ - time_now;
+  }
+  return 0;
+}
+
+}

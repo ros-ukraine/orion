@@ -21,9 +21,21 @@
 *
 */
 
-#include "orion_protocol/framer.h"
+#ifndef ORION_PROTOCOL_ORION_DATA_LINK_LAYER_H
+#define ORION_PROTOCOL_ORION_DATA_LINK_LAYER_H
 
-int main()
+namespace orion
 {
-   return 0;
-}
+
+class DataLinkLayer
+{
+public:
+  virtual void sendFrame(const uint8_t *buffer, uint32_t size, uint32_t timeout) = 0;
+  virtual void receiveFrame(uint8_t *buffer, uint32_t size, uint32_t timeout) = 0;
+  virtual ~DataLink() = default;
+
+};
+
+}  // orion
+
+#endif  // ORION_PROTOCOL_ORION_DATA_LINK_LAYER_H

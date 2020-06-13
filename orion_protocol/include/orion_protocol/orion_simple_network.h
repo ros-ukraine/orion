@@ -21,42 +21,33 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_HEADER_H
-#define ORION_PROTOCOL_ORION_HEADER_H
+#ifndef ORION_PROTOCOL_ORION_SIMPLE_NETWORK_H
+#define ORION_PROTOCOL_ORION_SIMPLE_NETWORK_H
+
+#include "orion_protocol/orion_data_link_layer.h"
+#include "orion_protocol/orion_network_layer.h"
 
 namespace orion
 {
 
-#pragma pack(push, 1)
-
-struct FrameHeader
+class SimpleNetwork: public NetworkLayer
 {
-  uint16_t size;
-  uint16_t crc;
-};
+public:
+  SimpleNetwork(DataLinkLayer *data_link_layer) : data_link_layer_(DataLinkLayer *data_link_layer) {};
+  virtual ~SimpleNetwork() = default;
 
-struct PacketHeader
-{
-  uint16_t sequence_id;
-};
+  virtual size_t sendAndReceivePacket(const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout,
+    uint8_t *output_buffer, uint32_t output_size);
 
-struct CommandHeader
-{
-  uint8_t message_id;
-  uint8_t version;
-  uint8_t backward_compatible;
-};
+private:
+  DataLinkLayer *data_link_layer_;
 
-struct ResultHeader
-{
-  uint8_t message_id;
-  uint8_t version;
-  uint8_t backward_compatible;
-  uint8_t error_code;
-};
+  const uinit32_t BUFFER_SIZE = 500;
+  uint8_t command_buffer_[BUFFER_SIZE];
 
-#pragma pack(pop)
+  uint32_t sequence_id_ = 0;
+}
 
 }  // orion
 
-#endif  // ORION_PROTOCOL_ORION_HEADER_H
+#endif  // ORION_PROTOCOL_ORION_SIMPLE_NETWORK_H
