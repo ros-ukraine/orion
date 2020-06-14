@@ -24,6 +24,9 @@
 #ifndef ORION_PROTOCOL_ORION_DATA_LINK_LAYER_H
 #define ORION_PROTOCOL_ORION_DATA_LINK_LAYER_H
 
+#include <stdint.h>
+#include <cstdlib>
+
 namespace orion
 {
 
@@ -31,8 +34,8 @@ class DataLinkLayer
 {
 public:
   virtual void sendFrame(const uint8_t *buffer, uint32_t size, uint32_t timeout) = 0;
-  virtual void receiveFrame(uint8_t *buffer, uint32_t size, uint32_t timeout) = 0;
-  virtual ~DataLink() = default;
+  virtual size_t receiveFrame(uint8_t *buffer, uint32_t size, uint32_t timeout) = 0;
+  virtual ~DataLinkLayer() = default;
 
 };
 

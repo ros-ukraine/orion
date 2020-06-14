@@ -20,7 +20,7 @@ include_directories(
 add_library(${PROJECT_NAME}
 #  src/orion_framer.cpp
   src/orion_timeout.cpp
-#  src/orion_simple_network.cpp
+  src/orion_simple_network.cpp
 )
 
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

@@ -24,6 +24,8 @@
 #ifndef ORION_PROTOCOL_ORION_HEADER_H
 #define ORION_PROTOCOL_ORION_HEADER_H
 
+#include <stdint.h>
+
 namespace orion
 {
 

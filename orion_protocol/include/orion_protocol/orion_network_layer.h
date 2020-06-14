@@ -24,6 +24,9 @@
 #ifndef ORION_PROTOCOL_ORION_NETWORK_LAYER_H
 #define ORION_PROTOCOL_ORION_NETWORK_LAYER_H
 
+#include <stdint.h>
+#include <cstdlib>
+
 namespace orion
 {
 

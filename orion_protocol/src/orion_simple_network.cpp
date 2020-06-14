@@ -23,6 +23,7 @@
 
 #include "orion_protocol/orion_simple_network.h"
 #include "orion_protocol/orion_header.h"
+#include "orion_protocol/orion_timeout.h"
 #include <ros/assert.h>
 #include <cstring>
 
@@ -33,33 +34,30 @@ size_t SimpleNetwork::sendAndReceivePacket(const uint8_t *input_buffer, uint32_t
     uint8_t *output_buffer, uint32_t output_size)
 {
   Timeout timer(timeout);
-  PacketHeader *packet_header = reinterpret_cast<PacketHeader*>(this->command_buffer);
+  PacketHeader *packet_header = reinterpret_cast<PacketHeader*>(this->command_buffer_);
   size_t command_buffer_size = sizeof(PacketHeader);
 
   ROS_ASSERT(command_buffer_size + input_size < BUFFER_SIZE);
 
-  packet_header.sequence_id = ++(this->sequence_id);
+  packet_header->sequence_id = ++(this->sequence_id_);
 
-  std::memcpy(this->command_buffer + command_buffer_size, input_buffer, input_size);
+  std::memcpy(this->command_buffer_ + command_buffer_size, input_buffer, input_size);
   command_buffer_size += input_size;
 
-  data_link_layer_.sendFrame(this->command_buffer, command_buffer_size, timer.timeLeft());
+  ROS_ASSERT(NULL != this->data_link_layer_);
+  this->data_link_layer_->sendFrame(this->command_buffer_, command_buffer_size, timer.timeLeft());
   bool received = false;
-  size_t output_size = 0;
+  size_t frame_output_size = 0;
   while (timer.hasTime() && (false == received))
   {
-    output_size = data_link_layer_.receiveFrame(output_buffer, output_size, timer.timeLeft());
-    if (output_size >= sizeof(PacketHeader))
+    frame_output_size = this->data_link_layer_->receiveFrame(output_buffer, output_size, timer.timeLeft());
+    if (frame_output_size >= sizeof(PacketHeader))
     {
-      PacketHeader *packet_header = reinterpret_cast<PacketHeader*>(output_size);
-      received = (this->sequence_id == packet_header.sequence_id)
+      PacketHeader *received_packet_header = reinterpret_cast<PacketHeader*>(output_buffer);
+      received = (this->sequence_id_ == received_packet_header->sequence_id);
     }
   }
   return output_size;
-}
-
-void SimpleNetwork::receivePacket(uint8_t *buffer, uint32_t size, uint32_t timeout)
-{
 }
 
 }
