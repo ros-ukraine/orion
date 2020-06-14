@@ -39,12 +39,14 @@ install(DIRECTORY include/${PROJECT_NAME}/
   PATTERN ".svn" EXCLUDE
 )
 
-catkin_add_gmock(${PROJECT_NAME}-test
-  test/test_orion_protocol.cpp
-  test/test_orion_master.cpp
-  test/test_orion_test_suite.cpp
-)
 
-if(TARGET ${PROJECT_NAME}-test)
-  target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
-endif()
+if (CATKIN_ENABLE_TESTING)
+  catkin_add_gmock(${PROJECT_NAME}_test_master test/test_orion_master.cpp)
+  add_dependencies(${PROJECT_NAME}_test_master ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(${PROJECT_NAME}_test_master ${PROJECT_NAME})
+
+
+  catkin_add_gmock(${PROJECT_NAME}_test_protocol test/test_orion_protocol.cpp)
+  add_dependencies(${PROJECT_NAME}_test_protocol ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(${PROJECT_NAME}_test_protocol ${PROJECT_NAME})
+endif ()

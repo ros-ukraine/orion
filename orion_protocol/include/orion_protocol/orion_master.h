@@ -32,7 +32,6 @@
 #include <cstring>
 #include <stdexcept>
 #include <cstdio>
-#include <cstring>
 
 namespace orion
 {
@@ -87,7 +86,7 @@ public:
         {
           throw std::range_error("Received different message_id from reply packet");
         }
-        if ((result_header->version != received_header->version) && (false == result_header->backward_compatible))
+        if ((result_header->version != received_header->version) && (0 == result_header->backward_compatible))
         {
           throw std::range_error("Received reply version is not compatible with existing one");
         }

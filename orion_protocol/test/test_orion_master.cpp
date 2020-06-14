@@ -24,6 +24,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <stdexcept>
+#include <cstring>
 #include "orion_protocol/orion_network_layer.h"
 #include "orion_protocol/orion_header.h"
 #include "orion_protocol/orion_master.h"
@@ -31,6 +32,8 @@
 using ::testing::Eq;
 using ::testing::Gt;
 using ::testing::NotNull;
+using ::testing::Invoke;
+using ::testing::Return;
 
 #pragma pack(push, 1)
 
@@ -64,7 +67,7 @@ public:
     uint8_t *output_buffer, uint32_t output_size));
 };
 
-TEST(TestSuite, timeoutExpiredException)
+TEST(TestSuite, masterTimeoutExpiredException)
 {
   MockNetworkLayer mock_network_layer;
   orion::Master master(&mock_network_layer);
@@ -91,4 +94,74 @@ TEST(TestSuite, timeoutExpiredException)
   {
     FAIL() << "Expected std::runtime_error";
   }
+}
+
+TEST(TestSuite, masterHappyPath)
+{
+  MockNetworkLayer mock_network_layer;
+  orion::Master master(&mock_network_layer);
+
+  HandshakeCommand command;
+  HandshakeResult result, reply_result;
+
+  uint8_t retry_count = 5;
+  uint32_t retry_timeout = orion::Master::Timeout::Second * 10;
+
+  EXPECT_CALL(mock_network_layer, sendAndReceivePacket(NotNull(), Gt(0), Eq(retry_timeout), NotNull(), Gt(0))
+    ).WillOnce(Invoke(
+            [=](const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout, uint8_t *output_buffer,
+              uint32_t output_size)
+            {
+              size_t size = sizeof(HandshakeResult);
+              std::memcpy(output_buffer, reinterpret_cast<const uint8_t*>(&reply_result), size);
+              return size;
+            }));
+
+  master.invoke(command, &result, retry_timeout, retry_count);
+}
+
+TEST(TestSuite, masterIncompatibleVersion)
+{
+  MockNetworkLayer mock_network_layer;
+  orion::Master master(&mock_network_layer);
+
+  HandshakeCommand command;
+  HandshakeResult result;
+
+  uint8_t retry_count = 2;
+  uint32_t retry_timeout = orion::Master::Timeout::Second * 4;
+
+  EXPECT_CALL(mock_network_layer, sendAndReceivePacket(NotNull(), Gt(0), Eq(retry_timeout), NotNull(), Gt(0))
+    ).WillOnce(Invoke(
+            [=](const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout, uint8_t *output_buffer,
+              uint32_t output_size)
+            {
+              size_t size = sizeof(HandshakeResult);
+              HandshakeResult reply_result;
+              reply_result.header.version = 2;
+              reply_result.header.backward_compatible = 0;
+
+              std::memcpy(output_buffer, reinterpret_cast<const uint8_t*>(&reply_result), size);
+              return size;
+            }));
+
+  try
+  {
+    master.invoke(command, &result, retry_timeout, retry_count);
+    FAIL() << "Expected std::range_error";
+  }
+  catch(std::range_error const &err)
+  {
+    EXPECT_EQ(err.what(), std::string("Received reply version is not compatible with existing one"));
+  }
+  catch(...)
+  {
+    FAIL() << "Expected std::range_error";
+  }
+}
+
+int main(int argc, char **argv)
+{
+  ::testing::InitGoogleMock(&argc, argv);
+  return RUN_ALL_TESTS();
 }
