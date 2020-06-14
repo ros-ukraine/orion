@@ -1,0 +1,51 @@
+@startuml
+
+participant Client as C
+participant Master
+participant "Network Layer" as NL
+participant "Data Link Layer" as DL
+participant UART
+
+C -> Master: invoke
+activate Master
+
+Master -> NL: sendAndReceivePacket
+rnote over Master: repeat provided\namount of times\nin case of failure
+deactivate Master
+activate NL
+
+NL -> DL: sendFrame
+deactivate NL
+activate DL
+
+DL -> UART: sendBuffer
+rnote over UART: send until\ntimeout
+deactivate DL
+activate UART
+
+UART --> DL: result
+deactivate UART
+activate DL
+
+DL -> UART: receiveBuffer
+rnote over UART: receive until\ntimeout
+deactivate DL
+activate UART
+
+UART --> DL: result
+deactivate UART
+activate DL
+
+DL -> NL: receiveFrame
+deactivate DL
+activate NL
+
+NL --> Master: result
+deactivate NL
+activate Master
+
+Master --> C: result
+deactivate Master
+
+
+@enduml
