@@ -22,9 +22,10 @@
 */
 
 #include <gtest/gtest.h>
-#include "orion_protocol/orion_framer.h"
+#include <gmock/gmock.h>
 
-TEST(TestSuite, positiveTestCase)
+int main(int argc, char **argv)
 {
-    EXPECT_EQ(5, 5);
+  ::testing::InitGoogleMock(&argc, argv);
+  return RUN_ALL_TESTS();
 }
