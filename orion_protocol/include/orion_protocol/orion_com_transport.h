@@ -21,33 +21,29 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_SIMPLE_NETWORK_H
-#define ORION_PROTOCOL_ORION_SIMPLE_NETWORK_H
+#ifndef ORION_PROTOCOL_ORION_COM_TRANSPORT_H
+#define ORION_PROTOCOL_ORION_COM_TRANSPORT_H
 
 #include "orion_protocol/orion_data_link_layer.h"
-#include "orion_protocol/orion_network_layer.h"
+#include "orion_protocol/orion_transport.h"
 
 namespace orion
 {
 
-class SimpleNetwork: public NetworkLayer
+class ComTransport: public Transport
 {
 public:
-  SimpleNetwork(DataLinkLayer *data_link_layer) : data_link_layer_(data_link_layer) {};
-  virtual ~SimpleNetwork() = default;
+  ComTransport(DataLinkLayer *data_link_layer) : data_link_layer_(data_link_layer) {};
+  virtual ~ComTransport() = default;
 
-  virtual size_t sendAndReceivePacket(const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout,
-    uint8_t *output_buffer, uint32_t output_size);
+  virtual bool sendPacket(const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout);
+  virtual size_t receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout);
+  virtual bool hasReceivedPacket();
 
 private:
   DataLinkLayer *data_link_layer_;
-
-  static const uint32_t BUFFER_SIZE = 500;
-  uint8_t command_buffer_[BUFFER_SIZE];
-
-  uint32_t sequence_id_ = 0;
 };
 
 }  // orion
 
-#endif  // ORION_PROTOCOL_ORION_SIMPLE_NETWORK_H
+#endif  // ORION_PROTOCOL_ORION_COM_TRANSPORT_H

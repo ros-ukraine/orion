@@ -21,43 +21,24 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_HEADER_H
-#define ORION_PROTOCOL_ORION_HEADER_H
+#ifndef ORION_PROTOCOL_ORION_TRANSPORT_H
+#define ORION_PROTOCOL_ORION_TRANSPORT_H
 
 #include <stdint.h>
+#include <cstdlib>
 
 namespace orion
 {
 
-#pragma pack(push, 1)
-
-struct FrameHeader
+class Transport
 {
-  uint16_t size;
-  uint16_t crc;
+public:
+  virtual bool sendPacket(const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout) = 0;
+  virtual size_t receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout) = 0;
+  virtual bool hasReceivedPacket() = 0;
+  virtual ~Transport() = default;
 };
-
-// TODO: Consider adding anonymous struct for common fields
-
-struct CommandHeader
-{
-  uint8_t message_id;
-  uint8_t version;
-  uint8_t oldest_compatible_version;
-  uint16_t sequence_id;
-};
-
-struct ResultHeader
-{
-  uint8_t message_id;
-  uint8_t version;
-  uint8_t oldest_compatible_version;
-  uint16_t sequence_id;
-  uint8_t error_code;
-};
-
-#pragma pack(pop)
 
 }  // orion
 
-#endif  // ORION_PROTOCOL_ORION_HEADER_H
+#endif  // ORION_PROTOCOL_ORION_TRANSPORT_H

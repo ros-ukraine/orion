@@ -21,23 +21,28 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_NETWORK_LAYER_H
-#define ORION_PROTOCOL_ORION_NETWORK_LAYER_H
-
-#include <stdint.h>
-#include <cstdlib>
+#include "orion_protocol/orion_com_transport.h"
+#include "orion_protocol/orion_header.h"
+#include "orion_protocol/orion_timeout.h"
 
 namespace orion
 {
 
-class NetworkLayer
+bool ComTransport::sendPacket(const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout)
 {
-public:
-  virtual size_t sendAndReceivePacket(const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout,
-    uint8_t *output_buffer, uint32_t output_size) = 0;
-  virtual ~NetworkLayer() = default;
-};
+  // TODO: Implement
+  return false;
+}
 
-}  // orion
+size_t ComTransport::receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout)
+{
+  // TODO: Implement
+}
 
-#endif  // ORION_PROTOCOL_ORION_NETWORK_LAYER_H
+bool ComTransport::hasReceivedPacket()
+{
+  // TODO: Implement
+  return false;
+}
+
+}

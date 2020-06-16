@@ -25,9 +25,9 @@
 #include <gmock/gmock.h>
 #include <stdexcept>
 #include <cstring>
-#include "orion_protocol/orion_network_layer.h"
+#include "orion_protocol/orion_transport.h"
 #include "orion_protocol/orion_header.h"
-#include "orion_protocol/orion_master.h"
+#include "orion_protocol/orion_major.h"
 
 using ::testing::Eq;
 using ::testing::Gt;
@@ -60,30 +60,30 @@ struct HandshakeResult
 
 #pragma pack(pop)
 
-class MockNetworkLayer: public orion::NetworkLayer
+class MockTransport: public orion::Transport
 {
 public:
   MOCK_METHOD5(sendAndReceivePacket, size_t(const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout,
     uint8_t *output_buffer, uint32_t output_size));
 };
 
-TEST(TestSuite, masterTimeoutExpiredException)
+TEST(TestSuite, timeoutExpiredException)
 {
-  MockNetworkLayer mock_network_layer;
-  orion::Master master(&mock_network_layer);
+  MockTransport mock_transport;
+  orion::Major major(&mock_transport);
 
   HandshakeCommand command;
   HandshakeResult result;
 
   uint8_t retry_count = 3;
-  uint32_t retry_timeout = orion::Master::Timeout::Second;
+  uint32_t retry_timeout = orion::Major::Timeout::Second;
 
-  EXPECT_CALL(mock_network_layer, sendAndReceivePacket(NotNull(), Gt(0), Eq(retry_timeout), NotNull(), Gt(0))
+  EXPECT_CALL(mock_transport, sendAndReceivePacket(NotNull(), Gt(0), Eq(retry_timeout), NotNull(), Gt(0))
     ).Times(retry_count);
 
   try
   {
-    master.invoke(command, &result, retry_timeout, retry_count);
+    major.invoke(command, &result, retry_timeout, retry_count);
     FAIL() << "Expected std::runtime_error";
   }
   catch(std::runtime_error const & err)
@@ -96,18 +96,18 @@ TEST(TestSuite, masterTimeoutExpiredException)
   }
 }
 
-TEST(TestSuite, masterHappyPath)
+TEST(TestSuite, happyPath)
 {
-  MockNetworkLayer mock_network_layer;
-  orion::Master master(&mock_network_layer);
+  MockTransport mock_transport;
+  orion::Major major(&mock_transport);
 
   HandshakeCommand command;
   HandshakeResult result, reply_result;
 
   uint8_t retry_count = 5;
-  uint32_t retry_timeout = orion::Master::Timeout::Second * 10;
+  uint32_t retry_timeout = orion::Major::Timeout::Second * 10;
 
-  EXPECT_CALL(mock_network_layer, sendAndReceivePacket(NotNull(), Gt(0), Eq(retry_timeout), NotNull(), Gt(0))
+  EXPECT_CALL(mock_transport, sendAndReceivePacket(NotNull(), Gt(0), Eq(retry_timeout), NotNull(), Gt(0))
     ).WillOnce(Invoke(
             [=](const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout, uint8_t *output_buffer,
               uint32_t output_size)
@@ -117,21 +117,21 @@ TEST(TestSuite, masterHappyPath)
               return size;
             }));
 
-  master.invoke(command, &result, retry_timeout, retry_count);
+  major.invoke(command, &result, retry_timeout, retry_count);
 }
 
-TEST(TestSuite, masterIncompatibleVersion)
+TEST(TestSuite, incompatibleVersion)
 {
-  MockNetworkLayer mock_network_layer;
-  orion::Master master(&mock_network_layer);
+  MockTransport mock_transport;
+  orion::Major major(&mock_transport);
 
   HandshakeCommand command;
   HandshakeResult result;
 
   uint8_t retry_count = 2;
-  uint32_t retry_timeout = orion::Master::Timeout::Second * 4;
+  uint32_t retry_timeout = orion::Major::Timeout::Second * 4;
 
-  EXPECT_CALL(mock_network_layer, sendAndReceivePacket(NotNull(), Gt(0), Eq(retry_timeout), NotNull(), Gt(0))
+  EXPECT_CALL(mock_transport, sendAndReceivePacket(NotNull(), Gt(0), Eq(retry_timeout), NotNull(), Gt(0))
     ).WillOnce(Invoke(
             [=](const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout, uint8_t *output_buffer,
               uint32_t output_size)
@@ -147,7 +147,7 @@ TEST(TestSuite, masterIncompatibleVersion)
 
   try
   {
-    master.invoke(command, &result, retry_timeout, retry_count);
+    major.invoke(command, &result, retry_timeout, retry_count);
     FAIL() << "Expected std::range_error";
   }
   catch(std::range_error const &err)

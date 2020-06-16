@@ -21,10 +21,10 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_MASTER_H
-#define ORION_PROTOCOL_ORION_MASTER_H
+#ifndef ORION_PROTOCOL_ORION_MAJOR_H
+#define ORION_PROTOCOL_ORION_MAJOR_H
 
-#include "orion_protocol/orion_network_layer.h"
+#include "orion_protocol/orion_transport.h"
 #include "orion_protocol/orion_header.h"
 #include "orion_protocol/orion_timeout.h"
 #include <ros/assert.h>
@@ -36,61 +36,71 @@
 namespace orion
 {
 
-class Master
+class Major
 {
 public:
-  Master(NetworkLayer *network_layer) : network_layer_(network_layer) {};
+  Major(Transport *transport) : transport_(transport) {};
 
-  Master(NetworkLayer *network_layer, uint32_t retry_timeout, uint8_t retry_count) : network_layer_(network_layer),
+  Major(Transport *transport, uint32_t retry_timeout, uint8_t retry_count) : transport_(transport),
     default_timeout_(retry_timeout),
     default_retry_count_(retry_count) {};
 
   template<class Command, class Result>
-  void invoke(const Command &command, Result *result)
+  void invoke(Command command, Result *result)
   {
     this->invoke<Command, Result>(command, result, this->default_timeout_, this->default_retry_count_);
   }
 
   template<class Command, class Result>
-  void invoke(const Command &command, Result *result, uint32_t retry_timeout)
+  void invoke(Command command, Result *result, uint32_t retry_timeout)
   {
     this->invoke<Command, Result>(command, result, retry_timeout, this->default_retry_count_);
   }
 
   template<class Command, class Result>
-  void invoke(const Command &command, Result *result, uint32_t retry_timeout, uint8_t retry_count)
+  void invoke(Command command, Result *result, uint32_t retry_timeout, uint8_t retry_count)
   {
-    ROS_ASSERT(NULL != this->network_layer_);
+    ROS_ASSERT(NULL != this->transport_);
     ROS_ASSERT(sizeof(Command) >= sizeof(CommandHeader));
     ROS_ASSERT(sizeof(Result) >= sizeof(ResultHeader));
 
-    const CommandHeader *command_header = reinterpret_cast<const CommandHeader*>(&command);
+    CommandHeader *command_header = reinterpret_cast<CommandHeader*>(&command);
     ResultHeader *result_header = reinterpret_cast<ResultHeader*>(result);
 
     bool received = false;
     while ((retry_count > 0) && (false == received))
     {
-      size_t size_received = this->network_layer_->sendAndReceivePacket(reinterpret_cast<const uint8_t*>(&command),
-        sizeof(command), retry_timeout, this->result_buffer_, BUFFER_SIZE);
-      if (size_received >= sizeof(ResultHeader))
+      command_header->sequence_id = ++(this->sequence_id_);
+      // TODO: Analyze issues with size of the packet in TCP based transport
+//      command_header->size = sizeof(Command);
+      bool send_status = this->transport_->sendPacket(reinterpret_cast<uint8_t*>(&command), sizeof(command),
+        retry_timeout);
+      if (send_status)
       {
-        ResultHeader *received_header = reinterpret_cast<ResultHeader*>(this->result_buffer_);
-        if (0 != received_header->error_code)
+        size_t size_received = this->transport_->receivePacket(this->result_buffer_, BUFFER_SIZE, retry_timeout);
+        // TODO: Read packets from buffer using hasPacket function
+        if (size_received >= sizeof(ResultHeader))
         {
-          char message[200];
-          std::snprintf(message, sizeof(message), "Error code: %d detected in return packet",
-            received_header->error_code);
-          throw std::runtime_error(message);
+          // TODO: Add size and compatibility checks and equence_id
+          ResultHeader *received_header = reinterpret_cast<ResultHeader*>(this->result_buffer_);
+          if (0 != received_header->error_code)
+          {
+            char message[200];
+            std::snprintf(message, sizeof(message), "Error code: %d detected in return packet",
+              received_header->error_code);
+            throw std::runtime_error(message);
+          }
+          if (result_header->message_id != command_header->message_id)
+          {
+            throw std::range_error("Received different message_id from reply packet");
+          }
+          if ((result_header->version > received_header->version) ||
+            (result_header->version < result_header->oldest_compatible_version))
+          {
+            throw std::range_error("Received reply version is not compatible with existing one");
+          }
+          received = true;
         }
-        if (result_header->message_id != command_header->message_id)
-        {
-          throw std::range_error("Received different message_id from reply packet");
-        }
-        if ((result_header->version != received_header->version) && (0 == result_header->backward_compatible))
-        {
-          throw std::range_error("Received reply version is not compatible with existing one");
-        }
-        received = true;
       }
       retry_count--;
     }
@@ -105,18 +115,17 @@ public:
 
 private:
 
-  void sendAndReceive(const uint8_t *input_buffer, uint32_t input_size, uint32_t retry_timeout, uint8_t retry_count,
-    uint8_t *output_buffer, uint32_t output_size);
-
   uint32_t default_timeout_ = 100 * Timeout::Millisecond;
   uint8_t default_retry_count_ = 1;
 
-  NetworkLayer *network_layer_;
+  Transport *transport_;
 
   static const uint32_t BUFFER_SIZE = 500;
   uint8_t result_buffer_[BUFFER_SIZE];
+
+  uint32_t sequence_id_ = 0;
 };
 
 }  // orion
 
-#endif  // ORION_PROTOCOL_ORION_MASTER_H
+#endif  // ORION_PROTOCOL_ORION_MAJOR_H

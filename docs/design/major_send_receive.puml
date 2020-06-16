@@ -1,0 +1,67 @@
+@startuml
+
+actor Actor as A
+participant Major as M
+participant Transport as T
+participant "Data Link Layer" as D
+participant COM as C
+
+A -> M: invoke
+activate M
+
+M -> T: sendPacket
+rnote over M: repeat provided\namount of times\nin case of failure
+deactivate M
+activate T
+
+T -> D: sendFrame
+deactivate T
+activate D
+
+D -> C: sendBuffer
+rnote over C: send until\ntimeout
+deactivate D
+activate C
+
+C --> D: result
+deactivate C
+activate D
+
+D --> T: result
+deactivate D
+activate T
+
+T --> M: result
+deactivate T
+activate M
+
+M -> T: receivePacket
+rnote over M: repeat provided\namount of times\nin case of failure
+deactivate M
+activate T
+
+T -> D: receiveFrame
+deactivate T
+activate D
+
+D -> C: receiveBuffer
+rnote over C: receive until\ntimeout
+deactivate D
+activate C
+
+C --> D: result
+deactivate C
+activate D
+
+D --> T: result
+deactivate D
+activate T
+
+T --> M: result
+deactivate T
+activate M
+
+M --> A: result
+deactivate M
+
+@enduml

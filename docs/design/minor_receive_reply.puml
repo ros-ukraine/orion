@@ -1,0 +1,38 @@
+@startuml
+
+participant UART
+participant "Data Link Layer" as D
+participant Transport as T
+participant Minor as M
+actor Actor as A
+
+UART -> D: receivedBufferCallback
+activate D
+
+D -> T: receiveFrameCallback
+deactivate D
+activate T
+
+T -> M: receivedPacketCallback
+deactivate T
+activate M
+
+M -> A: commandCallback
+rnote over A: process\nrequest
+deactivate M
+
+A -> M: reply
+activate M
+
+M -> T: sendPacket
+deactivate M
+activate T
+
+T -> D: sendFrame
+deactivate T
+activate D
+
+D -> UART: sendBuffer
+deactivate DL
+
+@enduml

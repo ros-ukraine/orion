@@ -20,7 +20,7 @@ include_directories(
 add_library(${PROJECT_NAME}
 #  src/orion_framer.cpp
   src/orion_timeout.cpp
-  src/orion_simple_network.cpp
+  src/orion_com_transport.cpp
 )
 
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -41,9 +41,9 @@ install(DIRECTORY include/${PROJECT_NAME}/
 
 
 if (CATKIN_ENABLE_TESTING)
-  catkin_add_gmock(${PROJECT_NAME}_test_master test/test_orion_master.cpp)
-  add_dependencies(${PROJECT_NAME}_test_master ${catkin_EXPORTED_TARGETS})
-  target_link_libraries(${PROJECT_NAME}_test_master ${PROJECT_NAME})
+  catkin_add_gmock(${PROJECT_NAME}_test_major test/test_orion_major.cpp)
+  add_dependencies(${PROJECT_NAME}_test_major ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(${PROJECT_NAME}_test_major ${PROJECT_NAME})
 
 
   catkin_add_gmock(${PROJECT_NAME}_test_protocol test/test_orion_protocol.cpp)
