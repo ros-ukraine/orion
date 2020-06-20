@@ -19,6 +19,7 @@ class DataLink {
 note top of DataLink: Data Link Layer
 
 class Network {
+  +uint8_t[] data
 }
 
 note top of Network: Network Layer

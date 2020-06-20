@@ -25,7 +25,7 @@
 #define ORION_PROTOCOL_ORION_TIMEOUT_H
 
 #include <stdint.h>
-#include <ros/ros.h>
+#include <chrono>
 
 namespace orion
 {
@@ -43,8 +43,7 @@ public:
   uint32_t timeLeft();
 
 private:
-  ros::Time till_time_;
-
+  std::chrono::steady_clock::time_point till_time_;
 };
 
 }  // orion

@@ -21,14 +21,19 @@
 *
 */
 
+#include <chrono>
 #include "orion_protocol/orion_timeout.h"
+
+using std::chrono::microseconds;
+using std::chrono::steady_clock;
+using std::chrono::duration_cast;
 
 namespace orion
 {
 
 Timeout::Timeout(uint32_t timeout)
 {
-  this->till_time_ = ros::Time::now() + ros::Duration(0, timeout * 1000);
+  this->till_time_ = steady_clock::now() + microseconds(timeout);
 }
 
 bool Timeout::hasTime()
@@ -38,11 +43,12 @@ bool Timeout::hasTime()
 
 uint32_t Timeout::timeLeft()
 {
-  ros::Time time_now = ros::Time::now();
+  steady_clock::time_point time_now = steady_clock::now();
+
   if (this->till_time_ > time_now)
   {
-    uint64_t time_left = this->till_time_.toNSec() - time_now.toNSec();
-    return static_cast<uint32_t>(time_left / 1000);
+    auto result = duration_cast<microseconds>(this->till_time_ - time_now).count();
+    return static_cast<uint32_t>(result);
   }
   return 0;
 }

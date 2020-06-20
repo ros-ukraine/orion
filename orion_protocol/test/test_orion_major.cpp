@@ -79,7 +79,7 @@ TEST(TestSuite, timeoutExpiredException)
   HandshakeResult result;
 
   uint8_t retry_count = 3;
-  uint32_t retry_timeout = orion::Major::Timeout::Second;
+  uint32_t retry_timeout = orion::Major::Interval::Second;
 
   EXPECT_CALL(mock_transport, sendPacket(NotNull(), Gt(0), Eq(retry_timeout))).WillRepeatedly(Return(false));
 
