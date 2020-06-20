@@ -79,7 +79,7 @@ void Major::validateResult(const CommandHeader *command_header, const ResultHead
     throw std::range_error("Received different message_id from reply packet");
   }
   if ((result_header->version > received_header->version) ||
-    (result_header->version < result_header->oldest_compatible_version))
+    (result_header->version < received_header->oldest_compatible_version))
   {
     throw std::range_error("Received reply version is not compatible with existing one");
   }
