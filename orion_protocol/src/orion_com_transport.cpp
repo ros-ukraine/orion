@@ -45,4 +45,4 @@ bool ComTransport::hasReceivedPacket()
   return false;
 }
 
-}
+}  // orion

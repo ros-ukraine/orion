@@ -57,65 +57,6 @@ public:
     this->invoke<Command, Result>(command, result, retry_timeout, this->default_retry_count_);
   }
 
-  bool processPacket(const CommandHeader *command_header, const ResultHeader *result_header, Timeout &timeout,
-    size_t &size_received)
-  {
-    size_received = this->transport_->receivePacket(this->result_buffer_, BUFFER_SIZE, timeout.timeLeft());
-    ResultHeader *received_header;
-    bool same_sequence_id = false;
-    do
-    {
-      if (size_received >= sizeof(ResultHeader))
-      {
-        received_header = reinterpret_cast<ResultHeader*>(this->result_buffer_);
-        if (result_header->sequence_id == received_header->sequence_id)
-        {
-          same_sequence_id = true;
-        }
-      }
-      if (!same_sequence_id && this->transport_->hasReceivedPacket() && timeout.hasTime())
-      {
-        size_received = this->transport_->receivePacket(this->result_buffer_, BUFFER_SIZE, timeout.timeLeft());
-      }
-    }
-    while ((false == same_sequence_id) && timeout.hasTime());
-
-    return same_sequence_id;
-  }
-
-  void validateResult(const CommandHeader *command_header, const ResultHeader *result_header, size_t size_received)
-  {
-    ResultHeader *received_header;
-    if (size_received < sizeof(ResultHeader))
-    {
-      char message[200];
-      std::snprintf(message, sizeof(message), "Received size %zu bytes is less than result header %zu bytes",
-        size_received, sizeof(ResultHeader));
-      throw std::range_error(message);
-    }
-    received_header = reinterpret_cast<ResultHeader*>(this->result_buffer_);
-    if (result_header->sequence_id != received_header->sequence_id)
-    {
-      throw std::range_error("Could not receive packet with the same sequence_id");
-    }
-    if (0 != received_header->error_code)
-    {
-      char message[200];
-      std::snprintf(message, sizeof(message), "Error code: %d detected in return packet",
-        received_header->error_code);
-      throw std::runtime_error(message);
-    }
-    if (result_header->message_id != command_header->message_id)
-    {
-      throw std::range_error("Received different message_id from reply packet");
-    }
-    if ((result_header->version > received_header->version) ||
-      (result_header->version < result_header->oldest_compatible_version))
-    {
-      throw std::range_error("Received reply version is not compatible with existing one");
-    }
-  }
-
   template<class Command, class Result>
   void invoke(Command command, Result *result, uint32_t retry_timeout, uint8_t retry_count)
   {
@@ -151,6 +92,9 @@ public:
   enum Interval { Microsecond = 1, Millisecond = 1000 * Microsecond, Second = 1000 * Millisecond };
 
 private:
+  bool processPacket(const CommandHeader *command_header, const ResultHeader *result_header, Timeout &timeout,
+    size_t &size_received);
+  void validateResult(const CommandHeader *command_header, const ResultHeader *result_header, size_t size_received);
 
   uint32_t default_timeout_ = 100 * Interval::Millisecond;
   uint8_t default_retry_count_ = 1;
