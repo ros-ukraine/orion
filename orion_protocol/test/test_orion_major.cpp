@@ -31,6 +31,7 @@
 
 using ::testing::Eq;
 using ::testing::Gt;
+using ::testing::Le;
 using ::testing::NotNull;
 using ::testing::Invoke;
 using ::testing::Return;
@@ -70,7 +71,7 @@ public:
   MOCK_METHOD0(hasReceivedPacket, bool());
 };
 
-TEST(TestSuite, timeoutExpiredException)
+TEST(TestSuite, sendPacketTimeoutExpiredException)
 {
   MockTransport mock_transport;
   orion::Major main(&mock_transport);
@@ -79,7 +80,7 @@ TEST(TestSuite, timeoutExpiredException)
   HandshakeResult result;
 
   uint8_t retry_count = 3;
-  uint32_t retry_timeout = orion::Major::Interval::Second;
+  uint32_t retry_timeout = orion::Major::Interval::Microsecond * 200;
 
   EXPECT_CALL(mock_transport, sendPacket(NotNull(), Gt(0), Eq(retry_timeout))).WillRepeatedly(Return(false));
 
@@ -98,30 +99,33 @@ TEST(TestSuite, timeoutExpiredException)
   }
 }
 
-//TEST(TestSuite, happyPath)
-//{
-//  MockTransport mock_transport;
-//  orion::Major major(&mock_transport);
-//
-//  HandshakeCommand command;
-//  HandshakeResult result, reply_result;
-//
-//  uint8_t retry_count = 5;
-//  uint32_t retry_timeout = orion::Major::Timeout::Second * 10;
-//
-//  EXPECT_CALL(mock_transport, sendAndReceivePacket(NotNull(), Gt(0), Eq(retry_timeout), NotNull(), Gt(0))
-//    ).WillOnce(Invoke(
-//            [=](const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout, uint8_t *output_buffer,
-//              uint32_t output_size)
-//            {
-//              size_t size = sizeof(HandshakeResult);
-//              std::memcpy(output_buffer, reinterpret_cast<const uint8_t*>(&reply_result), size);
-//              return size;
-//            }));
-//
-//  major.invoke(command, &result, retry_timeout, retry_count);
-//}
-//
+TEST(TestSuite, happyPath)
+{
+  MockTransport mock_transport;
+  orion::Major main(&mock_transport);
+
+  HandshakeCommand command;
+  HandshakeResult result;
+
+  uint8_t retry_count = 5;
+  uint32_t retry_timeout = orion::Major::Interval::Microsecond * 400;
+
+  EXPECT_CALL(mock_transport, sendPacket(NotNull(), Gt(0), Eq(retry_timeout))).WillOnce(Return(true));
+  EXPECT_CALL(mock_transport, hasReceivedPacket()).Times(0);
+  EXPECT_CALL(mock_transport, receivePacket(NotNull(), Gt(0), Le(retry_timeout))
+    ).WillOnce(Invoke(
+            [=](uint8_t *output_buffer, uint32_t output_size, uint32_t timeout)
+            {
+              size_t size = sizeof(HandshakeResult);
+              HandshakeResult reply_result;
+              reply_result.header.sequence_id = 1;
+              std::memcpy(output_buffer, reinterpret_cast<const uint8_t*>(&reply_result), size);
+              return size;
+            }));
+
+  main.invoke(command, &result, retry_timeout, retry_count);
+}
+
 //TEST(TestSuite, incompatibleVersion)
 //{
 //  MockTransport mock_transport;

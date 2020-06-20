@@ -37,7 +37,7 @@ bool Major::processPacket(const CommandHeader *command_header, const ResultHeade
     if (size_received >= sizeof(ResultHeader))
     {
       received_header = reinterpret_cast<ResultHeader*>(this->result_buffer_);
-      if (result_header->sequence_id == received_header->sequence_id)
+      if (command_header->sequence_id == received_header->sequence_id)
       {
         same_sequence_id = true;
       }
@@ -63,7 +63,7 @@ void Major::validateResult(const CommandHeader *command_header, const ResultHead
     throw std::range_error(message);
   }
   received_header = reinterpret_cast<ResultHeader*>(this->result_buffer_);
-  if (result_header->sequence_id != received_header->sequence_id)
+  if (command_header->sequence_id != received_header->sequence_id)
   {
     throw std::range_error("Could not receive packet with the same sequence_id");
   }
