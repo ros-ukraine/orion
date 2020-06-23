@@ -21,27 +21,25 @@
 *
 */
 
-#include "orion_protocol/orion_com_transport.h"
-#include "orion_protocol/orion_header.h"
-#include "orion_protocol/orion_timeout.h"
+#ifndef ORION_PROTOCOL_ORION_COMMUNICATION_H
+#define ORION_PROTOCOL_ORION_COMMUNICATION_H
+
+#include <stdint.h>
+#include <cstdlib>
 
 namespace orion
 {
 
-bool ComTransport::sendPacket(const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout)
+class Communication
 {
-  this->data_link_layer_->sendFrame(input_buffer, input_size, timeout);
-  return true;
-}
-
-size_t ComTransport::receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout)
-{
-  return this->data_link_layer_->receiveFrame(output_buffer, output_size, timeout);
-}
-
-bool ComTransport::hasReceivedPacket()
-{
-  return this->data_link_layer_->hasReceiveFrame();
-}
+public:
+  virtual size_t receiveAvailableBuffer(uint8_t *buffer, uint32_t size) = 0;
+  virtual size_t receiveBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout) = 0;
+  virtual bool hasAvailableBuffer() = 0;
+  virtual bool sendBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout) = 0;
+  virtual ~Communication() = default;
+};
 
 }  // orion
+
+#endif  // ORION_PROTOCOL_ORION_COMMUNICATION_H

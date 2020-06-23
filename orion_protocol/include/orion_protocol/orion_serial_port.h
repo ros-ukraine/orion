@@ -21,27 +21,35 @@
 *
 */
 
-#include "orion_protocol/orion_com_transport.h"
-#include "orion_protocol/orion_header.h"
-#include "orion_protocol/orion_timeout.h"
+#ifndef ORION_PROTOCOL_ORION_SERIAL_PORT_H
+#define ORION_PROTOCOL_ORION_SERIAL_PORT_H
+
+#include <stdint.h>
+#include <cstdlib>
+#include "orion_protocol/orion_communication.h"
 
 namespace orion
 {
 
-bool ComTransport::sendPacket(const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout)
+class SerialPort: public Communication
 {
-  this->data_link_layer_->sendFrame(input_buffer, input_size, timeout);
-  return true;
-}
+public:
+  void connect(const char* port_name, uint32_t baud = 9600);
+  void disconnect();
 
-size_t ComTransport::receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout)
-{
-  return this->data_link_layer_->receiveFrame(output_buffer, output_size, timeout);
-}
+  SerialPort();
+  virtual size_t receiveAvailableBuffer(uint8_t *buffer, uint32_t size) = 0;
+  virtual size_t receiveBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout) = 0;
+  virtual bool hasAvailableBuffer() = 0;
+  virtual bool sendBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout) = 0;
+  virtual ~SerialPort() = default;
 
-bool ComTransport::hasReceivedPacket()
-{
-  return this->data_link_layer_->hasReceiveFrame();
-}
+private:
+  void setInterfaceAttributes(uint32_t speed);
+
+  int file_descriptor_ = -1;
+};
 
 }  // orion
+
+#endif  // ORION_PROTOCOL_ORION_SERIAL_PORT_H

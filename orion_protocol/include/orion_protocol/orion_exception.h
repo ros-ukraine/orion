@@ -21,27 +21,39 @@
 *
 */
 
-#include "orion_protocol/orion_com_transport.h"
-#include "orion_protocol/orion_header.h"
-#include "orion_protocol/orion_timeout.h"
+#ifndef ORION_PROTOCOL_ORION_EXCEPTION_H
+#define ORION_PROTOCOL_ORION_EXCEPTION_H
+
+#include <utility>
+#include <string>
+#include <cstdio>
 
 namespace orion
 {
 
-bool ComTransport::sendPacket(const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout)
+namespace exception
 {
-  this->data_link_layer_->sendFrame(input_buffer, input_size, timeout);
-  return true;
+
+template <class ExceptionType, typename ...Args>
+void raise(const char* format, Args && ...args)
+{
+    auto size = std::snprintf(nullptr, 0, format, std::forward<Args>(args)...);
+    std::string message(size + 1, '\0');
+    std::sprintf(&message[0], format, std::forward<Args>(args)...);
+    throw ExceptionType(message);
 }
 
-size_t ComTransport::receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout)
+template <class ExceptionType, typename ...Args>
+void raiseIf(bool condition, const char* format, Args && ...args)
 {
-  return this->data_link_layer_->receiveFrame(output_buffer, output_size, timeout);
+  if (condition)
+  {
+    raise<ExceptionType>(format, std::forward<Args>(args)...);
+  }
 }
 
-bool ComTransport::hasReceivedPacket()
-{
-  return this->data_link_layer_->hasReceiveFrame();
-}
+}  // exception
 
 }  // orion
+
+#endif  // ORION_PROTOCOL_ORION_EXCEPTION_H

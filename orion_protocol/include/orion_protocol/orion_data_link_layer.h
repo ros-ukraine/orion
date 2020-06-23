@@ -33,8 +33,9 @@ namespace orion
 class DataLinkLayer
 {
 public:
-  virtual void sendFrame(const uint8_t *buffer, uint32_t size, uint32_t timeout) = 0;
+  virtual bool sendFrame(const uint8_t *buffer, uint32_t size, uint32_t timeout) = 0;
   virtual size_t receiveFrame(uint8_t *buffer, uint32_t size, uint32_t timeout) = 0;
+  virtual bool hasReceiveFrame() = 0;
   virtual ~DataLinkLayer() = default;
 
 };

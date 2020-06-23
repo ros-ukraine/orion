@@ -21,27 +21,31 @@
 *
 */
 
-#include "orion_protocol/orion_com_transport.h"
-#include "orion_protocol/orion_header.h"
-#include "orion_protocol/orion_timeout.h"
+#include "orion_protocol/orion_byte_stream.h"
 
 namespace orion
 {
 
-bool ComTransport::sendPacket(const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout)
+ByteStream::ByteStream()
 {
-  this->data_link_layer_->sendFrame(input_buffer, input_size, timeout);
-  return true;
+
 }
 
-size_t ComTransport::receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout)
+bool ByteStream::sendFrame(const uint8_t *buffer, uint32_t size, uint32_t timeout)
 {
-  return this->data_link_layer_->receiveFrame(output_buffer, output_size, timeout);
+    return false;
+
 }
 
-bool ComTransport::hasReceivedPacket()
+size_t ByteStream::receiveFrame(uint8_t *buffer, uint32_t size, uint32_t timeout)
 {
-  return this->data_link_layer_->hasReceiveFrame();
+    return 0;
+
+}
+
+bool ByteStream::hasReceiveFrame()
+{
+    return true;
 }
 
 }  // orion
