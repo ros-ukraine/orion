@@ -21,27 +21,34 @@
 *
 */
 
-#include "orion_protocol/orion_com_transport.h"
-#include "orion_protocol/orion_header.h"
-#include "orion_protocol/orion_timeout.h"
+#ifndef ORION_PROTOCOL_ORION_FRAME_TRANSPORT_H
+#define ORION_PROTOCOL_ORION_FRAME_TRANSPORT_H
+
+#include <stdint.h>
+#include <list>
+#include "orion_protocol/orion_communication.h"
+#include "orion_protocol/orion_transport.h"
 
 namespace orion
 {
 
-bool ComTransport::sendPacket(const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout)
+class FrameTransport: public Transport
 {
-  this->data_link_layer_->sendFrame(input_buffer, input_size, timeout);
-  return true;
-}
+public:
+  FrameTransport(Communication *communication):communication_(communication) {};
+  virtual bool sendPacket(const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout);
+  virtual size_t receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout);
+  virtual bool hasReceivedPacket();
+  virtual ~FrameTransport() = default;
+private:
+  bool hasFrameInQueue();
 
-size_t ComTransport::receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout)
-{
-  return this->data_link_layer_->receiveFrame(output_buffer, output_size, timeout);
-}
+  Communication *communication_;
 
-bool ComTransport::hasReceivedPacket()
-{
-  return this->data_link_layer_->hasReceiveFrame();
-}
+  // TODO: Add circular buffer
+  std::list<uint8_t> queue_;
+};
 
 }  // orion
+
+#endif  // ORION_PROTOCOL_ORION_FRAME_TRANSPORT_H

@@ -21,8 +21,14 @@
 *
 */
 
+#ifndef ORION_PROTOCOL_ORION_FRAMER_H
+#define ORION_PROTOCOL_ORION_FRAMER_H
+
 #include <stdint.h>
 #include <stddef.h>
+
+namespace orion
+{
 
 //  uint8_t data[8] = {1, 2, 3, 4, 0, 0, 0, 0};
 //  uint8_t buffer[256] = {0};
@@ -30,7 +36,8 @@
 //  uint8_t dataD[128] = {0};
 //  framer.DecodePacket(&buffer[1], s-2, dataD, sizeof(dataD));
 
-class Framer {
+class Framer
+{
 
 	struct Header {
 		uint32_t crc;
@@ -47,4 +54,12 @@ public:
 
 	size_t EncodePacket(uint8_t* data, size_t len, uint8_t* packet, size_t avail_len);
 	size_t DecodePacket(uint8_t* packet, size_t len, uint8_t* data, size_t avail_len);
+
+	static const uint8_t FRAME_DELIMETER = 0;
 };
+
+const uint8_t Framer::FRAME_DELIMETER;
+
+}  // orion
+
+#endif  // ORION_PROTOCOL_ORION_FRAMER_H

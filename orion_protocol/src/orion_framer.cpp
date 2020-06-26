@@ -23,6 +23,9 @@
 
 #include "orion_protocol/framer.h"
 
+namespace orion
+{
+
 #define StartBlock()	(code_ptr = dst++, code = 1)
 #define FinishBlock()	(*code_ptr = code)
 
@@ -45,7 +48,7 @@ size_t Framer::EncodePacket(uint8_t* data, size_t len, uint8_t* packet, size_t a
 	header->crc = crc16_calc(data, len - sizeof(*header));
 
 	/// Start 0
-	packet[send_len++] = 0;
+	packet[send_len++] = FRAME_DELIMETER;
 
 	ret = StuffData(data, len, &packet[send_len]);
 	if (ret < 1) {
@@ -54,7 +57,7 @@ size_t Framer::EncodePacket(uint8_t* data, size_t len, uint8_t* packet, size_t a
 	send_len += ret;
 
 	// End 0
-	packet[send_len++] = 0;
+	packet[send_len++] = FRAME_DELIMETER;
 
 	return send_len;
 }
@@ -157,3 +160,4 @@ size_t Framer::UnStuffData(const uint8_t *ptr, size_t length, uint8_t *dst)
 	return dst - start;
 }
 
+}  // orion
