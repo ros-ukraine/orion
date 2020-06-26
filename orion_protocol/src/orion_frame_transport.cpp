@@ -43,6 +43,45 @@ bool FrameTransport::sendPacket(const uint8_t *input_buffer, uint32_t input_size
 
 size_t FrameTransport::receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout)
 {
+  Timeout duration(timeout);
+  size_t result = 0;
+  bool decode = this->hasReceivedPacket();
+  if (false == decode)
+  {
+    size_t size = this->communication_->receiveBuffer(this->buffer_, BUFFER_SIZE, (duration.timeLeft() * 3) / 4);
+    for (size_t i = 0; i < size; i++)
+    {
+      this->queue_.push_back(this->buffer_[i]);
+    }
+
+    if (this->hasFrameInQueue())
+    {
+      decode = true;
+    }
+  }
+
+  if (decode)
+  {
+    auto position = std::find(this->queue_.begin(), this->queue_.end(), Framer::FRAME_DELIMETER);
+    this->queue_.erase(this->queue_.begin(), position);
+    position = std::find(std::next(this->queue_.begin()), this->queue_.end(), Framer::FRAME_DELIMETER);
+
+    size_t count = 0;
+    for (auto it = this->queue_.begin(); it != position; ++it)
+    {
+      this->buffer_[count++] = *it;
+    }
+    if (position != this->queue_.end())
+    {
+      this->queue_.erase(this->queue_.begin(), std::next(position));
+    }
+    else
+    {
+      this->queue_.clear();
+    }
+    result = this->framer_.decodePacket(this->buffer_, count, output_buffer, output_size);
+  }
+  return result;
 }
 
 bool FrameTransport::hasFrameInQueue()
