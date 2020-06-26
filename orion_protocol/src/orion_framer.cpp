@@ -21,10 +21,12 @@
 *
 */
 
-#include "orion_protocol/framer.h"
+#include "orion_protocol/orion_framer.h"
 
 namespace orion
 {
+
+const uint8_t Framer::FRAME_DELIMETER;
 
 #define StartBlock()	(code_ptr = dst++, code = 1)
 #define FinishBlock()	(*code_ptr = code)
@@ -37,7 +39,7 @@ namespace orion
  * @param avail_len[in]		Available len in out buffer.
  * @return Resulting length of encoded data.
  */
-size_t Framer::EncodePacket(uint8_t* data, size_t len, uint8_t* packet, size_t avail_len) {
+size_t Framer::encodePacket(const uint8_t* data, size_t len, uint8_t* packet, size_t avail_len) {
 	size_t send_len = 0;
 	size_t ret = 0;
 	Header *header = nullptr;
@@ -45,12 +47,12 @@ size_t Framer::EncodePacket(uint8_t* data, size_t len, uint8_t* packet, size_t a
 	header = (Header*)&data[len - sizeof(*header)];
 
 	header->crc = 0;
-	header->crc = crc16_calc(data, len - sizeof(*header));
+	header->crc = crc16Calc(data, len - sizeof(*header));
 
 	/// Start 0
 	packet[send_len++] = FRAME_DELIMETER;
 
-	ret = StuffData(data, len, &packet[send_len]);
+	ret = stuffData(data, len, &packet[send_len]);
 	if (ret < 1) {
 		return 0;
 	}
@@ -70,17 +72,17 @@ size_t Framer::EncodePacket(uint8_t* data, size_t len, uint8_t* packet, size_t a
  * @param avail_len[out]	Available size of data buffer
  * @return Length of decoded data
  */
-size_t Framer::DecodePacket(uint8_t* packet, size_t len, uint8_t* data, size_t avail_len) {
+size_t Framer::decodePacket(const uint8_t* packet, size_t len, uint8_t* data, size_t avail_len) {
 	Header *header = nullptr;
 
-	size_t ret = UnStuffData(packet, len, data);
+	size_t ret = unStuffData(packet, len, data);
 	if (ret < 1) {
 		return 0;
 	}
 
 	header = (Header*)&data[ret - sizeof(*header)];
 
-	uint16_t crc = crc16_calc(data, ret - sizeof(*header));
+	uint16_t crc = crc16Calc(data, ret - sizeof(*header));
 
 	if (crc != header->crc) {
 		return 0;
@@ -89,15 +91,15 @@ size_t Framer::DecodePacket(uint8_t* packet, size_t len, uint8_t* data, size_t a
 	return ret;
 }
 
-uint16_t Framer::crc16_calc(uint8_t *data, size_t len) {
+uint16_t Framer::crc16Calc(const uint8_t *data, size_t len) {
 	uint16_t crc = 0xFFFF;
 	for (uint32_t i = 0; i < len; i++) {
-		crc = crc16_update(crc, data[i]);
+		crc = crc16Update(crc, data[i]);
 	}
 	return crc;
 }
 
-uint16_t Framer::crc16_update(uint16_t crc, uint8_t a) {
+uint16_t Framer::crc16Update(uint16_t crc, const uint8_t a) {
 	int i;
 
 	crc ^= (uint16_t)a;
@@ -111,7 +113,7 @@ uint16_t Framer::crc16_update(uint16_t crc, uint8_t a) {
 	return crc;
 }
 
-size_t Framer::StuffData(const uint8_t *ptr, size_t length, uint8_t *dst)
+size_t Framer::stuffData(const uint8_t *ptr, size_t length, uint8_t *dst)
 {
 	const uint8_t *start = dst, *end = ptr + length;
 	uint8_t code, *code_ptr; /* Where to insert the leading count */
@@ -141,7 +143,7 @@ size_t Framer::StuffData(const uint8_t *ptr, size_t length, uint8_t *dst)
  * Returns the length of the decoded data
  * (which is guaranteed to be <= length).
  */
-size_t Framer::UnStuffData(const uint8_t *ptr, size_t length, uint8_t *dst)
+size_t Framer::unStuffData(const uint8_t *ptr, size_t length, uint8_t *dst)
 {
 	const uint8_t *start = dst, *end = ptr + length;
 	uint8_t code = 0xFF, copy = 0;

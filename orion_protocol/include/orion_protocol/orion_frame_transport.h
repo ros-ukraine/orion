@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <list>
 #include "orion_protocol/orion_communication.h"
+#include "orion_protocol/orion_framer.h"
 #include "orion_protocol/orion_transport.h"
 
 namespace orion
@@ -43,7 +44,11 @@ public:
 private:
   bool hasFrameInQueue();
 
+  Framer framer_;
   Communication *communication_;
+
+  static const size_t BUFFER_SIZE = 500;
+  uint8_t buffer_[BUFFER_SIZE];
 
   // TODO: Add circular buffer
   std::list<uint8_t> queue_;

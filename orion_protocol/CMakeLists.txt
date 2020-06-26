@@ -18,7 +18,7 @@ include_directories(
 )
 
 add_library(${PROJECT_NAME}
-#  src/orion_framer.cpp
+  src/orion_framer.cpp
   src/orion_serial_port.cpp
   src/orion_timeout.cpp
   src/orion_major.cpp

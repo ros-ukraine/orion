@@ -43,22 +43,20 @@ class Framer
 		uint32_t crc;
 	} formated;
 
-	size_t StuffData(const uint8_t *ptr, size_t length, uint8_t *dst);
-	size_t UnStuffData(const uint8_t *ptr, size_t length, uint8_t *dst);
-	uint16_t crc16_calc(uint8_t *data, size_t len);
-	uint16_t crc16_update(uint16_t crc, uint8_t a);
+	size_t stuffData(const uint8_t *ptr, size_t length, uint8_t *dst);
+	size_t unStuffData(const uint8_t *ptr, size_t length, uint8_t *dst);
+	uint16_t crc16Calc(const uint8_t *data, size_t len);
+	uint16_t crc16Update(uint16_t crc, const uint8_t a);
 
 public:
 	Framer() {};
 	virtual ~Framer() {};
 
-	size_t EncodePacket(uint8_t* data, size_t len, uint8_t* packet, size_t avail_len);
-	size_t DecodePacket(uint8_t* packet, size_t len, uint8_t* data, size_t avail_len);
+	size_t encodePacket(const uint8_t* data, size_t len, uint8_t* packet, size_t avail_len);
+	size_t decodePacket(const uint8_t* packet, size_t len, uint8_t* data, size_t avail_len);
 
 	static const uint8_t FRAME_DELIMETER = 0;
 };
-
-const uint8_t Framer::FRAME_DELIMETER;
 
 }  // orion
 

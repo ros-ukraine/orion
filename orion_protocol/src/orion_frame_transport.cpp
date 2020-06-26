@@ -25,13 +25,20 @@
 #include <algorithm>
 #include <iterator>
 #include "orion_protocol/orion_framer.h"
+#include "orion_protocol/orion_timeout.h"
 #include "orion_protocol/orion_frame_transport.h"
 
 namespace orion
 {
 
+const size_t FrameTransport::BUFFER_SIZE;
+
 bool FrameTransport::sendPacket(const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout)
 {
+  Timeout duration(timeout);
+  size_t packet_size = this->framer_.encodePacket(input_buffer, input_size, this->buffer_, BUFFER_SIZE);
+  bool result = this->communication_->sendBuffer(this->buffer_, packet_size, duration.timeLeft());
+  return result;
 }
 
 size_t FrameTransport::receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout)
@@ -52,10 +59,8 @@ bool FrameTransport::hasFrameInQueue()
   return false;
 }
 
-
 bool FrameTransport::hasReceivedPacket()
 {
-  const uint32_t BUFFER_SIZE = 500;
   bool result = false;
 
   if (this->hasFrameInQueue())
@@ -64,11 +69,10 @@ bool FrameTransport::hasReceivedPacket()
   }
   else if (this->communication_->hasAvailableBuffer())
   {
-    uint8_t buffer[BUFFER_SIZE];
-    size_t received_size = this->communication_->receiveAvailableBuffer(buffer, BUFFER_SIZE);
+    size_t received_size = this->communication_->receiveAvailableBuffer(this->buffer_, BUFFER_SIZE);
     for (size_t i = 0; i < received_size; i++)
     {
-      this->queue_.push_back(buffer[i]);
+      this->queue_.push_back(this->buffer_[i]);
     }
     if (this->hasFrameInQueue())
     {
