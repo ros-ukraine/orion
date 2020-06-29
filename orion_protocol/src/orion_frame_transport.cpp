@@ -25,7 +25,9 @@
 #include <algorithm>
 #include <iterator>
 #include <cstring>
+#include "orion_protocol/orion_header.h"
 #include "orion_protocol/orion_framer.h"
+#include "orion_protocol/orion_crc.h"
 #include "orion_protocol/orion_timeout.h"
 #include "orion_protocol/orion_frame_transport.h"
 
@@ -34,13 +36,14 @@ namespace orion
 
 const size_t FrameTransport::BUFFER_SIZE;
 
-bool FrameTransport::sendPacket(const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout)
+bool FrameTransport::sendPacket(uint8_t *input_buffer, uint32_t input_size, uint32_t timeout)
 {
+  ROS_ASSERT(input_size >= sizeof(FrameHeader));
   Timeout duration(timeout);
-  // TODO: Change interface of Framer to accept buffer of smaller length and no need to accomodate CRC at the end
-  std::memcpy(this->data_buffer_, input_buffer, input_size);
-  size_t packet_size = this->framer_.encodePacket(this->data_buffer_, input_size + sizeof(uint32_t), this->buffer_,
-    BUFFER_SIZE);
+
+  FrameHeader *frame_header = reinterpret_cast<FrameHeader*>(input_buffer);
+  frame_header->crc = CRC::calculateCRC16(input_buffer, input_size);
+  size_t packet_size = this->framer_->encodePacket(input_buffer, input_size, this->buffer_, BUFFER_SIZE);
   bool result = this->communication_->sendBuffer(this->buffer_, packet_size, duration.timeLeft());
   return result;
 }
@@ -57,7 +60,6 @@ size_t FrameTransport::receivePacket(uint8_t *output_buffer, uint32_t output_siz
     {
       this->queue_.push_back(this->buffer_[i]);
     }
-
     if (this->hasFrameInQueue())
     {
       decode = true;
@@ -83,7 +85,19 @@ size_t FrameTransport::receivePacket(uint8_t *output_buffer, uint32_t output_siz
     {
       this->queue_.clear();
     }
-    result = this->framer_.decodePacket(this->buffer_, count, output_buffer, output_size);
+    result = this->framer_->decodePacket(this->buffer_, count, output_buffer, output_size);
+    if (result >= sizeof(FrameHeader))
+    {
+      result = 0;
+    }
+    else
+    {
+      FrameHeader *frame_header = reinterpret_cast<FrameHeader*>(output_buffer);
+      if (CRC::calculateCRC16(output_buffer, output_size) != frame_header->crc)
+      {
+        result = 0;
+      }
+    }
   }
   return result;
 }

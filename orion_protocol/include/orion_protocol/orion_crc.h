@@ -21,24 +21,25 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_TRANSPORT_H
-#define ORION_PROTOCOL_ORION_TRANSPORT_H
+#ifndef ORION_PROTOCOL_ORION_CRC_H
+#define ORION_PROTOCOL_ORION_CRC_H
 
 #include <stdint.h>
-#include <cstdlib>
+#include <stddef.h>
 
 namespace orion
 {
 
-class Transport
+class CRC
 {
 public:
-  virtual bool sendPacket(uint8_t *input_buffer, uint32_t input_size, uint32_t timeout) = 0;
-  virtual size_t receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout) = 0;
-  virtual bool hasReceivedPacket() = 0;
-  virtual ~Transport() = default;
+	static uint16_t calculateCRC16(const uint8_t *data, size_t length);
+
+private:
+	static  uint16_t updateCRC16(uint16_t crc, const uint8_t byte);
+
 };
 
 }  // orion
 
-#endif  // ORION_PROTOCOL_ORION_TRANSPORT_H
+#endif  // ORION_PROTOCOL_ORION_CRC_H

@@ -37,7 +37,7 @@ bool Major::processPacket(const CommandHeader *command_header, const ResultHeade
     if (size_received >= sizeof(ResultHeader))
     {
       received_header = reinterpret_cast<ResultHeader*>(this->result_buffer_);
-      if (command_header->sequence_id == received_header->sequence_id)
+      if (command_header->common.sequence_id == received_header->common.sequence_id)
       {
         same_sequence_id = true;
       }
@@ -63,7 +63,7 @@ void Major::validateResult(const CommandHeader *command_header, const ResultHead
     throw std::range_error(message);
   }
   received_header = reinterpret_cast<ResultHeader*>(this->result_buffer_);
-  if (command_header->sequence_id != received_header->sequence_id)
+  if (command_header->common.sequence_id != received_header->common.sequence_id)
   {
     throw std::range_error("Could not receive packet with the same sequence_id");
   }
@@ -74,12 +74,12 @@ void Major::validateResult(const CommandHeader *command_header, const ResultHead
       received_header->error_code);
     throw std::runtime_error(message);
   }
-  if (result_header->message_id != command_header->message_id)
+  if (result_header->common.message_id != command_header->common.message_id)
   {
     throw std::range_error("Received different message_id from reply packet");
   }
-  if ((result_header->version > received_header->version) ||
-    (result_header->version < received_header->oldest_compatible_version))
+  if ((result_header->common.version > received_header->common.version) ||
+    (result_header->common.version < received_header->common.oldest_compatible_version))
   {
     throw std::range_error("Received reply version is not compatible with existing one");
   }

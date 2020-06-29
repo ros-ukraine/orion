@@ -22,6 +22,8 @@ add_library(${PROJECT_NAME}
   src/orion_serial_port.cpp
   src/orion_tcp_serial_bridge.cpp
   src/orion_framer.cpp
+  src/orion_cobs_framer.cpp
+  src/orion_crc.cpp
   src/orion_frame_transport.cpp
   src/orion_timeout.cpp
   src/orion_major.cpp

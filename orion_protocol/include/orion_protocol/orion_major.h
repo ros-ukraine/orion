@@ -72,7 +72,7 @@ public:
     while ((retry_count > 0) && (false == received))
     {
       Timeout timeout(retry_timeout);
-      command_header->sequence_id = ++(this->sequence_id_);
+      command_header->common.sequence_id = ++(this->sequence_id_);
       bool send_status = this->transport_->sendPacket(reinterpret_cast<uint8_t*>(&command), sizeof(command),
         retry_timeout);
       if (send_status)

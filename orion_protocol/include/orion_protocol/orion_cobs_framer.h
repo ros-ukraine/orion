@@ -21,24 +21,30 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_TRANSPORT_H
-#define ORION_PROTOCOL_ORION_TRANSPORT_H
+#ifndef ORION_PROTOCOL_ORION_COBS_FRAMER_H
+#define ORION_PROTOCOL_ORION_COBS_FRAMER_H
 
 #include <stdint.h>
-#include <cstdlib>
+#include <stddef.h>
+#include "orion_protocol/orion_framer.h"
 
 namespace orion
 {
 
-class Transport
+class COBSFramer: public Framer
 {
+	size_t stuffData(const uint8_t *ptr, size_t length, uint8_t *dst);
+	size_t unStuffData(const uint8_t *ptr, size_t length, uint8_t *dst);
+
 public:
-  virtual bool sendPacket(uint8_t *input_buffer, uint32_t input_size, uint32_t timeout) = 0;
-  virtual size_t receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout) = 0;
-  virtual bool hasReceivedPacket() = 0;
-  virtual ~Transport() = default;
+	COBSFramer() = default;
+
+	virtual size_t encodePacket(const uint8_t* data, size_t length, uint8_t* packet, size_t buffer_length);
+	virtual size_t decodePacket(const uint8_t* packet, size_t length, uint8_t* data, size_t buffer_length);
+  virtual ~COBSFramer() = default;
+
 };
 
 }  // orion
 
-#endif  // ORION_PROTOCOL_ORION_TRANSPORT_H
+#endif  // ORION_PROTOCOL_ORION_COBS_FRAMER_H

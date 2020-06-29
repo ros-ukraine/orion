@@ -33,26 +33,27 @@ namespace orion
 
 struct FrameHeader
 {
-  uint16_t size;
   uint16_t crc;
 };
 
-// TODO: Consider adding anonymous struct for common fields
-
-struct CommandHeader
+struct CommonHeader
 {
   uint8_t message_id;
   uint8_t version;
   uint8_t oldest_compatible_version;
   uint16_t sequence_id;
+};
+
+struct CommandHeader
+{
+  FrameHeader frame;
+  CommonHeader common;
 };
 
 struct ResultHeader
 {
-  uint8_t message_id;
-  uint8_t version;
-  uint8_t oldest_compatible_version;
-  uint16_t sequence_id;
+  FrameHeader frame;
+  CommonHeader common;
   uint8_t error_code;
 };
 
