@@ -49,6 +49,7 @@ private:
 
   static const size_t BUFFER_SIZE = 500;
   uint8_t buffer_[BUFFER_SIZE];
+  uint8_t data_buffer_[BUFFER_SIZE];
 
   // TODO: Add circular buffer
   std::list<uint8_t> queue_;

@@ -75,7 +75,7 @@ size_t Framer::encodePacket(const uint8_t* data, size_t len, uint8_t* packet, si
 size_t Framer::decodePacket(const uint8_t* packet, size_t len, uint8_t* data, size_t avail_len) {
 	Header *header = nullptr;
 
-	size_t ret = unStuffData(packet, len, data);
+	size_t ret = unStuffData(&packet[1], len, data);
 	if (ret < 1) {
 		return 0;
 	}
@@ -88,6 +88,8 @@ size_t Framer::decodePacket(const uint8_t* packet, size_t len, uint8_t* data, si
 		return 0;
 	}
 
+  ret -= sizeof(*header);
+  ret--; // TODO: Understand why ?
 	return ret;
 }
 

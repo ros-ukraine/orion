@@ -24,6 +24,7 @@
 #include <ros/assert.h>
 #include <algorithm>
 #include <iterator>
+#include <cstring>
 #include "orion_protocol/orion_framer.h"
 #include "orion_protocol/orion_timeout.h"
 #include "orion_protocol/orion_frame_transport.h"
@@ -36,7 +37,10 @@ const size_t FrameTransport::BUFFER_SIZE;
 bool FrameTransport::sendPacket(const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout)
 {
   Timeout duration(timeout);
-  size_t packet_size = this->framer_.encodePacket(input_buffer, input_size, this->buffer_, BUFFER_SIZE);
+  // TODO: Change interface of Framer to accept buffer of smaller length and no need to accomodate CRC at the end
+  std::memcpy(this->data_buffer_, input_buffer, input_size);
+  size_t packet_size = this->framer_.encodePacket(this->data_buffer_, input_size + sizeof(uint32_t), this->buffer_,
+    BUFFER_SIZE);
   bool result = this->communication_->sendBuffer(this->buffer_, packet_size, duration.timeLeft());
   return result;
 }

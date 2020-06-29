@@ -5,6 +5,7 @@ add_definitions(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
     roscpp
+    rospy
 )
 
 catkin_package(
@@ -49,7 +50,13 @@ if (CATKIN_ENABLE_TESTING)
   target_link_libraries(${PROJECT_NAME}_test_major ${PROJECT_NAME})
 
 
-  catkin_add_gmock(${PROJECT_NAME}_test_protocol test/test_orion_protocol.cpp)
-  add_dependencies(${PROJECT_NAME}_test_protocol ${catkin_EXPORTED_TARGETS})
-  target_link_libraries(${PROJECT_NAME}_test_protocol ${PROJECT_NAME})
+  catkin_add_gmock(${PROJECT_NAME}_test_framer test/test_orion_framer.cpp)
+  add_dependencies(${PROJECT_NAME}_test_framer ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(${PROJECT_NAME}_test_framer ${PROJECT_NAME})
+
+#!!!! TODO !!!
+#  find_package(rostest REQUIRED)
+#  add_rostest_gtest(tests_mynode test/mynode.test src/test/test_mynode.cpp [more cpp files])
+#  target_link_libraries(tests_mynode ${catkin_LIBRARIES})
+
 endif ()
