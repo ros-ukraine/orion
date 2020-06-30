@@ -24,11 +24,11 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <string>
-#include "orion_protocol/orion_framer.h"
+#include "orion_protocol/orion_cobs_framer.h"
 
 TEST(TestSuite, positiveTestCase)
 {
-  orion::Framer framer;
+  orion::COBSFramer framer;
 
   const char test1[100] = "Hello Test 1";
   const char test2[100] = "Different String";
@@ -40,8 +40,7 @@ TEST(TestSuite, positiveTestCase)
   size_t packet_size = 0;
   size_t data_size = 0;
 
-  packet_size = framer.encodePacket(reinterpret_cast<const uint8_t*>(test1),
-    strlen(test1) + sizeof(uint32_t) + 1, buffer, BUFFER_SIZE);
+  packet_size = framer.encodePacket(reinterpret_cast<const uint8_t*>(test1), strlen(test1) + 1, buffer, BUFFER_SIZE);
 
   ASSERT_GT(packet_size, 0);
   ASSERT_EQ(orion::Framer::FRAME_DELIMETER, buffer[0]);
@@ -51,8 +50,8 @@ TEST(TestSuite, positiveTestCase)
   ASSERT_EQ(strlen(test1) + 1, data_size);
   ASSERT_STREQ(test1, result);
 
-  packet_size = framer.encodePacket(reinterpret_cast<const uint8_t*>(test2), 
-    strlen(test2)  + sizeof(uint32_t) + 1, buffer, BUFFER_SIZE);
+  packet_size = framer.encodePacket(reinterpret_cast<const uint8_t*>(test2),
+    strlen(test2)  + 1, buffer, BUFFER_SIZE);
 
   ASSERT_GT(packet_size, 0);
   ASSERT_EQ(orion::Framer::FRAME_DELIMETER, buffer[0]);
@@ -62,7 +61,7 @@ TEST(TestSuite, positiveTestCase)
   ASSERT_EQ(strlen(test2) + 1, data_size);
   ASSERT_STREQ(test2, result);
 
-  packet_size = framer.encodePacket(reinterpret_cast<const uint8_t*>(test1), sizeof(uint32_t), buffer, BUFFER_SIZE);
+  packet_size = framer.encodePacket(reinterpret_cast<const uint8_t*>(test1), 0, buffer, BUFFER_SIZE);
 
   ASSERT_GT(packet_size, 0);
   ASSERT_EQ(orion::Framer::FRAME_DELIMETER, buffer[0]);
