@@ -42,10 +42,17 @@ struct HandshakeCommand
 {
   orion::CommandHeader header =
   {
-    .message_id = 2,
-    .version = 1,
-    .oldest_compatible_version = 1,
-    .sequence_id = 0
+    .frame =
+    {
+      .crc = 0
+    },
+    .common =
+    {
+      .message_id = 2,
+      .version = 1,
+      .oldest_compatible_version = 1,
+      .sequence_id = 0
+    }
   };
 };
 
@@ -53,10 +60,17 @@ struct HandshakeResult
 {
   orion::ResultHeader header =
   {
-    .message_id = 2,
-    .version = 1,
-    .oldest_compatible_version = 1,
-    .sequence_id = 0,
+    .frame =
+    {
+      .crc = 0
+    },
+    .common =
+    {
+      .message_id = 2,
+      .version = 1,
+      .oldest_compatible_version = 1,
+      .sequence_id = 0
+    },
     .error_code = 0
   };
 };
@@ -66,7 +80,7 @@ struct HandshakeResult
 class MockTransport: public orion::Transport
 {
 public:
-  MOCK_METHOD3(sendPacket, bool(const uint8_t *input_buffer, uint32_t input_size, uint32_t timeout));
+  MOCK_METHOD3(sendPacket, bool(uint8_t *input_buffer, uint32_t input_size, uint32_t timeout));
   MOCK_METHOD3(receivePacket, size_t(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout));
   MOCK_METHOD0(hasReceivedPacket, bool());
 };
@@ -120,7 +134,7 @@ TEST(TestSuite, happyPath)
             {
               size_t size = sizeof(HandshakeResult);
               HandshakeResult reply_result;
-              reply_result.header.sequence_id = 1;
+              reply_result.header.common.sequence_id = 1;
               std::memcpy(output_buffer, reinterpret_cast<const uint8_t*>(&reply_result), size);
               return size;
             }));
@@ -135,8 +149,8 @@ TEST(TestSuite, incompatibleVersion)
 
   HandshakeCommand command;
   HandshakeResult result;
-  result.header.version = 1;
-  result.header.oldest_compatible_version = 1;
+  result.header.common.version = 1;
+  result.header.common.oldest_compatible_version = 1;
 
   uint8_t retry_count = 2;
   uint32_t retry_timeout = orion::Major::Interval::Microsecond * 300;
@@ -149,9 +163,9 @@ TEST(TestSuite, incompatibleVersion)
             {
               size_t size = sizeof(HandshakeResult);
               HandshakeResult reply_result;
-              reply_result.header.sequence_id = 1;
-              reply_result.header.version = 2;
-              reply_result.header.oldest_compatible_version = 2;
+              reply_result.header.common.sequence_id = 1;
+              reply_result.header.common.version = 2;
+              reply_result.header.common.oldest_compatible_version = 2;
               std::memcpy(output_buffer, reinterpret_cast<const uint8_t*>(&reply_result), size);
               return size;
             }));
@@ -189,7 +203,7 @@ TEST(TestSuite, errorInReply)
             {
               size_t size = sizeof(HandshakeResult);
               HandshakeResult reply_result;
-              reply_result.header.sequence_id = 1;
+              reply_result.header.common.sequence_id = 1;
               reply_result.header.error_code = 12;
               std::memcpy(output_buffer, reinterpret_cast<const uint8_t*>(&reply_result), size);
               return size;
