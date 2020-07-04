@@ -42,7 +42,7 @@ bool FrameTransport::sendPacket(uint8_t *input_buffer, uint32_t input_size, uint
   Timeout duration(timeout);
 
   FrameHeader *frame_header = reinterpret_cast<FrameHeader*>(input_buffer);
-  frame_header->crc = CRC::calculateCRC16(input_buffer, input_size);
+  frame_header->crc = CRC::calculateCRC16(input_buffer + sizeof(FrameHeader), input_size - sizeof(FrameHeader));
   size_t packet_size = this->framer_->encodePacket(input_buffer, input_size, this->buffer_, BUFFER_SIZE);
   bool result = this->communication_->sendBuffer(this->buffer_, packet_size, duration.timeLeft());
   return result;
@@ -72,28 +72,33 @@ size_t FrameTransport::receivePacket(uint8_t *output_buffer, uint32_t output_siz
     this->queue_.erase(this->queue_.begin(), position);
     position = std::find(std::next(this->queue_.begin()), this->queue_.end(), Framer::FRAME_DELIMETER);
 
+    ROS_ASSERT(this->queue_.end() != position);
+
     size_t count = 0;
     for (auto it = this->queue_.begin(); it != position; ++it)
     {
       this->buffer_[count++] = *it;
     }
+    this->buffer_[count++] = Framer::FRAME_DELIMETER;
+    position = std::next(position);
     if (position != this->queue_.end())
     {
-      this->queue_.erase(this->queue_.begin(), std::next(position));
+      this->queue_.erase(this->queue_.begin(), position);
     }
     else
     {
       this->queue_.clear();
     }
     result = this->framer_->decodePacket(this->buffer_, count, output_buffer, output_size);
-    if (result >= sizeof(FrameHeader))
+    if (result < sizeof(FrameHeader))
     {
       result = 0;
     }
     else
     {
       FrameHeader *frame_header = reinterpret_cast<FrameHeader*>(output_buffer);
-      if (CRC::calculateCRC16(output_buffer, output_size) != frame_header->crc)
+      if (CRC::calculateCRC16(output_buffer + sizeof(FrameHeader), 
+        result - sizeof(FrameHeader)) != frame_header->crc)
       {
         result = 0;
       }

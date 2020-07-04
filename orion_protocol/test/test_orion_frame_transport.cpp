@@ -26,6 +26,8 @@
 #include <string>
 #include "orion_protocol/orion_communication.h"
 #include "orion_protocol/orion_framer.h"
+#include "orion_protocol/orion_crc.h"
+#include "orion_protocol/orion_header.h"
 #include "orion_protocol/orion_frame_transport.h"
 #include "orion_protocol/orion_major.h"
 
@@ -80,6 +82,47 @@ TEST(TestSuite, sendPacket)
   frame_transport.sendPacket(packet, BUFFER_SIZE, retry_timeout);
 
   ASSERT_STREQ(reinterpret_cast<char*>(send_buffer), encoded_packet);
+}
+
+TEST(TestSuite, receivePacket)
+{
+  MockCommunication mock_communication;
+  MockFramer mock_framer;
+  orion::FrameTransport frame_transport(&mock_communication, &mock_framer);
+
+  const size_t BUFFER_SIZE = 30;
+  uint8_t packet[BUFFER_SIZE];
+  char decoded_packet[] = "  Decoded Packet";
+  size_t decoded_packet_length = strlen(decoded_packet) + 1;
+  uint32_t retry_timeout = orion::Major::Interval::Microsecond * 300;
+
+  uint16_t crc = orion::CRC::calculateCRC16(reinterpret_cast<uint8_t*>(decoded_packet + sizeof(orion::FrameHeader)),
+    decoded_packet_length - sizeof(orion::FrameHeader));
+  orion::FrameHeader *header = reinterpret_cast<orion::FrameHeader*>(decoded_packet);
+  header->crc = crc;
+
+  EXPECT_CALL(mock_communication, hasAvailableBuffer()).WillOnce(Return(false));
+
+  char received_message[] = " Received Message";
+  uint8_t* receive_buffer = reinterpret_cast<uint8_t*>(received_message);
+  size_t data_size = strlen(received_message) + 1;
+  receive_buffer[0] = orion::Framer::FRAME_DELIMETER;
+  receive_buffer[data_size] = orion::Framer::FRAME_DELIMETER;
+  EXPECT_CALL(mock_communication, receiveBuffer(NotNull(), Gt(data_size), Le(retry_timeout))).WillOnce(
+    DoAll(
+      SetArrayArgument<0>(receive_buffer, receive_buffer + data_size),
+      Return(data_size)));
+
+  EXPECT_CALL(mock_framer, decodePacket(NotNull(), Eq(data_size), _, Gt(decoded_packet_length))).WillOnce(
+    DoAll(
+      SetArrayArgument<2>(decoded_packet, decoded_packet + decoded_packet_length),
+      Return(decoded_packet_length)));
+
+  size_t packet_size = frame_transport.receivePacket(packet, BUFFER_SIZE, retry_timeout);
+
+  ASSERT_EQ(decoded_packet_length, packet_size);
+
+  ASSERT_STREQ(reinterpret_cast<char*>(packet), decoded_packet);
 }
 
 int main(int argc, char **argv)
