@@ -45,20 +45,21 @@ install(DIRECTORY include/${PROJECT_NAME}/
   PATTERN ".svn" EXCLUDE
 )
 
-
 if (CATKIN_ENABLE_TESTING)
   catkin_add_gmock(${PROJECT_NAME}_test_major test/test_orion_major.cpp)
   add_dependencies(${PROJECT_NAME}_test_major ${catkin_EXPORTED_TARGETS})
   target_link_libraries(${PROJECT_NAME}_test_major ${PROJECT_NAME})
 
-
   catkin_add_gmock(${PROJECT_NAME}_test_cobs_framer test/test_orion_cobs_framer.cpp)
   add_dependencies(${PROJECT_NAME}_test_cobs_framer ${catkin_EXPORTED_TARGETS})
   target_link_libraries(${PROJECT_NAME}_test_cobs_framer ${PROJECT_NAME})
 
-#!!!! TODO !!!
-#  find_package(rostest REQUIRED)
-#  add_rostest_gtest(tests_mynode test/mynode.test src/test/test_mynode.cpp [more cpp files])
-#  target_link_libraries(tests_mynode ${catkin_LIBRARIES})
+  catkin_add_gmock(${PROJECT_NAME}_test_frame_transport test/test_orion_frame_transport.cpp)
+  add_dependencies(${PROJECT_NAME}_test_frame_transport ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(${PROJECT_NAME}_test_frame_transport ${PROJECT_NAME})
+
+  find_package(rostest REQUIRED)
+  add_rostest_gmock(test_tcp_bridge_integration test/test_tcp_bridge_integration.test test/test_tcp_bridge_integration.cpp)
+  target_link_libraries(test_tcp_bridge_integration ${PROJECT_NAME})
 
 endif ()

@@ -38,10 +38,10 @@ public:
   void disconnect();
 
   TCPSerialBridge();
-  virtual size_t receiveAvailableBuffer(uint8_t *buffer, uint32_t size) = 0;
-  virtual size_t receiveBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout) = 0;
-  virtual bool hasAvailableBuffer() = 0;
-  virtual bool sendBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout) = 0;
+  virtual size_t receiveAvailableBuffer(uint8_t *buffer, uint32_t size);
+  virtual size_t receiveBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout);
+  virtual bool hasAvailableBuffer();
+  virtual bool sendBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout);
   virtual ~TCPSerialBridge() = default;
 
 private:
