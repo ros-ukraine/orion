@@ -33,8 +33,12 @@ using ::testing::Eq;
 using ::testing::Gt;
 using ::testing::Le;
 using ::testing::NotNull;
+using ::testing::_;
 using ::testing::Invoke;
 using ::testing::Return;
+using ::testing::SetArgPointee;
+using ::testing::SetArrayArgument;
+using ::testing::SaveArg;
 
 class MockCommunication: public orion::Communication
 {
@@ -52,7 +56,7 @@ public:
   MOCK_METHOD4(decodePacket, size_t(const uint8_t* packet, size_t length, uint8_t* data, size_t buffer_length));
 };
 
-TEST(TestSuite, echoResponse)
+TEST(TestSuite, sendPacket)
 {
   MockCommunication mock_communication;
   MockFramer mock_framer;
@@ -60,12 +64,22 @@ TEST(TestSuite, echoResponse)
 
   const size_t BUFFER_SIZE = 20;
   uint8_t packet[BUFFER_SIZE];
+  char encoded_packet[] = "Encoded Packet";
   uint32_t retry_timeout = orion::Major::Interval::Microsecond * 200;
 
-  EXPECT_CALL(mock_framer, encodePacket(Eq(packet), Eq(BUFFER_SIZE), NotNull(), Gt(0))).WillOnce(Return(BUFFER_SIZE));
-  EXPECT_CALL(mock_communication, sendBuffer(NotNull(), Gt(0), Le(retry_timeout))).WillOnce(Return(BUFFER_SIZE));
+  EXPECT_CALL(mock_framer, encodePacket(Eq(packet), Eq(BUFFER_SIZE), _, Gt(strlen(encoded_packet) + 1))).WillOnce(
+    DoAll(
+      SetArrayArgument<2>(encoded_packet, encoded_packet + strlen(encoded_packet) + 1),
+      Return(strlen(encoded_packet) + 1)));
+  uint8_t *send_buffer;
+  EXPECT_CALL(mock_communication, sendBuffer(NotNull(), Gt(0), Le(retry_timeout))).WillOnce(
+    DoAll(
+      SaveArg<0>(&send_buffer),
+      Return(true)));
 
   frame_transport.sendPacket(packet, BUFFER_SIZE, retry_timeout);
+
+  ASSERT_STREQ(reinterpret_cast<char*>(send_buffer), encoded_packet);
 }
 
 int main(int argc, char **argv)
