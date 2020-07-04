@@ -85,7 +85,7 @@ TEST(TestSuite, sucessfulEchoResponse)
   HandshakeResult result;
 
   uint8_t retry_count = 3;
-  uint32_t retry_timeout = orion::Major::Interval::Microsecond * 200;
+  uint32_t retry_timeout = orion::Major::Interval::Second * 3;
 
   command.data1 = 0;
   command.data2 = -200;
