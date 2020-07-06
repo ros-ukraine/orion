@@ -33,8 +33,8 @@ namespace orion
 
 class COBSFramer: public Framer
 {
-	size_t stuffData(const uint8_t *ptr, size_t length, uint8_t *dst);
-	size_t unStuffData(const uint8_t *ptr, size_t length, uint8_t *dst);
+	size_t encode(const uint8_t *input, size_t length, uint8_t *output);
+	size_t decode(const uint8_t *input, size_t length, uint8_t *output);
 
 public:
 	COBSFramer() = default;

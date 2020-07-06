@@ -26,8 +26,8 @@
 namespace orion
 {
 
-#define StartBlock()	(code_ptr = dst++, code = 1)
-#define FinishBlock()	(*code_ptr = code)
+#define StartBlock()	(code_ptr = output++, index = 1)
+#define FinishBlock()	(*code_ptr = index)
 
 // TODO: fix parameter description
 /**
@@ -46,7 +46,7 @@ size_t COBSFramer::encodePacket(const uint8_t* data, size_t length, uint8_t* pac
 	// Start 0
 	packet[send_len++] = Framer::FRAME_DELIMETER;
 
-	result = stuffData(data, length, &packet[send_len]);
+	result = encode(data, length, &packet[send_len]);
 	if (result < 1)
 	{
 		result = 0;
@@ -73,7 +73,7 @@ size_t COBSFramer::encodePacket(const uint8_t* data, size_t length, uint8_t* pac
  */
 size_t COBSFramer::decodePacket(const uint8_t* packet, size_t length, uint8_t* data, size_t buffer_length)
 {
-	size_t result = unStuffData(&packet[1], length, data);
+	size_t result = decode(&packet[1], length, data);
 	if (result < 1)
 	{
 		return 0;
@@ -82,18 +82,23 @@ size_t COBSFramer::decodePacket(const uint8_t* packet, size_t length, uint8_t* d
 	return result;
 }
 
-size_t COBSFramer::stuffData(const uint8_t *ptr, size_t length, uint8_t *dst)
+size_t COBSFramer::encode(const uint8_t *input, size_t length, uint8_t *output)
 {
-	const uint8_t *start = dst, *end = ptr + length;
-	uint8_t code, *code_ptr; /* Where to insert the leading count */
+	const uint8_t *start = output;
+	const uint8_t *end = input + length;
+	uint8_t index;
+	uint8_t *code_ptr;
 
 	StartBlock();
-	while (ptr < end) {
-		if (code != 0xFF) {
-			uint8_t c = *ptr++;
-			if (c != 0) {
-				*dst++ = c;
-				code++;
+	while (input < end)
+	{
+		if (0xFF != index)
+		{
+			uint8_t symbol = *input++;
+			if (Framer::FRAME_DELIMETER != symbol)
+			{
+				*output++ = symbol;
+				index++;
 				continue;
 			}
 		}
@@ -101,34 +106,47 @@ size_t COBSFramer::stuffData(const uint8_t *ptr, size_t length, uint8_t *dst)
 		StartBlock();
 	}
 	FinishBlock();
-	return dst - start;
+	return output - start;
 }
 
 /*
- * UnStuffData decodes "length" bytes of data at
- * the location pointed to by "ptr", writing the
- * output to the location pointed to by "dst".
+ * decode - decodes "length" bytes of data at
+ * the location pointed to by "input", writing the
+ * output to the location pointed to by "output".
  *
  * Returns the length of the decoded data
  * (which is guaranteed to be <= length).
  */
-size_t COBSFramer::unStuffData(const uint8_t *ptr, size_t length, uint8_t *dst)
+size_t COBSFramer::decode(const uint8_t *input, size_t length, uint8_t *output)
 {
-	const uint8_t *start = dst, *end = ptr + length;
-	uint8_t code = 0xFF, copy = 0;
+	const uint8_t *start = output;
+	const uint8_t *end = input + length;
+	uint8_t index = 0xFF;
+	uint8_t inverse_index = 0;
 
-	for (; ptr < end; copy--) {
-		if (copy != 0) {
-			*dst++ = *ptr++;
-		} else {
-			if (code != 0xFF)
-				*dst++ = 0;
-			copy = code = *ptr++;
-			if (code == 0)
-				break; /* Source length too long */
+	while (input < end)
+	{
+		if (0 != inverse_index)
+		{
+			*output++ = *input++;
 		}
+		else
+		{
+			if (0xFF != index)
+			{
+				*output++ = Framer::FRAME_DELIMETER;
+		  }
+		  index = *input++;
+			inverse_index = index;
+			if (0 == index)
+			{
+			  // Source length exceeded limits of 255 symbols
+				break;
+		  }
+		}
+		inverse_index--;
 	}
-	return dst - start;
+	return output - start;
 }
 
 }  // orion
