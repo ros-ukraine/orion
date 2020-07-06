@@ -35,9 +35,6 @@ class CRC
 public:
 	static uint16_t calculateCRC16(const uint8_t *data, size_t length);
 
-private:
-	static  uint16_t updateCRC16(uint16_t crc, const uint8_t byte);
-
 };
 
 }  // orion
