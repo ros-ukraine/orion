@@ -33,7 +33,7 @@ namespace orion
 class CRC
 {
 public:
-	static uint16_t calculateCRC16(const uint8_t *data, size_t length);
+  static uint16_t calculateCRC16(const uint8_t *data, size_t length);
 
 };
 

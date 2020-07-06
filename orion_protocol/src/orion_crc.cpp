@@ -28,10 +28,10 @@ namespace orion
 
 uint16_t CRC::calculateCRC16(const uint8_t *data, size_t length)
 {
-	uint16_t result = 0xFFFF;
-	for (uint32_t i = 0; i < length; i++)
-	{
-		result ^= (uint16_t)data[i];
+  uint16_t result = 0xFFFF;
+  for (uint32_t i = 0; i < length; i++)
+  {
+    result ^= (uint16_t)data[i];
     for (uint8_t j = 0; j < 8; ++j)
     {
       if (result & 1)
@@ -43,8 +43,8 @@ uint16_t CRC::calculateCRC16(const uint8_t *data, size_t length)
         result = (result >> 1);
       }
     }
-	}
-	return result;
+  }
+  return result;
 }
 
 }  // orion

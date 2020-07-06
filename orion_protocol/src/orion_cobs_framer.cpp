@@ -40,26 +40,26 @@ namespace orion
  */
 size_t COBSFramer::encodePacket(const uint8_t* data, size_t length, uint8_t* packet, size_t buffer_length)
 {
-	size_t send_len = 0;
-	size_t result = 0;
+  size_t send_len = 0;
+  size_t result = 0;
 
-	// Start 0
-	packet[send_len++] = Framer::FRAME_DELIMETER;
+  // Start 0
+  packet[send_len++] = Framer::FRAME_DELIMETER;
 
-	result = encode(data, length, &packet[send_len]);
-	if (result < 1)
-	{
-		result = 0;
-	}
-	else
-	{
-	  send_len += result;
+  result = encode(data, length, &packet[send_len]);
+  if (result < 1)
+  {
+    result = 0;
+  }
+  else
+  {
+    send_len += result;
 
-	  // End 0
-	  packet[send_len++] = Framer::FRAME_DELIMETER;
-	}
+    // End 0
+    packet[send_len++] = Framer::FRAME_DELIMETER;
+  }
 
-	return send_len;
+  return send_len;
 }
 
 // TODO: fix parameter description
@@ -73,40 +73,40 @@ size_t COBSFramer::encodePacket(const uint8_t* data, size_t length, uint8_t* pac
  */
 size_t COBSFramer::decodePacket(const uint8_t* packet, size_t length, uint8_t* data, size_t buffer_length)
 {
-	size_t result = decode(&packet[1], length, data);
-	if (result < 1)
-	{
-		return 0;
-	}
+  size_t result = decode(&packet[1], length, data);
+  if (result < 1)
+  {
+    return 0;
+  }
   result--; // TODO: Understand why ?
-	return result;
+  return result;
 }
 
 size_t COBSFramer::encode(const uint8_t *input, size_t length, uint8_t *output)
 {
-	const uint8_t *start = output;
-	const uint8_t *end = input + length;
-	uint8_t index;
-	uint8_t *code_ptr;
+  const uint8_t *start = output;
+  const uint8_t *end = input + length;
+  uint8_t index;
+  uint8_t *code_ptr;
 
-	StartBlock();
-	while (input < end)
-	{
-		if (0xFF != index)
-		{
-			uint8_t symbol = *input++;
-			if (Framer::FRAME_DELIMETER != symbol)
-			{
-				*output++ = symbol;
-				index++;
-				continue;
-			}
-		}
-		FinishBlock();
-		StartBlock();
-	}
-	FinishBlock();
-	return output - start;
+  StartBlock();
+  while (input < end)
+  {
+    if (0xFF != index)
+    {
+      uint8_t symbol = *input++;
+      if (Framer::FRAME_DELIMETER != symbol)
+      {
+        *output++ = symbol;
+        index++;
+        continue;
+      }
+    }
+    FinishBlock();
+    StartBlock();
+  }
+  FinishBlock();
+  return output - start;
 }
 
 /*
@@ -119,34 +119,34 @@ size_t COBSFramer::encode(const uint8_t *input, size_t length, uint8_t *output)
  */
 size_t COBSFramer::decode(const uint8_t *input, size_t length, uint8_t *output)
 {
-	const uint8_t *start = output;
-	const uint8_t *end = input + length;
-	uint8_t index = 0xFF;
-	uint8_t inverse_index = 0;
+  const uint8_t *start = output;
+  const uint8_t *end = input + length;
+  uint8_t index = 0xFF;
+  uint8_t inverse_index = 0;
 
-	while (input < end)
-	{
-		if (0 != inverse_index)
-		{
-			*output++ = *input++;
-		}
-		else
-		{
-			if (0xFF != index)
-			{
-				*output++ = Framer::FRAME_DELIMETER;
-		  }
-		  index = *input++;
-			inverse_index = index;
-			if (0 == index)
-			{
-			  // Source length exceeded limits of 255 symbols
-				break;
-		  }
-		}
-		inverse_index--;
-	}
-	return output - start;
+  while (input < end)
+  {
+    if (0 != inverse_index)
+    {
+      *output++ = *input++;
+    }
+    else
+    {
+      if (0xFF != index)
+      {
+        *output++ = Framer::FRAME_DELIMETER;
+      }
+      index = *input++;
+      inverse_index = index;
+      if (0 == index)
+      {
+        // Source length exceeded limits of 255 symbols
+        break;
+      }
+    }
+    inverse_index--;
+  }
+  return output - start;
 }
 
 }  // orion
