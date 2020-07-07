@@ -36,7 +36,7 @@ public:
   /*
     @timeout - time in microseconds
   */
-  Timeout(uint32_t timeout);
+  explicit Timeout(uint32_t timeout);
 
   bool hasTime();
 

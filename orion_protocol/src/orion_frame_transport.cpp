@@ -97,7 +97,7 @@ size_t FrameTransport::receivePacket(uint8_t *output_buffer, uint32_t output_siz
     else
     {
       FrameHeader *frame_header = reinterpret_cast<FrameHeader*>(output_buffer);
-      if (CRC::calculateCRC16(output_buffer + sizeof(FrameHeader), 
+      if (CRC::calculateCRC16(output_buffer + sizeof(FrameHeader),
         result - sizeof(FrameHeader)) != frame_header->crc)
       {
         result = 0;

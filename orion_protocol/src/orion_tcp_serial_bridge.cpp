@@ -137,7 +137,6 @@ bool TCPSerialBridge::hasAvailableBuffer()
     return true;
   }
   return false;
-
 }
 
 bool TCPSerialBridge::sendBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout)

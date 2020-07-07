@@ -11,7 +11,7 @@ def main():
     port = rospy.get_param('~port', 8989)
     server_address = ('localhost', port)
 
-    rospy.loginfo('Starting up on {}'.format(server_address));
+    rospy.loginfo('Starting up on {}'.format(server_address))
 
     sock.bind(server_address)
     sock.listen(1)
