@@ -107,6 +107,6 @@ private:
   uint32_t sequence_id_ = 0;
 };
 
-}  // orion
+}  // namespace orion
 
 #endif  // ORION_PROTOCOL_ORION_MAJOR_H

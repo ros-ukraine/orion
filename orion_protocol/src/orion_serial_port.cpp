@@ -201,5 +201,4 @@ bool SerialPort::sendBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout)
   return false;
 }
 
-
-}  // orion
+}  // namespace orion

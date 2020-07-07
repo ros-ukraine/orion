@@ -26,10 +26,10 @@
 namespace orion
 {
 
-#define StartBlock()	(code_ptr = output++, index = 1)
-#define FinishBlock()	(*code_ptr = index)
+#define StartBlock() (code_ptr = output++, index = 1)
+#define FinishBlock() (*code_ptr = index)
 
-// TODO: fix parameter description
+// TODO(Andriy): fix parameter description
 /**
  *
  * @param data[in] 			pointer on data that should be encoded. At the end should be reserved memory for header
@@ -62,7 +62,7 @@ size_t COBSFramer::encodePacket(const uint8_t* data, size_t length, uint8_t* pac
   return send_len;
 }
 
-// TODO: fix parameter description
+// TODO(Andriy): fix parameter description
 /**
  *
  * @param packet[in]		Pointer on data that should be decoded.
@@ -78,7 +78,7 @@ size_t COBSFramer::decodePacket(const uint8_t* packet, size_t length, uint8_t* d
   {
     return 0;
   }
-  result--; // TODO: Understand why ?
+  result--;  // TODO(Andriy): Understand why ?
   return result;
 }
 
@@ -149,4 +149,4 @@ size_t COBSFramer::decode(const uint8_t *input, size_t length, uint8_t *output)
   return output - start;
 }
 
-}  // orion
+}  // namespace orion

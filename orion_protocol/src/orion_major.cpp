@@ -85,4 +85,4 @@ void Major::validateResult(const CommandHeader *command_header, const ResultHead
   }
 }
 
-}  // orion
+}  // namespace orion

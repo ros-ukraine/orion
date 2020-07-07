@@ -39,6 +39,6 @@ public:
   virtual ~Transport() = default;
 };
 
-}  // orion
+}  // namespace orion
 
 #endif  // ORION_PROTOCOL_ORION_TRANSPORT_H

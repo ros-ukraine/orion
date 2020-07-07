@@ -45,6 +45,6 @@ public:
 
 };
 
-}  // orion
+}  // namespace orion
 
 #endif  // ORION_PROTOCOL_ORION_COBS_FRAMER_H

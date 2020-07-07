@@ -40,6 +40,6 @@ public:
   virtual ~Communication() = default;
 };
 
-}  // orion
+}  // namespace orion
 
 #endif  // ORION_PROTOCOL_ORION_COMMUNICATION_H

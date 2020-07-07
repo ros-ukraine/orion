@@ -52,8 +52,8 @@ void raiseIf(bool condition, const char* format, Args && ...args)
   }
 }
 
-}  // exception
+}  // namespace exception
 
-}  // orion
+}  // namespace orion
 
 #endif  // ORION_PROTOCOL_ORION_EXCEPTION_H

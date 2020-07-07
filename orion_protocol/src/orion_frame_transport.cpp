@@ -144,4 +144,4 @@ bool FrameTransport::hasReceivedPacket()
   return result;
 }
 
-}  // orion
+}  // namespace orion

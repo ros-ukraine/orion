@@ -50,10 +50,10 @@ private:
   static const size_t BUFFER_SIZE = 500;
   uint8_t buffer_[BUFFER_SIZE];
 
-  // TODO: Add circular buffer
+  // TODO(Andriy): Add circular buffer
   std::list<uint8_t> queue_;
 };
 
-}  // orion
+}  // namespace orion
 
 #endif  // ORION_PROTOCOL_ORION_FRAME_TRANSPORT_H

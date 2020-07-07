@@ -48,6 +48,6 @@ private:
   int socket_descriptor_ = -1;
 };
 
-}  // orion
+}  // namespace orion
 
 #endif  // ORION_PROTOCOL_ORION_TCP_SERIAL_BRIDGE_H

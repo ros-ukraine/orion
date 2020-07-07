@@ -28,4 +28,4 @@ namespace orion
 
 const uint8_t Framer::FRAME_DELIMETER;
 
-}  // orion
+}  // namespace orion

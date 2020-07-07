@@ -59,6 +59,6 @@ struct ResultHeader
 
 #pragma pack(pop)
 
-}  // orion
+}  // namespace orion
 
 #endif  // ORION_PROTOCOL_ORION_HEADER_H

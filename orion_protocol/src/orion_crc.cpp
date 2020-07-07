@@ -47,4 +47,4 @@ uint16_t CRC::calculateCRC16(const uint8_t *data, size_t length)
   return result;
 }
 
-}  // orion
+}  // namespace orion

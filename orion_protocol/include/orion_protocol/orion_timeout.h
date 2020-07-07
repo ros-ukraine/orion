@@ -46,6 +46,6 @@ private:
   std::chrono::steady_clock::time_point till_time_;
 };
 
-}  // orion
+}  // namespace orion
 
 #endif  // ORION_PROTOCOL_ORION_TIMEOUT_H

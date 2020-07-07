@@ -37,6 +37,6 @@ public:
 
 };
 
-}  // orion
+}  // namespace orion
 
 #endif  // ORION_PROTOCOL_ORION_CRC_H

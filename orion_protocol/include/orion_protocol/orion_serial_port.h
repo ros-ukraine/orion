@@ -50,6 +50,6 @@ private:
   int file_descriptor_ = -1;
 };
 
-}  // orion
+}  // namespace orion
 
 #endif  // ORION_PROTOCOL_ORION_SERIAL_PORT_H

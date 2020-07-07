@@ -40,6 +40,6 @@ public:
 	static const uint8_t FRAME_DELIMETER = 0;
 };
 
-}  // orion
+}  // namespace orion
 
 #endif  // ORION_PROTOCOL_ORION_FRAMER_H
