@@ -33,11 +33,11 @@ namespace orion
 class Framer
 {
 public:
-	virtual size_t encodePacket(const uint8_t* data, size_t length, uint8_t* packet, size_t buffer_length) = 0;
-	virtual size_t decodePacket(const uint8_t* packet, size_t length, uint8_t* data, size_t buffer_length) = 0;
+  virtual size_t encodePacket(const uint8_t* data, size_t length, uint8_t* packet, size_t buffer_length) = 0;
+  virtual size_t decodePacket(const uint8_t* packet, size_t length, uint8_t* data, size_t buffer_length) = 0;
   virtual ~Framer() = default;
 
-	static const uint8_t FRAME_DELIMETER = 0;
+  static const uint8_t FRAME_DELIMETER = 0;
 };
 
 }  // namespace orion

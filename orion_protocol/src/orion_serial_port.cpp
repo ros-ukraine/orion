@@ -51,12 +51,12 @@ void SerialPort::setInterfaceAttributes(uint32_t speed)
     cfsetospeed(&tty, (speed_t)speed);
     cfsetispeed(&tty, (speed_t)speed);
 
-    tty.c_cflag |= (CLOCAL | CREAD); // ignore modem controls
+    tty.c_cflag |= (CLOCAL | CREAD);  // ignore modem controls
     tty.c_cflag &= ~CSIZE;
-    tty.c_cflag |= CS8; // 8-bit characters
-    tty.c_cflag &= ~PARENB; // no parity bit
-    tty.c_cflag &= ~CSTOPB; // only need 1 stop bit
-    tty.c_cflag &= ~CRTSCTS; // no hardware flowcontrol
+    tty.c_cflag |= CS8;  // 8-bit characters
+    tty.c_cflag &= ~PARENB;  // no parity bit
+    tty.c_cflag &= ~CSTOPB;  // only need 1 stop bit
+    tty.c_cflag &= ~CRTSCTS;  // no hardware flowcontrol
 
     // setup for non-canonical mode
     tty.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
@@ -151,7 +151,6 @@ bool SerialPort::hasAvailableBuffer()
     return true;
   }
   return false;
-
 }
 
 bool SerialPort::sendBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout)

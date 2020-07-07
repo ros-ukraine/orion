@@ -42,7 +42,6 @@ public:
   virtual size_t encodePacket(const uint8_t* data, size_t length, uint8_t* packet, size_t buffer_length);
   virtual size_t decodePacket(const uint8_t* packet, size_t length, uint8_t* data, size_t buffer_length);
   virtual ~COBSFramer() = default;
-
 };
 
 }  // namespace orion

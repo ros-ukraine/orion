@@ -39,11 +39,11 @@ namespace orion
 class Major
 {
 public:
-  Major(Transport *transport) : transport_(transport) {};
+  explicit Major(Transport *transport) : transport_(transport) {}
 
   Major(Transport *transport, uint32_t retry_timeout, uint8_t retry_count) : transport_(transport),
     default_timeout_(retry_timeout),
-    default_retry_count_(retry_count) {};
+    default_retry_count_(retry_count) {}
 
   template<class Command, class Result>
   void invoke(Command command, Result *result)
