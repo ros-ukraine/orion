@@ -5,6 +5,7 @@ add_definitions(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
     roscpp
+    rospy
 )
 
 catkin_package(
@@ -18,24 +19,24 @@ include_directories(
 )
 
 add_library(${PROJECT_NAME}
-  src/framer.cpp
+  src/orion_serial_port.cpp
+  src/orion_tcp_serial_bridge.cpp
+  src/orion_framer.cpp
+  src/orion_cobs_framer.cpp
+  src/orion_crc.cpp
+  src/orion_frame_transport.cpp
+  src/orion_timeout.cpp
+  src/orion_major.cpp
 )
 
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(${PROJECT_NAME}_node src/main.cpp)
-
-add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-target_link_libraries(${PROJECT_NAME}_node
-  ${PROJECT_NAME}
+target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
 )
 
-install(TARGETS ${PROJECT_NAME}_node
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+install(TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(DIRECTORY include/${PROJECT_NAME}/
@@ -44,7 +45,21 @@ install(DIRECTORY include/${PROJECT_NAME}/
   PATTERN ".svn" EXCLUDE
 )
 
-catkin_add_gtest(${PROJECT_NAME}-test test/test_orion_protocol.cpp)
-if(TARGET ${PROJECT_NAME}-test)
-  target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
-endif()
+if (CATKIN_ENABLE_TESTING)
+  catkin_add_gmock(${PROJECT_NAME}_test_major test/test_orion_major.cpp)
+  add_dependencies(${PROJECT_NAME}_test_major ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(${PROJECT_NAME}_test_major ${PROJECT_NAME})
+
+  catkin_add_gmock(${PROJECT_NAME}_test_cobs_framer test/test_orion_cobs_framer.cpp)
+  add_dependencies(${PROJECT_NAME}_test_cobs_framer ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(${PROJECT_NAME}_test_cobs_framer ${PROJECT_NAME})
+
+  catkin_add_gmock(${PROJECT_NAME}_test_frame_transport test/test_orion_frame_transport.cpp)
+  add_dependencies(${PROJECT_NAME}_test_frame_transport ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(${PROJECT_NAME}_test_frame_transport ${PROJECT_NAME})
+
+  find_package(rostest REQUIRED)
+  add_rostest_gmock(test_tcp_bridge_integration test/test_tcp_bridge_integration.test test/test_tcp_bridge_integration.cpp)
+  target_link_libraries(test_tcp_bridge_integration ${PROJECT_NAME})
+
+endif ()

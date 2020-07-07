@@ -21,9 +21,33 @@
 *
 */
 
-#include "orion_protocol/framer.h"
+#ifndef ORION_PROTOCOL_ORION_TCP_SERIAL_BRIDGE_H
+#define ORION_PROTOCOL_ORION_TCP_SERIAL_BRIDGE_H
 
-int DoSomething(int a, int b)
+#include <stdint.h>
+#include <cstdlib>
+#include "orion_protocol/orion_communication.h"
+
+namespace orion
 {
-  return a + b;
-}
+
+class TCPSerialBridge: public Communication
+{
+public:
+  void connect(const char* hostname, uint32_t port = 8080);
+  void disconnect();
+
+  TCPSerialBridge();
+  virtual size_t receiveAvailableBuffer(uint8_t *buffer, uint32_t size);
+  virtual size_t receiveBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout);
+  virtual bool hasAvailableBuffer();
+  virtual bool sendBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout);
+  virtual ~TCPSerialBridge() = default;
+
+private:
+  int socket_descriptor_ = -1;
+};
+
+}  // namespace orion
+
+#endif  // ORION_PROTOCOL_ORION_TCP_SERIAL_BRIDGE_H

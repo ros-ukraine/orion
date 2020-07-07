@@ -21,9 +21,24 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_FRAMER_H
-#define ORION_PROTOCOL_FRAMER_H
+#ifndef ORION_PROTOCOL_ORION_TRANSPORT_H
+#define ORION_PROTOCOL_ORION_TRANSPORT_H
 
-int DoSomething(int a, int b);
+#include <stdint.h>
+#include <cstdlib>
 
-#endif  // ORION_PROTOCOL_FRAMER_H
+namespace orion
+{
+
+class Transport
+{
+public:
+  virtual bool sendPacket(uint8_t *input_buffer, uint32_t input_size, uint32_t timeout) = 0;
+  virtual size_t receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout) = 0;
+  virtual bool hasReceivedPacket() = 0;
+  virtual ~Transport() = default;
+};
+
+}  // namespace orion
+
+#endif  // ORION_PROTOCOL_ORION_TRANSPORT_H

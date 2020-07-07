@@ -21,16 +21,39 @@
 *
 */
 
-#include <gtest/gtest.h>
-#include "orion_protocol/framer.h"
+#ifndef ORION_PROTOCOL_ORION_FRAME_TRANSPORT_H
+#define ORION_PROTOCOL_ORION_FRAME_TRANSPORT_H
 
-TEST(TestSuite, positiveTestCase)
-{
-  EXPECT_EQ(5, DoSomething(2, 3));
-}
+#include <stdint.h>
+#include <list>
+#include "orion_protocol/orion_communication.h"
+#include "orion_protocol/orion_framer.h"
+#include "orion_protocol/orion_transport.h"
 
-int main(int argc, char **argv)
+namespace orion
 {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+
+class FrameTransport: public Transport
+{
+public:
+  FrameTransport(Communication *communication, Framer *framer):communication_(communication), framer_(framer) {}
+  virtual bool sendPacket(uint8_t *input_buffer, uint32_t input_size, uint32_t timeout);
+  virtual size_t receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout);
+  virtual bool hasReceivedPacket();
+  virtual ~FrameTransport() = default;
+private:
+  bool hasFrameInQueue();
+
+  Framer *framer_;
+  Communication *communication_;
+
+  static const size_t BUFFER_SIZE = 500;
+  uint8_t buffer_[BUFFER_SIZE];
+
+  // TODO(Andriy): Add circular buffer
+  std::list<uint8_t> queue_;
+};
+
+}  // namespace orion
+
+#endif  // ORION_PROTOCOL_ORION_FRAME_TRANSPORT_H
