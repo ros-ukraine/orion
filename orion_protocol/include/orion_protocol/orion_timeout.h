@@ -25,7 +25,7 @@
 #define ORION_PROTOCOL_ORION_TIMEOUT_H
 
 #include <stdint.h>
-#include <chrono>
+#include <chrono>  // NOLINT [build/c++11]
 
 namespace orion
 {
