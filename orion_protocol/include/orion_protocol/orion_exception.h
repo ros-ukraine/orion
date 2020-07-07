@@ -39,7 +39,7 @@ void raise(const char* format, Args && ...args)
 {
     auto size = std::snprintf(nullptr, 0, format, std::forward<Args>(args)...);
     std::string message(size + 1, '\0');
-    std::sprintf(&message[0], format, std::forward<Args>(args)...);
+    std::snprintf(&message[0], size + 1, format, std::forward<Args>(args)...);
     throw ExceptionType(message);
 }
 
