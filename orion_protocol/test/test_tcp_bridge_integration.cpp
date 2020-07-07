@@ -35,17 +35,8 @@ struct HandshakeCommand
 {
   orion::CommandHeader header =
   {
-    .frame =
-    {
-      .crc = 0
-    },
-    .common =
-    {
-      .message_id = 2,
-      .version = 1,
-      .oldest_compatible_version = 1,
-      .sequence_id = 0
-    }
+    .frame = { .crc = 0 },
+    .common = { .message_id = 2, .version = 1, .oldest_compatible_version = 1, .sequence_id = 0 }
   };
   uint8_t data1;
   int16_t data2;
@@ -55,17 +46,8 @@ struct HandshakeResult
 {
   orion::ResultHeader header =
   {
-    .frame =
-    {
-      .crc = 0
-    },
-    .common =
-    {
-      .message_id = 2,
-      .version = 1,
-      .oldest_compatible_version = 1,
-      .sequence_id = 0
-    },
+    .frame = { .crc = 0 },
+    .common = { .message_id = 2, .version = 1, .oldest_compatible_version = 1, .sequence_id = 0 },
     .error_code = 0
   };
   int16_t data2;
