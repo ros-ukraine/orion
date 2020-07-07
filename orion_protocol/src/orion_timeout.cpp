@@ -21,7 +21,7 @@
 *
 */
 
-#include <chrono>
+#include <chrono>  // NOLINT [build/c++11]
 #include "orion_protocol/orion_timeout.h"
 
 using std::chrono::microseconds;
