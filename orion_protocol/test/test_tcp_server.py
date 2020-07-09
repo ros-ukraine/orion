@@ -8,8 +8,8 @@ def main():
     rospy.init_node('test_tcp_server')
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    port = rospy.get_param('~port', 8989)
-    server_address = ('localhost', port)
+    port = rospy.get_param('~port', 9190)
+    server_address = ('0.0.0.0', port)
 
     rospy.loginfo('Starting up on {}'.format(server_address))
 

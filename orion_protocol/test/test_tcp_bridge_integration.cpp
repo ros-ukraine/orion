@@ -24,6 +24,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <string>
+#include <chrono>  // NOLINT [build/c++11]
+#include <thread>  // NOLINT [build/c++11]
 #include "orion_protocol/orion_tcp_serial_bridge.h"
 #include "orion_protocol/orion_cobs_framer.h"
 #include "orion_protocol/orion_frame_transport.h"
@@ -57,8 +59,10 @@ struct HandshakeResult
 
 TEST(TestSuite, sucessfulEchoResponse)
 {
+  std::this_thread::sleep_for(std::chrono::seconds(3));
+
   orion::TCPSerialBridge bridge;
-  bridge.connect("localhost", 8989);
+  bridge.connect("0.0.0.0", 9190);
   orion::COBSFramer framer;
   orion::FrameTransport frame_transport(&bridge, &framer);
   orion::Major server(&frame_transport);
