@@ -25,7 +25,7 @@
 #include <gmock/gmock.h>
 #include <string>
 #include <chrono>  // NOLINT [build/c++11]
-#include <thread>
+#include <thread>  // NOLINT [build/c++11]
 #include "orion_protocol/orion_tcp_serial_bridge.h"
 #include "orion_protocol/orion_cobs_framer.h"
 #include "orion_protocol/orion_frame_transport.h"
