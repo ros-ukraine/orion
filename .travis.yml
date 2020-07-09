@@ -7,7 +7,7 @@ services:
 
 env:
   global:
-    - docker_image_name: shadowrobot/build-tools
+    - docker_image_name: shadowrobot/build-tools:xenial-kinetic
     - toolset_branch: master
     - server_type: travis
     - ros_release_name: kinetic
