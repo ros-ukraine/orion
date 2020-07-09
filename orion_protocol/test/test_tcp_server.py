@@ -9,7 +9,7 @@ def main():
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     port = rospy.get_param('~port', 8989)
-    server_address = ('localhost', port)
+    server_address = ('0.0.0.0', port)
 
     rospy.loginfo('Starting up on {}'.format(server_address))
 

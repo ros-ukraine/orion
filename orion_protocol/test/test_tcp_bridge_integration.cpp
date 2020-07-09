@@ -58,7 +58,7 @@ struct HandshakeResult
 TEST(TestSuite, sucessfulEchoResponse)
 {
   orion::TCPSerialBridge bridge;
-  bridge.connect("localhost", 8989);
+  bridge.connect("0.0.0.0", 8989);
   orion::COBSFramer framer;
   orion::FrameTransport frame_transport(&bridge, &framer);
   orion::Major server(&frame_transport);
