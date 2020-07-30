@@ -1,0 +1,6 @@
+<launch>
+  <node pkg="orion_protocol" name="test_tcp_server" type="test_tcp_server.py" output="screen">
+    <param name="port" type="int" value="9190"/>
+  </node>
+  <test test-name="test_tcp_bridge_integration" pkg="orion_protocol" type="test_tcp_bridge_integration"/>
+</launch>

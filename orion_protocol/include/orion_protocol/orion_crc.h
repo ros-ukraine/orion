@@ -21,9 +21,21 @@
 *
 */
 
-#include "orion_protocol/framer.h"
+#ifndef ORION_PROTOCOL_ORION_CRC_H
+#define ORION_PROTOCOL_ORION_CRC_H
 
-int main()
+#include <stdint.h>
+#include <stddef.h>
+
+namespace orion
 {
-   return 0;
-}
+
+class CRC
+{
+public:
+  static uint16_t calculateCRC16(const uint8_t *data, size_t length);
+};
+
+}  // namespace orion
+
+#endif  // ORION_PROTOCOL_ORION_CRC_H
