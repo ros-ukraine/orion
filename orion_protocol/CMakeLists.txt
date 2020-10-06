@@ -19,14 +19,14 @@ include_directories(
 )
 
 add_library(${PROJECT_NAME}
-  src/orion_serial_port.cpp
-  src/orion_tcp_serial_bridge.cpp
-  src/orion_framer.cpp
-  src/orion_cobs_framer.cpp
-  src/orion_crc.cpp
-  src/orion_frame_transport.cpp
-  src/orion_timeout.cpp
-  src/orion_major.cpp
+  src/major/orion_serial_port.cpp
+  src/major/orion_tcp_serial_bridge.cpp
+  src/common/orion_framer.cpp
+  src/common/orion_cobs_framer.cpp
+  src/common/orion_crc.cpp
+  src/common/orion_frame_transport.cpp
+  src/common/orion_timeout.cpp
+  src/major/orion_major.cpp
 )
 
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
