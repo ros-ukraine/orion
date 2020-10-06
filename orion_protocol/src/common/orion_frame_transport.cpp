@@ -21,7 +21,7 @@
 *
 */
 
-#include <ros/assert.h>
+#include <assert.h>
 #include <algorithm>
 #include <iterator>
 #include <cstring>
@@ -38,7 +38,7 @@ const size_t FrameTransport::BUFFER_SIZE;
 
 bool FrameTransport::sendPacket(uint8_t *input_buffer, uint32_t input_size, uint32_t timeout)
 {
-  ROS_ASSERT(input_size >= sizeof(FrameHeader));
+  assert(input_size >= sizeof(FrameHeader));
   Timeout duration(timeout);
 
   FrameHeader *frame_header = reinterpret_cast<FrameHeader*>(input_buffer);
@@ -72,7 +72,7 @@ size_t FrameTransport::receivePacket(uint8_t *output_buffer, uint32_t output_siz
     this->queue_.erase(this->queue_.begin(), position);
     position = std::find(std::next(this->queue_.begin()), this->queue_.end(), Framer::FRAME_DELIMETER);
 
-    ROS_ASSERT(this->queue_.end() != position);
+    assert(this->queue_.end() != position);
 
     size_t count = 0;
     for (auto it = this->queue_.begin(); it != position; ++it)

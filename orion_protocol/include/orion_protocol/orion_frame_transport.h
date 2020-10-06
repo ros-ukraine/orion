@@ -36,7 +36,7 @@ namespace orion
 class FrameTransport: public Transport
 {
 public:
-  FrameTransport(Communication *communication, Framer *framer):communication_(communication), framer_(framer) {}
+  FrameTransport(Communication *communication, Framer *framer):framer_(framer), communication_(communication) {}
   virtual bool sendPacket(uint8_t *input_buffer, uint32_t input_size, uint32_t timeout);
   virtual size_t receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout);
   virtual bool hasReceivedPacket();
