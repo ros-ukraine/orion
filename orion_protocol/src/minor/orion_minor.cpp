@@ -21,33 +21,41 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_MINOR_H
-#define ORION_PROTOCOL_ORION_MINOR_H
-
+#include "orion_protocol/orion_minor.h"
+#include <assert.h>
 #include <stdint.h>
 #include <stdbool.h>
-
-#include "orion_protocol/orion_header.h"
-#include "orion_protocol/orion_transport.h"
 
 namespace orion
 {
 
-class Minor
+bool Minor::waitAndReceiveCommand(uint8_t * buffer, size_t buffer_size, uint32_t timeout, size_t &size_received)
 {
-public:
-  explicit Minor(Transport *transport) : transport_(transport) {}
+    // TODO(Andriy): Implement
+    assert(false);
+    return (false);
+}
 
-  bool waitAndReceiveCommand(uint8_t * buffer, size_t buffer_size, uint32_t timeout, size_t &size_received);
+bool Minor::receiveCommand(uint8_t * buffer, size_t buffer_size, size_t &size_received)
+{
+    assert(NULL != buffer);
+    assert(0 < buffer_size);
 
-  bool receiveCommand(uint8_t * buffer, size_t buffer_size, size_t &size_received);
+    bool result = false;
+    if (transport_->hasReceivedPacket())
+    {
+        size_received = transport_->receivePacket(buffer, buffer_size, 0);
+        result = (size_received > 0);
+    }
+    return (result);
+}
 
-  void sendResult(uint8_t * buffer, const size_t size);
+void Minor::sendResult(uint8_t * buffer, const size_t size)
+{
+    assert(NULL != buffer);
+    assert(0 < size);
 
-private:
-  Transport *transport_;
-};
+    transport_->sendPacket(buffer, size, 0);
+}
 
 }  // namespace orion
-
-#endif  // ORION_PROTOCOL_ORION_MAJOR_H
