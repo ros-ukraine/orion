@@ -50,6 +50,10 @@ if (CATKIN_ENABLE_TESTING)
   add_dependencies(${PROJECT_NAME}_test_major ${catkin_EXPORTED_TARGETS})
   target_link_libraries(${PROJECT_NAME}_test_major ${PROJECT_NAME})
 
+  catkin_add_gmock(${PROJECT_NAME}_test_minor test/test_orion_minor.cpp src/minor/orion_minor.cpp)
+  add_dependencies(${PROJECT_NAME}_test_minor ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(${PROJECT_NAME}_test_minor ${PROJECT_NAME})
+
   catkin_add_gmock(${PROJECT_NAME}_test_cobs_framer test/test_orion_cobs_framer.cpp)
   add_dependencies(${PROJECT_NAME}_test_cobs_framer ${catkin_EXPORTED_TARGETS})
   target_link_libraries(${PROJECT_NAME}_test_cobs_framer ${PROJECT_NAME})
