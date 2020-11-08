@@ -43,16 +43,17 @@ using ::testing::SetArrayArgument;
 
 #pragma pack(push, 1)
 
-struct HandshakeCommand
+struct SimpleCommand
 {
   orion::CommandHeader header =
   {
     .frame = { .crc = 0 },
     .common = { .message_id = 2, .version = 1, .oldest_compatible_version = 1, .sequence_id = 0 }
   };
+  uint8_t data = 0;
 };
 
-struct HandshakeResult
+struct SimpleResult
 {
   orion::ResultHeader header =
   {
@@ -60,6 +61,8 @@ struct HandshakeResult
     .common = { .message_id = 2, .version = 1, .oldest_compatible_version = 1, .sequence_id = 0 },
     .error_code = 0
   };
+  uint8_t data1 = 0;
+  uint8_t data2 = 0;
 };
 
 #pragma pack(pop)
@@ -79,6 +82,7 @@ TEST(TestSuite, happyPath)
   orion::Major main_obj(&mock_outbound_transport);
   orion::Minor minor_obj(&mock_inbound_transport);
 
+  const uint8_t SAMPLE_DATA = 203;
   const uint16_t OUTBOUND_BUFFER_SIZE = 200;
   uint8_t outbound_buffer[OUTBOUND_BUFFER_SIZE] = {0};
   uint8_t *p_outbound = NULL;
@@ -89,23 +93,28 @@ TEST(TestSuite, happyPath)
   uint8_t *p_inbound = NULL;
   uint32_t actual_inbound_size = 0;
 
-  HandshakeCommand command;
-  HandshakeResult result;
+  SimpleCommand command;
+  SimpleResult result;
 
   uint8_t retry_count = 5;
   uint32_t retry_timeout = orion::Major::Interval::Microsecond * 400;
 
   EXPECT_CALL(mock_outbound_transport, sendPacket(NotNull(), Gt(0), Le(retry_timeout))).WillOnce(
     DoAll(SaveArg<0>(&p_outbound), SaveArg<1>(&actual_outbound_size), Return(true)));
-  EXPECT_CALL(mock_outbound_transport, hasReceivedPacket()).Times(0); // ???
+  EXPECT_CALL(mock_outbound_transport, hasReceivedPacket()).Times(0);
   auto mock_outbound_receive_packet = [&](uint8_t *output_buffer, uint32_t output_size, uint32_t timeout)
     {
       size_t size_received = 0;
       minor_obj.receiveCommand(inbound_buffer, INBOUND_BUFFER_SIZE, size_received);
 
-      size_t size = sizeof(HandshakeResult);
-      HandshakeResult reply_result;
+      size_t size = sizeof(SimpleResult);
+      SimpleResult reply_result;
       reply_result.header.common.sequence_id = 1;
+      if (size_received == sizeof(SimpleCommand))
+      {
+        SimpleCommand *p_command = reinterpret_cast<SimpleCommand*>(inbound_buffer);
+        reply_result.data1 = p_command->data;  
+      }
       minor_obj.sendResult(reinterpret_cast<uint8_t*>(&reply_result), sizeof(reply_result));
 
       std::memcpy(output_buffer, p_inbound, actual_inbound_size);
@@ -121,8 +130,10 @@ TEST(TestSuite, happyPath)
   EXPECT_CALL(mock_inbound_transport, receivePacket(NotNull(), Gt(0), Le(retry_timeout))).WillOnce(
     DoAll(SetArrayArgument<0>(p_outbound, p_outbound + actual_outbound_size), Return(actual_outbound_size)));
 
+  command.data = SAMPLE_DATA;
   main_obj.invoke(command, &result, retry_timeout, retry_count);
   ASSERT_EQ(actual_outbound_size, sizeof(command));
+  ASSERT_EQ(command.data,result.data1);
 }
 
 int main(int argc, char **argv)
