@@ -39,7 +39,6 @@ using ::testing::Invoke;
 using ::testing::Return;
 using ::testing::DoAll;
 using ::testing::SaveArg;
-using ::testing::SetArrayArgument;
 
 #pragma pack(push, 1)
 
@@ -127,13 +126,19 @@ TEST(TestSuite, happyPath)
   EXPECT_CALL(mock_inbound_transport, sendPacket(NotNull(), Gt(0), Le(retry_timeout))).WillOnce(
     DoAll(SaveArg<0>(&p_inbound), SaveArg<1>(&actual_inbound_size), Return(true)));
   EXPECT_CALL(mock_inbound_transport, hasReceivedPacket()).WillOnce(Return(true));
+
+  auto mock_inbound_receive_packet = [&](uint8_t *output_buffer, uint32_t output_size, uint32_t timeout)
+    {
+      std::memcpy(output_buffer, p_outbound, actual_outbound_size);
+      return actual_outbound_size;
+    };
   EXPECT_CALL(mock_inbound_transport, receivePacket(NotNull(), Gt(0), Le(retry_timeout))).WillOnce(
-    DoAll(SetArrayArgument<0>(p_outbound, p_outbound + actual_outbound_size), Return(actual_outbound_size)));
+    Invoke(mock_inbound_receive_packet));
 
   command.data = SAMPLE_DATA;
   main_obj.invoke(command, &result, retry_timeout, retry_count);
   ASSERT_EQ(actual_outbound_size, sizeof(command));
-  ASSERT_EQ(command.data,result.data1);
+  ASSERT_EQ(command.data, result.data1);
 }
 
 int main(int argc, char **argv)
