@@ -47,6 +47,13 @@ install(DIRECTORY include/${PROJECT_NAME}/
 )
 
 if (CATKIN_ENABLE_TESTING)
+
+  include_directories(
+    test/include
+    include
+    ${catkin_INCLUDE_DIRS}
+  )
+
   catkin_add_gmock(${PROJECT_NAME}_test_major test/test_orion_major.cpp)
   add_dependencies(${PROJECT_NAME}_test_major ${catkin_EXPORTED_TARGETS})
   target_link_libraries(${PROJECT_NAME}_test_major ${PROJECT_NAME})
@@ -62,6 +69,10 @@ if (CATKIN_ENABLE_TESTING)
   catkin_add_gmock(${PROJECT_NAME}_test_frame_transport test/test_orion_frame_transport.cpp)
   add_dependencies(${PROJECT_NAME}_test_frame_transport ${catkin_EXPORTED_TARGETS})
   target_link_libraries(${PROJECT_NAME}_test_frame_transport ${PROJECT_NAME})
+
+  catkin_add_gmock(${PROJECT_NAME}_test_circular_buffer test/test_orion_circular_buffer.cpp)
+  add_dependencies(${PROJECT_NAME}_test_circular_buffer ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(${PROJECT_NAME}_test_circular_buffer ${PROJECT_NAME})
 
   find_package(rostest REQUIRED)
   add_rostest_gmock(test_tcp_bridge_integration test/test_tcp_bridge_integration.test test/test_tcp_bridge_integration.cpp)

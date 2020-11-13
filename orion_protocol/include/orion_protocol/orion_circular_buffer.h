@@ -51,7 +51,7 @@ uint32_t orion_circular_buffer_dequeue(orion_circular_buffer_t * p_this, uint8_t
 
 bool orion_circular_buffer_has_word(orion_circular_buffer_t * p_this, uint8_t delimeter);
 
-bool orion_circular_buffer_dequeu_word(orion_circular_buffer_t * p_this, uint8_t delimeter, uint8_t * p_buffer, 
+bool orion_circular_buffer_dequeue_word(orion_circular_buffer_t * p_this, uint8_t delimeter, uint8_t * p_buffer, 
     uint32_t size, uint32_t * p_actual_size);
 
 #ifdef __cplusplus

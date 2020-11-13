@@ -22,7 +22,6 @@
 */
 
 #include <assert.h>
-// #include <cstring>
 #include "orion_protocol/orion_header.h"
 #include "orion_protocol/orion_framer.h"
 #include "orion_protocol/orion_crc.h"
@@ -71,7 +70,7 @@ size_t FrameTransport::receivePacket(uint8_t *output_buffer, uint32_t output_siz
   if (decode)
   {
     uint32_t size = 0;
-    bool status = orion_circular_buffer_dequeu_word(&this->circular_queue_, Framer::FRAME_DELIMETER, this->buffer_, 
+    bool status = orion_circular_buffer_dequeue_word(&this->circular_queue_, Framer::FRAME_DELIMETER, this->buffer_, 
       BUFFER_SIZE, &size);
     assert(status);
     result = this->framer_->decodePacket(this->buffer_, size, output_buffer, output_size);

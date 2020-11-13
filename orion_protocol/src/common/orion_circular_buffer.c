@@ -32,6 +32,8 @@ static bool find_byte(const orion_circular_buffer_t * p_this, uint32_t start_ind
 static bool find_word(const orion_circular_buffer_t * p_this, uint32_t * p_start_index, uint32_t * p_end_index, 
     uint8_t delimiter);
 
+static uint32_t get_word_size(const orion_circular_buffer_t * p_this, const uint32_t start_index, const uint32_t end_index);
+
 void orion_circular_buffer_init(orion_circular_buffer_t * p_this, uint8_t * p_buffer, uint32_t size)
 {
     assert(NULL != p_this);
@@ -148,6 +150,20 @@ uint32_t orion_circular_buffer_dequeue(orion_circular_buffer_t * p_this, uint8_t
     return (result);
 }
 
+uint32_t get_word_size(const orion_circular_buffer_t * p_this, const uint32_t start_index, const uint32_t end_index)
+{
+    uint32_t result = 0;
+    if (start_index <= end_index)
+    {
+        result = end_index - start_index + 1;
+    }
+    else
+    {
+        result = p_this->buffer_size - start_index + end_index + 1;
+    }
+    return (result);
+}
+
 bool find_byte(const orion_circular_buffer_t * p_this, uint32_t start_index, uint8_t value, uint32_t * p_index)
 {
     assert(NULL != p_this);
@@ -206,13 +222,13 @@ bool find_word(const orion_circular_buffer_t * p_this, uint32_t * p_start_index,
     bool found = find_byte(p_this, p_this->head_index, delimiter, p_start_index);
     *p_end_index = *p_start_index;
 
-    while (found && (*p_end_index - *p_start_index < 2))
+    while (found && (3 > get_word_size(p_this, *p_start_index, *p_end_index)))
     {
         *p_start_index = *p_end_index;
         found = find_byte(p_this, *p_start_index + 1, delimiter, p_end_index);
     }
 
-    if (found && (*p_end_index - *p_start_index < 2))
+    if (found && (3 <= get_word_size(p_this, *p_start_index, *p_end_index)))
     {
         result = true;
     }
@@ -228,7 +244,7 @@ bool orion_circular_buffer_has_word(orion_circular_buffer_t * p_this, uint8_t de
     return (result);
 }
 
-bool orion_circular_buffer_dequeu_word(orion_circular_buffer_t * p_this, uint8_t delimeter, uint8_t * p_buffer, 
+bool orion_circular_buffer_dequeue_word(orion_circular_buffer_t * p_this, uint8_t delimeter, uint8_t * p_buffer, 
     uint32_t size, uint32_t * p_actual_size)
 {
     uint32_t start_index = 0;
@@ -236,15 +252,7 @@ bool orion_circular_buffer_dequeu_word(orion_circular_buffer_t * p_this, uint8_t
     bool result = find_word(p_this, &start_index, &end_index, delimeter); 
     if (result)
     {
-        uint32_t word_size = 0;
-        if (start_index < end_index)
-        {
-            word_size = end_index - start_index + 1;
-        }
-        else
-        {
-            word_size = p_this->buffer_size - start_index + end_index + 1;
-        }
+        uint32_t word_size = get_word_size(p_this, start_index, end_index);
         assert(size >= word_size);
         
         p_this->head_index = start_index;
