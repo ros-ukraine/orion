@@ -26,6 +26,7 @@ add_library(${PROJECT_NAME}
   src/common/orion_crc.cpp
   src/common/orion_frame_transport.cpp
   src/common/orion_timeout.cpp
+  src/common/orion_circular_buffer.c
   src/major/orion_major.cpp
 )
 

@@ -21,41 +21,41 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_FRAME_TRANSPORT_H
-#define ORION_PROTOCOL_ORION_FRAME_TRANSPORT_H
+#ifndef ORION_CIRCULAR_BUFFER_H_
+#define ORION_CIRCULAR_BUFFER_H_
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 #include <stdint.h>
-#include "orion_protocol/orion_circular_buffer.h"
-#include "orion_protocol/orion_communication.h"
-#include "orion_protocol/orion_framer.h"
-#include "orion_protocol/orion_transport.h"
+#include <stdbool.h>
 
-namespace orion
+typedef struct
 {
+    uint8_t * p_buffer;
+    uint32_t buffer_size;
+    uint32_t head_index;
+    uint32_t tail_index;
+    bool is_full;
+} orion_circular_buffer_t;
 
-class FrameTransport: public Transport
-{
-public:
-  FrameTransport(Communication *communication, Framer *framer);
-  virtual bool sendPacket(uint8_t *input_buffer, uint32_t input_size, uint32_t timeout);
-  virtual size_t receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout);
-  virtual bool hasReceivedPacket();
-  virtual ~FrameTransport() = default;
-private:
-  bool hasFrameInQueue();
+void orion_circular_buffer_init(orion_circular_buffer_t * p_this, uint8_t * p_buffer, uint32_t size);
 
-  Framer *framer_;
-  Communication *communication_;
+bool orion_circular_buffer_is_empty(const orion_circular_buffer_t * p_this);
 
-  static const size_t BUFFER_SIZE = 512;
-  uint8_t buffer_[BUFFER_SIZE];
+void orion_circular_buffer_add(orion_circular_buffer_t * p_this, const uint8_t * p_buffer, uint32_t size);
 
-  static const size_t QUEUE_BUFFER_SIZE = 1024;
-  uint8_t queue_buffer_[QUEUE_BUFFER_SIZE];
+uint32_t orion_circular_buffer_dequeue(orion_circular_buffer_t * p_this, uint8_t * p_buffer, uint32_t size);
 
-  orion_circular_buffer_t circular_queue_;
-};
+bool orion_circular_buffer_has_word(orion_circular_buffer_t * p_this, uint8_t delimeter);
 
-}  // namespace orion
+bool orion_circular_buffer_dequeu_word(orion_circular_buffer_t * p_this, uint8_t delimeter, uint8_t * p_buffer, 
+    uint32_t size, uint32_t * p_actual_size);
 
-#endif  // ORION_PROTOCOL_ORION_FRAME_TRANSPORT_H
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* ORION_CIRCULAR_BUFFER_H_ */

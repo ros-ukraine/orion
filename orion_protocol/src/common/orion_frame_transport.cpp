@@ -22,19 +22,24 @@
 */
 
 #include <assert.h>
-#include <algorithm>
-#include <iterator>
-#include <cstring>
+// #include <cstring>
 #include "orion_protocol/orion_header.h"
 #include "orion_protocol/orion_framer.h"
 #include "orion_protocol/orion_crc.h"
 #include "orion_protocol/orion_timeout.h"
 #include "orion_protocol/orion_frame_transport.h"
+#include "orion_protocol/orion_circular_buffer.h"
 
 namespace orion
 {
 
 const size_t FrameTransport::BUFFER_SIZE;
+
+FrameTransport::FrameTransport(Communication *communication, Framer *framer):framer_(framer), 
+  communication_(communication) 
+{
+  orion_circular_buffer_init(&this->circular_queue_, this->queue_buffer_, QUEUE_BUFFER_SIZE);
+}
 
 bool FrameTransport::sendPacket(uint8_t *input_buffer, uint32_t input_size, uint32_t timeout)
 {
@@ -56,10 +61,7 @@ size_t FrameTransport::receivePacket(uint8_t *output_buffer, uint32_t output_siz
   if (false == decode)
   {
     size_t size = this->communication_->receiveBuffer(this->buffer_, BUFFER_SIZE, (duration.timeLeft() * 3) / 4);
-    for (size_t i = 0; i < size; i++)
-    {
-      this->queue_.push_back(this->buffer_[i]);
-    }
+    orion_circular_buffer_add(&this->circular_queue_, this->buffer_, size);
     if (this->hasFrameInQueue())
     {
       decode = true;
@@ -68,28 +70,11 @@ size_t FrameTransport::receivePacket(uint8_t *output_buffer, uint32_t output_siz
 
   if (decode)
   {
-    auto position = std::find(this->queue_.begin(), this->queue_.end(), Framer::FRAME_DELIMETER);
-    this->queue_.erase(this->queue_.begin(), position);
-    position = std::find(std::next(this->queue_.begin()), this->queue_.end(), Framer::FRAME_DELIMETER);
-
-    assert(this->queue_.end() != position);
-
-    size_t count = 0;
-    for (auto it = this->queue_.begin(); it != position; ++it)
-    {
-      this->buffer_[count++] = *it;
-    }
-    this->buffer_[count++] = Framer::FRAME_DELIMETER;
-    position = std::next(position);
-    if (position != this->queue_.end())
-    {
-      this->queue_.erase(this->queue_.begin(), position);
-    }
-    else
-    {
-      this->queue_.clear();
-    }
-    result = this->framer_->decodePacket(this->buffer_, count, output_buffer, output_size);
+    uint32_t size = 0;
+    bool status = orion_circular_buffer_dequeu_word(&this->circular_queue_, Framer::FRAME_DELIMETER, this->buffer_, 
+      BUFFER_SIZE, &size);
+    assert(status);
+    result = this->framer_->decodePacket(this->buffer_, size, output_buffer, output_size);
     if (result < sizeof(FrameHeader))
     {
       result = 0;
@@ -109,16 +94,8 @@ size_t FrameTransport::receivePacket(uint8_t *output_buffer, uint32_t output_siz
 
 bool FrameTransport::hasFrameInQueue()
 {
-  auto position_forward = std::find(this->queue_.begin(), this->queue_.end(), Framer::FRAME_DELIMETER);
-  auto position_backward = std::find(this->queue_.rbegin(), this->queue_.rend(), Framer::FRAME_DELIMETER);
-  auto index_first = std::distance(position_forward, this->queue_.begin());
-  auto index_last = std::distance(position_backward, this->queue_.rend());
-
-  if (index_last - index_first > 1)
-  {
-    return true;
-  }
-  return false;
+  bool result = orion_circular_buffer_has_word(&this->circular_queue_, Framer::FRAME_DELIMETER);
+  return (result);
 }
 
 bool FrameTransport::hasReceivedPacket()
@@ -132,16 +109,13 @@ bool FrameTransport::hasReceivedPacket()
   else if (this->communication_->hasAvailableBuffer())
   {
     size_t received_size = this->communication_->receiveAvailableBuffer(this->buffer_, BUFFER_SIZE);
-    for (size_t i = 0; i < received_size; i++)
-    {
-      this->queue_.push_back(this->buffer_[i]);
-    }
+    orion_circular_buffer_add(&this->circular_queue_, this->buffer_, received_size);
     if (this->hasFrameInQueue())
     {
       result = true;
     }
   }
-  return result;
+  return (result);
 }
 
 }  // namespace orion
