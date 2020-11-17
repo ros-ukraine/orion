@@ -21,7 +21,7 @@ jobs:
         env:
           FIRST_NAME: Mona
           toolset_branch: master
-          server_type: local
+          server_type: local-docker
           ros_release_name: kinetic
           ubuntu_version_name: xenial
           used_modules: check_cache,check_build,code_coverage
