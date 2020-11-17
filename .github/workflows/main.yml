@@ -6,7 +6,9 @@ on:
 
 jobs:
   build:
-    runs-on: shadowrobot/build-tools:xenial-kinetic
+    runs-on: ubuntu-latest
+    container:
+      image: shadowrobot/build-tools:xenial-kinetic
 
     steps:
       - uses: actions/checkout@v2
