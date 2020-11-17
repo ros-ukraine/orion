@@ -19,14 +19,15 @@ include_directories(
 )
 
 add_library(${PROJECT_NAME}
-  src/orion_serial_port.cpp
-  src/orion_tcp_serial_bridge.cpp
-  src/orion_framer.cpp
-  src/orion_cobs_framer.cpp
-  src/orion_crc.cpp
-  src/orion_frame_transport.cpp
-  src/orion_timeout.cpp
-  src/orion_major.cpp
+  src/major/orion_serial_port.cpp
+  src/major/orion_tcp_serial_bridge.cpp
+  src/common/orion_framer.cpp
+  src/common/orion_cobs_framer.cpp
+  src/common/orion_crc.cpp
+  src/common/orion_frame_transport.cpp
+  src/common/orion_timeout.cpp
+  src/common/orion_circular_buffer.c
+  src/major/orion_major.cpp
 )
 
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -46,9 +47,20 @@ install(DIRECTORY include/${PROJECT_NAME}/
 )
 
 if (CATKIN_ENABLE_TESTING)
+
+  include_directories(
+    test/include
+    include
+    ${catkin_INCLUDE_DIRS}
+  )
+
   catkin_add_gmock(${PROJECT_NAME}_test_major test/test_orion_major.cpp)
   add_dependencies(${PROJECT_NAME}_test_major ${catkin_EXPORTED_TARGETS})
   target_link_libraries(${PROJECT_NAME}_test_major ${PROJECT_NAME})
+
+  catkin_add_gmock(${PROJECT_NAME}_test_minor test/test_orion_minor.cpp src/minor/orion_minor.cpp)
+  add_dependencies(${PROJECT_NAME}_test_minor ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(${PROJECT_NAME}_test_minor ${PROJECT_NAME})
 
   catkin_add_gmock(${PROJECT_NAME}_test_cobs_framer test/test_orion_cobs_framer.cpp)
   add_dependencies(${PROJECT_NAME}_test_cobs_framer ${catkin_EXPORTED_TARGETS})
@@ -57,6 +69,10 @@ if (CATKIN_ENABLE_TESTING)
   catkin_add_gmock(${PROJECT_NAME}_test_frame_transport test/test_orion_frame_transport.cpp)
   add_dependencies(${PROJECT_NAME}_test_frame_transport ${catkin_EXPORTED_TARGETS})
   target_link_libraries(${PROJECT_NAME}_test_frame_transport ${PROJECT_NAME})
+
+  catkin_add_gmock(${PROJECT_NAME}_test_circular_buffer test/test_orion_circular_buffer.cpp)
+  add_dependencies(${PROJECT_NAME}_test_circular_buffer ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(${PROJECT_NAME}_test_circular_buffer ${PROJECT_NAME})
 
   find_package(rostest REQUIRED)
   add_rostest_gmock(test_tcp_bridge_integration test/test_tcp_bridge_integration.test test/test_tcp_bridge_integration.cpp)

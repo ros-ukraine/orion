@@ -14,15 +14,18 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Build Project
-        run:   curl -s "$( echo "$remote_shell_script" | sed 's/#/%23/g' )" | bash /dev/stdin "$toolset_branch" $server_type $used_modules $relative_job_path
+        run: |
+          touch /github/home/.bashrc
+          wget -O /tmp/script.sh "$remote_shell_script" 
+          chmod 755 /tmp/script.sh
+          bash /tmp/script.sh "$toolset_branch" $server_type $used_modules $relative_job_path
         env:
-          FIRST_NAME: Mona
           toolset_branch: master
-          server_type: local
+          server_type: local-docker
           ros_release_name: kinetic
           ubuntu_version_name: xenial
           used_modules: check_cache,check_build,code_coverage
-          relative_job_path: ${{ env.GITHUB_WORKSPACE }}
-          unit_tests_result_dir: "${{ env.GITHUB_WORKSPACE }}/unit_tests"
-          coverage_tests_result_dir: "${{ env.GITHUB_WORKSPACE }}/code_coverage"
-          remote_shell_script: 'https://raw.githubusercontent.com/shadow-robot/sr-build-tools/$toolset_branch/bin/sr-run-ci-build.sh'
+          relative_job_path: ${{ github.workspace }}
+          unit_tests_result_dir: "${{ github.workspace }}/unit_tests"
+          coverage_tests_result_dir: "${{ github.workspace }}/code_coverage"
+          remote_shell_script: 'https://raw.githubusercontent.com/shadow-robot/sr-build-tools/master/bin/sr-run-ci-build.sh'
