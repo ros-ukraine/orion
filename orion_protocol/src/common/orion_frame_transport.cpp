@@ -60,10 +60,14 @@ size_t FrameTransport::receivePacket(uint8_t *output_buffer, uint32_t output_siz
   if (false == decode)
   {
     size_t size = this->communication_->receiveBuffer(this->buffer_, BUFFER_SIZE, (duration.timeLeft() * 3) / 4);
-    orion_circular_buffer_add(&this->circular_queue_, this->buffer_, size);
-    if (this->hasFrameInQueue())
+    if (size > 0)
     {
-      decode = true;
+      orion_circular_buffer_add(&this->circular_queue_, this->buffer_, size);
+
+      if (this->hasFrameInQueue())
+      {
+        decode = true;
+      }
     }
   }
 
