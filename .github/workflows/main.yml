@@ -20,7 +20,7 @@ jobs:
           ros_release_name: kinetic
           ubuntu_version_name: xenial
           used_modules: check_cache,check_build,code_coverage
-          relative_job_path: ${{ GITHUB_WORKSPACE }}
-          unit_tests_result_dir: "${{ relative_job_path }}/unit_tests"
-          coverage_tests_result_dir: "${{ relative_job_path }}/code_coverage"
+          relative_job_path: ${{ env.GITHUB_WORKSPACE }}
+          unit_tests_result_dir: "${{ env.GITHUB_WORKSPACE }}/unit_tests"
+          coverage_tests_result_dir: "${{ env.GITHUB_WORKSPACE }}/code_coverage"
           remote_shell_script: 'https://raw.githubusercontent.com/shadow-robot/sr-build-tools/$toolset_branch/bin/sr-run-ci-build.sh'
