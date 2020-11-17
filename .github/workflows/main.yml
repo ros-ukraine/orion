@@ -15,6 +15,7 @@ jobs:
 
       - name: Build Project
         run: |
+          touch /github/home/.bashrc
           wget -O /tmp/script.sh "$remote_shell_script" 
           chmod 755 /tmp/script.sh
           bash /tmp/script.sh "$toolset_branch" $server_type $used_modules $relative_job_path
