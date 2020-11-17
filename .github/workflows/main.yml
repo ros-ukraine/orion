@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ kinetic-devel ]
+
+jobs:
+  build:
+    runs-on: shadowrobot/build-tools:xenial-kinetic
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build Project
+        run:   curl -s "$( echo "$remote_shell_script" | sed 's/#/%23/g' )" | bash /dev/stdin "$toolset_branch" $server_type $used_modules $relative_job_path
+        env:
+          FIRST_NAME: Mona
+          toolset_branch: master
+          server_type: local
+          ros_release_name: kinetic
+          ubuntu_version_name: xenial
+          used_modules: check_cache,check_build,code_coverage
+          relative_job_path: ${{ GITHUB_WORKSPACE }}
+          unit_tests_result_dir: "${{ relative_job_path }}/unit_tests"
+          coverage_tests_result_dir: "${{ relative_job_path }}/code_coverage"
+          remote_shell_script: 'https://raw.githubusercontent.com/shadow-robot/sr-build-tools/$toolset_branch/bin/sr-run-ci-build.sh'
