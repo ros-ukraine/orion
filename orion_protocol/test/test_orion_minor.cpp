@@ -101,6 +101,8 @@ TEST(TestSuite, happyPath)
   EXPECT_CALL(mock_outbound_transport, sendPacket(NotNull(), Gt(0), Le(retry_timeout))).WillOnce(
     DoAll(SaveArg<0>(&p_outbound), SaveArg<1>(&actual_outbound_size), Return(true)));
   EXPECT_CALL(mock_outbound_transport, hasReceivedPacket()).Times(0);
+
+  // NOLINTNEXTLINE(build/c++11)
   auto mock_outbound_receive_packet = [&](uint8_t *output_buffer, uint32_t output_size, uint32_t timeout)
     {
       size_t size_received = 0;
@@ -112,7 +114,7 @@ TEST(TestSuite, happyPath)
       if (size_received == sizeof(SimpleCommand))
       {
         SimpleCommand *p_command = reinterpret_cast<SimpleCommand*>(inbound_buffer);
-        reply_result.data1 = p_command->data;  
+        reply_result.data1 = p_command->data;
       }
       minor_obj.sendResult(reinterpret_cast<uint8_t*>(&reply_result), sizeof(reply_result));
 
@@ -127,6 +129,7 @@ TEST(TestSuite, happyPath)
     DoAll(SaveArg<0>(&p_inbound), SaveArg<1>(&actual_inbound_size), Return(true)));
   EXPECT_CALL(mock_inbound_transport, hasReceivedPacket()).WillOnce(Return(true));
 
+  // NOLINTNEXTLINE(build/c++11)
   auto mock_inbound_receive_packet = [&](uint8_t *output_buffer, uint32_t output_size, uint32_t timeout)
     {
       std::memcpy(output_buffer, p_outbound, actual_outbound_size);

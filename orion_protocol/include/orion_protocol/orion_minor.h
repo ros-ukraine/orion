@@ -50,4 +50,4 @@ private:
 
 }  // namespace orion
 
-#endif  // ORION_PROTOCOL_ORION_MAJOR_H
+#endif  // ORION_PROTOCOL_ORION_MINOR_H

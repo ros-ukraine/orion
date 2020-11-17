@@ -117,7 +117,7 @@ TEST(TestSuite, wordsParsing)
   orion_circular_buffer_init(&circular_buff_struct, circular_buffer, circular_buffer_length);
   ASSERT_TRUE(orion_circular_buffer_is_empty(&circular_buff_struct));
   orion_circular_buffer_add(&circular_buff_struct, buffer, sizeof(buffer) - 1);
-  
+
   ASSERT_TRUE(orion_circular_buffer_has_word(&circular_buff_struct, delimiter));
   ASSERT_TRUE(orion_circular_buffer_dequeue_word(&circular_buff_struct, delimiter, output_buffer,
     circular_buffer_length, &actual_size));
