@@ -34,8 +34,8 @@ namespace orion
 
 const size_t FrameTransport::BUFFER_SIZE;
 
-FrameTransport::FrameTransport(Communication *communication, Framer *framer):framer_(framer), 
-  communication_(communication) 
+FrameTransport::FrameTransport(Communication *communication, Framer *framer):framer_(framer),
+  communication_(communication)
 {
   orion_circular_buffer_init(&this->circular_queue_, this->queue_buffer_, QUEUE_BUFFER_SIZE);
 }
@@ -74,7 +74,7 @@ size_t FrameTransport::receivePacket(uint8_t *output_buffer, uint32_t output_siz
   if (decode)
   {
     uint32_t size = 0;
-    bool status = orion_circular_buffer_dequeue_word(&this->circular_queue_, Framer::FRAME_DELIMETER, this->buffer_, 
+    bool status = orion_circular_buffer_dequeue_word(&this->circular_queue_, Framer::FRAME_DELIMETER, this->buffer_,
       BUFFER_SIZE, &size);
     assert(status);
     result = this->framer_->decodePacket(this->buffer_, size, output_buffer, output_size);

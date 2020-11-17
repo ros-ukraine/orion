@@ -21,8 +21,8 @@
 *
 */
 
-#ifndef ORION_CIRCULAR_BUFFER_H_
-#define ORION_CIRCULAR_BUFFER_H_
+#ifndef ORION_PROTOCOL_ORION_CIRCULAR_BUFFER_H_
+#define ORION_PROTOCOL_ORION_CIRCULAR_BUFFER_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -39,7 +39,8 @@ typedef struct
     uint32_t head_index;
     uint32_t tail_index;
     bool is_full;
-} orion_circular_buffer_t;
+}
+orion_circular_buffer_t;
 
 void orion_circular_buffer_init(orion_circular_buffer_t * p_this, uint8_t * p_buffer, uint32_t size);
 
@@ -51,11 +52,11 @@ uint32_t orion_circular_buffer_dequeue(orion_circular_buffer_t * p_this, uint8_t
 
 bool orion_circular_buffer_has_word(orion_circular_buffer_t * p_this, uint8_t delimeter);
 
-bool orion_circular_buffer_dequeue_word(orion_circular_buffer_t * p_this, uint8_t delimeter, uint8_t * p_buffer, 
+bool orion_circular_buffer_dequeue_word(orion_circular_buffer_t * p_this, uint8_t delimeter, uint8_t * p_buffer,
     uint32_t size, uint32_t * p_actual_size);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* ORION_CIRCULAR_BUFFER_H_ */
+#endif /* ORION_PROTOCOL_ORION_CIRCULAR_BUFFER_H_ */

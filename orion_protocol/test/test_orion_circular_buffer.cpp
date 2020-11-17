@@ -1,3 +1,26 @@
+/**
+* Copyright 2020 ROS Ukraine
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"),
+* to deal in the Software without restriction, including without limitation
+* the rights to use, copy, modify, merge, publish, distribute, sublicense,
+* and/or sell copies of the Software, and to permit persons to whom
+* the Software is furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included
+* in all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+* THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+* OTHER DEALINGS IN THE SOFTWARE.
+*
+*/
+
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include "gmock-global/gmock-global.h"
@@ -8,7 +31,7 @@ using ::testing::NotNull;
 using ::testing::Gt;
 using ::testing::Throw;
 
-//TODO(Andriy): Fix warning: function declared ‘noreturn’ has a ‘return’ statement
+// TODO(Andriy): Fix warning: function declared ‘noreturn’ has a ‘return’ statement
 MOCK_GLOBAL_FUNC4(__assert_fail, void(const char*, const char*, unsigned int, const char*));
 
 TEST(TestSuite, parametersValidation)
@@ -96,23 +119,23 @@ TEST(TestSuite, wordsParsing)
   orion_circular_buffer_add(&circular_buff_struct, buffer, sizeof(buffer) - 1);
   
   ASSERT_TRUE(orion_circular_buffer_has_word(&circular_buff_struct, delimiter));
-  ASSERT_TRUE(orion_circular_buffer_dequeue_word(&circular_buff_struct, delimiter, output_buffer, circular_buffer_length, 
-    &actual_size));
+  ASSERT_TRUE(orion_circular_buffer_dequeue_word(&circular_buff_struct, delimiter, output_buffer,
+    circular_buffer_length, &actual_size));
   output_buffer[actual_size] = 0;
   ASSERT_STREQ("zPacket1z", reinterpret_cast<char*>(output_buffer));
 
   ASSERT_TRUE(orion_circular_buffer_has_word(&circular_buff_struct, delimiter));
-  ASSERT_TRUE(orion_circular_buffer_dequeue_word(&circular_buff_struct, delimiter, output_buffer, circular_buffer_length, 
-    &actual_size));
+  ASSERT_TRUE(orion_circular_buffer_dequeue_word(&circular_buff_struct, delimiter, output_buffer,
+    circular_buffer_length, &actual_size));
   output_buffer[actual_size] = 0;
   ASSERT_STREQ("zHelloz", reinterpret_cast<char*>(output_buffer));
 
   ASSERT_FALSE(orion_circular_buffer_has_word(&circular_buff_struct, delimiter));
-  ASSERT_FALSE(orion_circular_buffer_dequeue_word(&circular_buff_struct, delimiter, output_buffer, circular_buffer_length, 
-    &actual_size));
+  ASSERT_FALSE(orion_circular_buffer_dequeue_word(&circular_buff_struct, delimiter, output_buffer,
+    circular_buffer_length, &actual_size));
   ASSERT_FALSE(orion_circular_buffer_has_word(&circular_buff_struct, delimiter));
-  ASSERT_FALSE(orion_circular_buffer_dequeue_word(&circular_buff_struct, delimiter, output_buffer, circular_buffer_length, 
-    &actual_size));
+  ASSERT_FALSE(orion_circular_buffer_dequeue_word(&circular_buff_struct, delimiter, output_buffer,
+    circular_buffer_length, &actual_size));
 
   ASSERT_TRUE(orion_circular_buffer_is_empty(&circular_buff_struct));
 
@@ -120,18 +143,18 @@ TEST(TestSuite, wordsParsing)
   orion_circular_buffer_add(&circular_buff_struct, overflow_buffer, sizeof(overflow_buffer) - 1);
   orion_circular_buffer_add(&circular_buff_struct, buffer, sizeof(buffer) - 1);
 
-  ASSERT_TRUE(orion_circular_buffer_dequeue_word(&circular_buff_struct, delimiter, output_buffer, circular_buffer_length, 
-    &actual_size));
+  ASSERT_TRUE(orion_circular_buffer_dequeue_word(&circular_buff_struct, delimiter, output_buffer,
+    circular_buffer_length, &actual_size));
   output_buffer[actual_size] = 0;
   ASSERT_STREQ("zPacket1z", reinterpret_cast<char*>(output_buffer));
 
-  ASSERT_TRUE(orion_circular_buffer_dequeue_word(&circular_buff_struct, delimiter, output_buffer, circular_buffer_length, 
-    &actual_size));
+  ASSERT_TRUE(orion_circular_buffer_dequeue_word(&circular_buff_struct, delimiter, output_buffer,
+    circular_buffer_length, &actual_size));
   output_buffer[actual_size] = 0;
   ASSERT_STREQ("zHelloz", reinterpret_cast<char*>(output_buffer));
 
-  ASSERT_FALSE(orion_circular_buffer_dequeue_word(&circular_buff_struct, delimiter, output_buffer, circular_buffer_length, 
-    &actual_size));
+  ASSERT_FALSE(orion_circular_buffer_dequeue_word(&circular_buff_struct, delimiter, output_buffer,
+    circular_buffer_length, &actual_size));
   ASSERT_TRUE(orion_circular_buffer_is_empty(&circular_buff_struct));
 }
 
