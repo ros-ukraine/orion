@@ -14,7 +14,10 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Build Project
-        run:   curl -s "$( echo "$remote_shell_script" | sed 's/#/%23/g' )" | bash /dev/stdin "$toolset_branch" $server_type $used_modules $relative_job_path
+        run: |
+          curl -s "$( echo "$remote_shell_script" | sed 's/#/%23/g' )" > /tmp/script.sh
+          chmod 755 /tmp/script.sh
+          bash /tmp/script.sh "$toolset_branch" $server_type $used_modules $relative_job_path
         env:
           FIRST_NAME: Mona
           toolset_branch: master
