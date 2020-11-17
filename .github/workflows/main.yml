@@ -15,7 +15,9 @@ jobs:
 
       - name: Build Project
         run: |
-          echo "$relative_job_path"
+          echo "Relative path => $relative_job_path"
+          echo "Workspace => $env.GITHUB_WORKSPACE"
+          echo "Simple Workspace => $GITHUB_WORKSPACE"
           ls -al $relative_job_path
 #          wget -O /tmp/script.sh "$remote_shell_script" 
 #          chmod 755 /tmp/script.sh
