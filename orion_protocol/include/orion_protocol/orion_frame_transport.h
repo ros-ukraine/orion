@@ -26,7 +26,7 @@
 
 #include <stdint.h>
 #include "orion_protocol/orion_circular_buffer.h"
-#include "orion_protocol/orion_communication.h"
+#include "orion_protocol/orion_communication.hpp"
 #include "orion_protocol/orion_framer.h"
 #include "orion_protocol/orion_transport.h"
 

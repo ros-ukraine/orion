@@ -26,7 +26,7 @@
 
 #include "orion_protocol/orion_transport.h"
 #include "orion_protocol/orion_header.h"
-#include "orion_protocol/orion_timeout.h"
+#include "orion_protocol/orion_timeout.hpp"
 #include <ros/assert.h>
 #include <stdint.h>
 #include <cstring>

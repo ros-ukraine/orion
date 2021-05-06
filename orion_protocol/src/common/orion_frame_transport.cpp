@@ -25,7 +25,7 @@
 #include "orion_protocol/orion_header.h"
 #include "orion_protocol/orion_framer.h"
 #include "orion_protocol/orion_crc.h"
-#include "orion_protocol/orion_timeout.h"
+#include "orion_protocol/orion_timeout.hpp"
 #include "orion_protocol/orion_frame_transport.h"
 #include "orion_protocol/orion_circular_buffer.h"
 

@@ -21,35 +21,27 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_COMMUNICATION_H
-#define ORION_PROTOCOL_ORION_COMMUNICATION_H
-
-#include <stdint.h>
-#include <stdbool.h>
 #include <stdlib.h>
+#include "orion_protocol/orion_memory.h"
 #include "orion_protocol/orion_error.h"
+#include "orion_protocol/orion_assert.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+orion_error_t orion_memory_allocate(size_t size, void ** pointer)
+{
+    ORION_ASSERT(size > 0);
 
-struct orion_communication_struct_t;
+    *pointer = malloc(size);
 
-typedef struct orion_communication_struct_t orion_communication_t;
+    if (NULL == *pointer)
+    {
+        return (ORION_ERROR_COULD_NOT_ALLOCATE_MEMORY);
+    }
 
-orion_error_t orion_communication_new(orion_communication_t ** me);
-orion_error_t orion_communication_delete(const orion_communication_t * me);
-
-orion_error_t orion_communication_receive_available_buffer(const orion_communication_t * me, uint8_t * buffer,
-  uint32_t size, size_t * received_size);
-orion_error_t orion_communication_receive_buffer(const orion_communication_t * me, uint8_t * buffer, uint32_t size,
-  uint32_t timeout, size_t * received_size);
-bool orion_communication_has_available_buffer(const orion_communication_t * me);
-orion_error_t orion_communication_send_buffer(const orion_communication_t * me, uint8_t *buffer, uint32_t size, 
-  uint32_t timeout);
-
-#ifdef __cplusplus
+    return (ORION_ERROR_OK); 
 }
-#endif
 
-#endif  // ORION_PROTOCOL_ORION_COMMUNICATION_H
+orion_error_t orion_memory_free(void * pointer)
+{
+    free(pointer);
+    return (ORION_ERROR_OK);
+}

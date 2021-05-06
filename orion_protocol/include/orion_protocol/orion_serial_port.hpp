@@ -21,35 +21,35 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_COMMUNICATION_H
-#define ORION_PROTOCOL_ORION_COMMUNICATION_H
+#ifndef ORION_PROTOCOL_ORION_SERIAL_PORT_HPP
+#define ORION_PROTOCOL_ORION_SERIAL_PORT_HPP
 
 #include <stdint.h>
-#include <stdbool.h>
-#include <stdlib.h>
+#include <cstdlib>
+#include "orion_protocol/orion_serial_port.h"
 #include "orion_protocol/orion_error.h"
+#include "orion_protocol/orion_communication.hpp"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace orion
+{
 
-struct orion_communication_struct_t;
+//TODO: (Andriy) Design class with error codes support
+class SerialPort : public Communication 
+{
+public:
+  SerialPort() : Communication() {};
 
-typedef struct orion_communication_struct_t orion_communication_t;
+  orion_error_t connect(const char* port_name, const uint32_t baud)
+  {
+    return (orion_communication_connect(object_, port_name, baud));
+  }
 
-orion_error_t orion_communication_new(orion_communication_t ** me);
-orion_error_t orion_communication_delete(const orion_communication_t * me);
+  orion_error_t disconnect()
+  {
+    return (orion_communication_disconnect(object_));
+  }
+};
 
-orion_error_t orion_communication_receive_available_buffer(const orion_communication_t * me, uint8_t * buffer,
-  uint32_t size, size_t * received_size);
-orion_error_t orion_communication_receive_buffer(const orion_communication_t * me, uint8_t * buffer, uint32_t size,
-  uint32_t timeout, size_t * received_size);
-bool orion_communication_has_available_buffer(const orion_communication_t * me);
-orion_error_t orion_communication_send_buffer(const orion_communication_t * me, uint8_t *buffer, uint32_t size, 
-  uint32_t timeout);
+}  // namespace orion
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif  // ORION_PROTOCOL_ORION_COMMUNICATION_H
+#endif  // ORION_PROTOCOL_ORION_SERIAL_PORT_HPP

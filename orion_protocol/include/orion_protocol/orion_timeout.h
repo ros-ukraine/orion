@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -25,27 +25,28 @@
 #define ORION_PROTOCOL_ORION_TIMEOUT_H
 
 #include <stdint.h>
-#include <chrono>  // NOLINT [build/c++11]
+#include <stdbool.h>
+#include "orion_protocol/orion_error.h"
 
-namespace orion
-{
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-class Timeout
-{
-public:
-  /*
-    @timeout - time in microseconds
-  */
-  explicit Timeout(uint32_t timeout);
+struct orion_timeout_struct_t;
 
-  bool hasTime();
+typedef struct orion_timeout_struct_t orion_timeout_t;
 
-  uint32_t timeLeft();
+/*
+  @timeout - time in microseconds
+*/
+orion_error_t orion_timeout_new(orion_timeout_t ** me, uint32_t timeout);
+orion_error_t orion_timeout_delete(const orion_timeout_t * me);
 
-private:
-  std::chrono::steady_clock::time_point till_time_;
-};
+bool orion_timeout_has_time(const orion_timeout_t * me);
+uint32_t orion_timeout_time_left(const orion_timeout_t * me);
 
-}  // namespace orion
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // ORION_PROTOCOL_ORION_TIMEOUT_H

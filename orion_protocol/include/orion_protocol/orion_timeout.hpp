@@ -21,35 +21,47 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_COMMUNICATION_H
-#define ORION_PROTOCOL_ORION_COMMUNICATION_H
+#ifndef ORION_PROTOCOL_ORION_TIMEOUT_HPP
+#define ORION_PROTOCOL_ORION_TIMEOUT_HPP
 
 #include <stdint.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include "orion_protocol/orion_error.h"
+#include "orion_protocol/orion_timeout.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace orion
+{
 
-struct orion_communication_struct_t;
+class Timeout
+{
+public:
+  /*
+    @timeout - time in microseconds
+  */
+  explicit Timeout(uint32_t timeout)
+  {
+    orion_timeout_new(&timeout_, timeout);
+  }
 
-typedef struct orion_communication_struct_t orion_communication_t;
+  ~Timeout()
+  {
+    orion_timeout_delete(timeout_);
+  }
 
-orion_error_t orion_communication_new(orion_communication_t ** me);
-orion_error_t orion_communication_delete(const orion_communication_t * me);
+  bool hasTime()
+  {
+    bool result = orion_timeout_has_time(timeout_);
+    return (result);
+  }
 
-orion_error_t orion_communication_receive_available_buffer(const orion_communication_t * me, uint8_t * buffer,
-  uint32_t size, size_t * received_size);
-orion_error_t orion_communication_receive_buffer(const orion_communication_t * me, uint8_t * buffer, uint32_t size,
-  uint32_t timeout, size_t * received_size);
-bool orion_communication_has_available_buffer(const orion_communication_t * me);
-orion_error_t orion_communication_send_buffer(const orion_communication_t * me, uint8_t *buffer, uint32_t size, 
-  uint32_t timeout);
+  uint32_t timeLeft()
+  {
+    uint32_t result = orion_timeout_time_left(timeout_);
+    return (result);
+  }
 
-#ifdef __cplusplus
-}
-#endif
+private:
+  orion_timeout_t * timeout_;
+};
 
-#endif  // ORION_PROTOCOL_ORION_COMMUNICATION_H
+}  // namespace orion
+
+#endif  // ORION_PROTOCOL_ORION_TIMEOUT_HPP

@@ -21,35 +21,22 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_COMMUNICATION_H
-#define ORION_PROTOCOL_ORION_COMMUNICATION_H
+#ifndef ORION_PROTOCOL_ORION_MEMORY_H
+#define ORION_PROTOCOL_ORION_MEMORY_H
 
 #include <stdint.h>
-#include <stdbool.h>
-#include <stdlib.h>
+#include <stddef.h>
 #include "orion_protocol/orion_error.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct orion_communication_struct_t;
-
-typedef struct orion_communication_struct_t orion_communication_t;
-
-orion_error_t orion_communication_new(orion_communication_t ** me);
-orion_error_t orion_communication_delete(const orion_communication_t * me);
-
-orion_error_t orion_communication_receive_available_buffer(const orion_communication_t * me, uint8_t * buffer,
-  uint32_t size, size_t * received_size);
-orion_error_t orion_communication_receive_buffer(const orion_communication_t * me, uint8_t * buffer, uint32_t size,
-  uint32_t timeout, size_t * received_size);
-bool orion_communication_has_available_buffer(const orion_communication_t * me);
-orion_error_t orion_communication_send_buffer(const orion_communication_t * me, uint8_t *buffer, uint32_t size, 
-  uint32_t timeout);
+orion_error_t orion_memory_allocate(size_t size, void ** pointer);
+orion_error_t orion_memory_free(void * pointer);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // ORION_PROTOCOL_ORION_COMMUNICATION_H
+#endif  // ORION_PROTOCOL_ORION_MEMORY_H
