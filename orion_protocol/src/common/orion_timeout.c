@@ -28,30 +28,14 @@
 
 #define ORION_CLOCKS_PER_MILLISECOND (CLOCKS_PER_SEC / 1000000)
 
-struct orion_timeout_struct_t
-{
-    clock_t till_time_;
-};
-
-
-orion_error_t orion_timeout_new(orion_timeout_t ** me, uint32_t timeout)
+orion_error_t orion_timeout_init(orion_timeout_t * me, uint32_t timeout)
 {
   ORION_ASSERT_NOT_NULL(me);
-  
-  orion_error_t result = orion_memory_allocate(sizeof(orion_timeout_t), (void**)me);
-  if (ORION_ERROR_OK == result)
-  {
-    clock_t time_now = clock();
-    (*me)->till_time_ = (clock_t) (((long int)(time_now) / ORION_CLOCKS_PER_MILLISECOND) + timeout);
-  }
-  return (result);
-}
+ 
+  clock_t time_now = clock();
+  me->till_time_ = (clock_t) (((long int)(time_now) / ORION_CLOCKS_PER_MILLISECOND) + timeout);
 
-orion_error_t orion_timeout_delete(const orion_timeout_t * me)
-{
-  ORION_ASSERT_NOT_NULL(me);
-  orion_error_t result = orion_memory_free((void*)me);
-  return (result);
+  return (ORION_ERROR_OK);
 }
 
 bool orion_timeout_has_time(const orion_timeout_t * me)

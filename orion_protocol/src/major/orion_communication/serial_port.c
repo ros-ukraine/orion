@@ -170,45 +170,51 @@ orion_error_t orion_communication_send_buffer(const orion_communication_t * me, 
     ORION_ASSERT_NOT_NULL(me);
     ORION_ASSERT(-1 != me->file_descriptor_);
 
-//TODO: (Andriy) Implement Timeout functionality and use it here !!!
-    // Timeout duration(timeout);
-    // size_t bytes_to_send = size;
-    // int select_status = -1;
-    // uint32_t position = 0;
+    orion_error_t result = ORION_ERROR_OK;
+    orion_timeout_t duration;
+    orion_timeout_init(&duration, timeout);
+    size_t bytes_to_send = size;
+    int select_status = -1;
+    uint32_t position = 0;
 
-    // fd_set set;
-    // timeval interval;
+    fd_set set;
+    struct timeval interval;
 
-    // while ((bytes_to_send > 0) && duration.hasTime())
-    // {
-    // ssize_t write_result = write(this->file_descriptor_, buffer + position, bytes_to_send);
-    // exception::raiseIf<std::runtime_error>(
-    //     (-1 == write_result),
-    //     "Error writing to serial port: %s", strerror(errno));
+    while ((bytes_to_send > 0) && orion_timeout_has_time(&duration))
+    {
+        ssize_t write_result = write(me->file_descriptor_, buffer + position, bytes_to_send);
+        if (-1 == write_result)
+        {
+            result = ORION_ERROR_WRITING_TO_SERIAL_PORT;
+            break;
+        }
 
-    // bytes_to_send -= write_result;
-    // position += write_result;
+        bytes_to_send -= write_result;
+        position += write_result;
 
-    // if ((bytes_to_send > 0) && duration.hasTime())
-    // {
-    //     FD_ZERO(&set);
-    //     FD_SET(this->file_descriptor_, &set);
+        if ((bytes_to_send > 0) && orion_timeout_has_time(&duration))
+        {
+            FD_ZERO(&set);
+            FD_SET(me->file_descriptor_, &set);
 
-    //     interval.tv_sec = 0;
-    //     interval.tv_usec = duration.timeLeft();
+            interval.tv_sec = 0;
+            interval.tv_usec = orion_timeout_time_left(&duration);
 
-    //     select_status = select(this->file_descriptor_ + 1, NULL, &set, NULL, &interval);
-    //     exception::raiseIf<std::runtime_error>(
-    //     (-1 == select_status),
-    //     "Error writing to serial port: %s", strerror(errno));
-    // }
-    // }
+            select_status = select(me->file_descriptor_ + 1, NULL, &set, NULL, &interval);
+            if (-1 == select_status)
+            {
+                result = ORION_ERROR_WRITING_TO_SERIAL_PORT;
+                break;
+            }
+        }
+    }
 
-    // if (0 == bytes_to_send)
-    // {
-    // return true;
-    // }
-    return false;
+    if ((ORION_ERROR_OK == result) && (bytes_to_send > 0))
+    {
+        result = ORION_ERROR_TIMEOUT;
+    }
+
+    return (result);
 }
 
 orion_error_t set_interface_attributes(const orion_communication_t *object, uint32_t speed)

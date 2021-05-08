@@ -38,28 +38,23 @@ public:
   */
   explicit Timeout(uint32_t timeout)
   {
-    orion_timeout_new(&timeout_, timeout);
-  }
-
-  ~Timeout()
-  {
-    orion_timeout_delete(timeout_);
+    orion_timeout_init(&timeout_, timeout);
   }
 
   bool hasTime()
   {
-    bool result = orion_timeout_has_time(timeout_);
+    bool result = orion_timeout_has_time(&timeout_);
     return (result);
   }
 
   uint32_t timeLeft()
   {
-    uint32_t result = orion_timeout_time_left(timeout_);
+    uint32_t result = orion_timeout_time_left(&timeout_);
     return (result);
   }
 
 private:
-  orion_timeout_t * timeout_;
+  orion_timeout_t timeout_;
 };
 
 }  // namespace orion

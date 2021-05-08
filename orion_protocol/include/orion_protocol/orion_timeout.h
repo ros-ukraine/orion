@@ -26,21 +26,22 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <time.h>
 #include "orion_protocol/orion_error.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct orion_timeout_struct_t;
-
-typedef struct orion_timeout_struct_t orion_timeout_t;
+typedef struct
+{
+    clock_t till_time_;
+} orion_timeout_t;
 
 /*
   @timeout - time in microseconds
 */
-orion_error_t orion_timeout_new(orion_timeout_t ** me, uint32_t timeout);
-orion_error_t orion_timeout_delete(const orion_timeout_t * me);
+orion_error_t orion_timeout_init(orion_timeout_t * me, uint32_t timeout);
 
 bool orion_timeout_has_time(const orion_timeout_t * me);
 uint32_t orion_timeout_time_left(const orion_timeout_t * me);
