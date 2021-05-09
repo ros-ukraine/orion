@@ -27,24 +27,22 @@
 #include <stdint.h>
 #include <cstdlib>
 #include "orion_protocol/orion_serial_port.h"
-#include "orion_protocol/orion_error.h"
 #include "orion_protocol/orion_communication.hpp"
 
 namespace orion
 {
 
-//TODO: (Andriy) Design class with error codes support
 class SerialPort : public Communication 
 {
 public:
   SerialPort() : Communication() {};
 
-  orion_error_t connect(const char* port_name, const uint32_t baud)
+  orion_communication_error_t connect(const char* port_name, const uint32_t baud)
   {
     return (orion_communication_connect(object_, port_name, baud));
   }
 
-  orion_error_t disconnect()
+  orion_communication_error_t disconnect()
   {
     return (orion_communication_disconnect(object_));
   }

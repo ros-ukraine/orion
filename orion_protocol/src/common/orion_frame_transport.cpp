@@ -21,12 +21,12 @@
 *
 */
 
-#include <assert.h>
+#include "orion_protocol/orion_assert.h"
 #include "orion_protocol/orion_header.h"
 #include "orion_protocol/orion_framer.h"
 #include "orion_protocol/orion_crc.h"
 #include "orion_protocol/orion_timeout.hpp"
-#include "orion_protocol/orion_frame_transport.h"
+#include "orion_protocol/orion_frame_transport.hpp"
 #include "orion_protocol/orion_circular_buffer.h"
 
 namespace orion
@@ -42,14 +42,15 @@ FrameTransport::FrameTransport(Communication *communication, Framer *framer):fra
 
 bool FrameTransport::sendPacket(uint8_t *input_buffer, uint32_t input_size, uint32_t timeout)
 {
-  assert(input_size >= sizeof(FrameHeader));
+  ORION_ASSERT(input_size >= sizeof(FrameHeader));
   Timeout duration(timeout);
 
   FrameHeader *frame_header = reinterpret_cast<FrameHeader*>(input_buffer);
   frame_header->crc = CRC::calculateCRC16(input_buffer + sizeof(FrameHeader), input_size - sizeof(FrameHeader));
   size_t packet_size = this->framer_->encodePacket(input_buffer, input_size, this->buffer_, BUFFER_SIZE);
-  bool result = this->communication_->sendBuffer(this->buffer_, packet_size, duration.timeLeft());
-  return result;
+  orion_communication_error_t status = this->communication_->sendBuffer(this->buffer_, packet_size, 
+    duration.timeLeft());
+  return (ORION_COM_ERROR_OK == status);
 }
 
 size_t FrameTransport::receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout)
@@ -59,8 +60,10 @@ size_t FrameTransport::receivePacket(uint8_t *output_buffer, uint32_t output_siz
   bool decode = this->hasReceivedPacket();
   if (false == decode)
   {
-    size_t size = this->communication_->receiveBuffer(this->buffer_, BUFFER_SIZE, (duration.timeLeft() * 3) / 4);
-    if (size > 0)
+    size_t size = 0;
+    orion_communication_error_t status_received = this->communication_->receiveBuffer(this->buffer_, BUFFER_SIZE, 
+      (duration.timeLeft() * 3) / 4, &size);
+    if ((ORION_COM_ERROR_OK == status_received) && (size > 0))
     {
       orion_circular_buffer_add(&this->circular_queue_, this->buffer_, size);
 
@@ -76,7 +79,7 @@ size_t FrameTransport::receivePacket(uint8_t *output_buffer, uint32_t output_siz
     uint32_t size = 0;
     bool status = orion_circular_buffer_dequeue_word(&this->circular_queue_, Framer::FRAME_DELIMETER, this->buffer_,
       BUFFER_SIZE, &size);
-    assert(status);
+    ORION_ASSERT(status);
     result = this->framer_->decodePacket(this->buffer_, size, output_buffer, output_size);
     if (result < sizeof(FrameHeader))
     {
@@ -111,11 +114,16 @@ bool FrameTransport::hasReceivedPacket()
   }
   else if (this->communication_->hasAvailableBuffer())
   {
-    size_t received_size = this->communication_->receiveAvailableBuffer(this->buffer_, BUFFER_SIZE);
-    orion_circular_buffer_add(&this->circular_queue_, this->buffer_, received_size);
-    if (this->hasFrameInQueue())
+    size_t received_size = 0;
+    orion_communication_error_t status = this->communication_->receiveAvailableBuffer(this->buffer_, BUFFER_SIZE, 
+      &received_size);
+    if (ORION_COM_ERROR_OK == status)
     {
-      result = true;
+      orion_circular_buffer_add(&this->circular_queue_, this->buffer_, received_size);
+      if (this->hasFrameInQueue())
+      {
+        result = true;
+      }
     }
   }
   return (result);

@@ -1,5 +1,5 @@
 /**
-* Copyright 2021 ROS Ukraine
+* Copyright 2020 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -21,24 +21,25 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_SERIAL_PORT_H
-#define ORION_PROTOCOL_ORION_SERIAL_PORT_H
+#ifndef ORION_PROTOCOL_ORION_TRANSPORT_HPP
+#define ORION_PROTOCOL_ORION_TRANSPORT_HPP
 
 #include <stdint.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include "orion_protocol/orion_communication.h"
+#include <cstdlib>
+#include "orion_protocol/orion_transport.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace orion
+{
 
-orion_communication_error_t orion_communication_connect(orion_communication_t * me, const char* port_name, 
-    const uint32_t baud);
-orion_communication_error_t orion_communication_disconnect(orion_communication_t * me);
+class Transport
+{
+public:
+  virtual bool sendPacket(uint8_t *input_buffer, uint32_t input_size, uint32_t timeout) = 0;
+  virtual size_t receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout) = 0;
+  virtual bool hasReceivedPacket() = 0;
+  virtual ~Transport() = default;
+};
 
-#ifdef __cplusplus
-}
-#endif
+}  // namespace orion
 
-#endif  // ORION_PROTOCOL_ORION_SERIAL_PORT_H
+#endif  // ORION_PROTOCOL_ORION_TRANSPORT_HPP

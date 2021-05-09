@@ -31,7 +31,6 @@
 namespace orion
 {
 
-//TODO: (Andriy) Design class with error codes support
 class Communication
 {
 public:
@@ -45,30 +44,25 @@ public:
     orion_communication_delete(object_);
   }
 
-  virtual size_t receiveAvailableBuffer(uint8_t *buffer, uint32_t size)
+  virtual orion_communication_error_t receiveAvailableBuffer(uint8_t *buffer, uint32_t size, size_t * received_size)
   {
-    size_t result = 0;
-    orion_communication_receive_available_buffer(object_, buffer, size, &result);
-    return (result);
+    return (orion_communication_receive_available_buffer(object_, buffer, size, received_size));
   }
 
-  virtual size_t receiveBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout)
+  virtual orion_communication_error_t receiveBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout, 
+    size_t * received_size)
   {
-    size_t result = 0;
-    orion_communication_receive_buffer(object_, buffer, size, timeout, &result);
-    return (result);
+    return (orion_communication_receive_buffer(object_, buffer, size, timeout, received_size));
   }
 
   virtual bool hasAvailableBuffer()
   {
-    bool result = orion_communication_has_available_buffer(object_);
-    return (result);
+    return (orion_communication_has_available_buffer(object_));
   }
 
-  virtual bool sendBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout)
+  virtual orion_communication_error_t sendBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout)
   {
-    orion_error_t result = orion_communication_send_buffer(object_, buffer, size, timeout);
-    return (ORION_ERROR_OK == result);
+    return (orion_communication_send_buffer(object_, buffer, size, timeout));
   }
 
 protected:

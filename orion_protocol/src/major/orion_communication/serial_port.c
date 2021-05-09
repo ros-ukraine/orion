@@ -29,7 +29,6 @@
 #include <termios.h>
 #include <unistd.h>
 #include "orion_protocol/orion_assert.h"
-#include "orion_protocol/orion_error.h"
 #include "orion_protocol/orion_serial_port.h"
 #include "orion_protocol/orion_timeout.h"
 #include "orion_protocol/orion_memory.h"
@@ -45,27 +44,28 @@ struct orion_communication_settings_struct_t
     uint32_t baud;
 };
 
-static orion_error_t set_interface_attributes(const orion_communication_t * me, uint32_t speed);
+static orion_communication_error_t set_interface_attributes(const orion_communication_t * me, uint32_t speed);
 
-orion_error_t orion_communication_new(orion_communication_t ** me)
+orion_communication_error_t orion_communication_new(orion_communication_t ** me)
 {
   ORION_ASSERT_NOT_NULL(me);
-  orion_error_t result = orion_memory_allocate(sizeof(orion_communication_t), (void**)me);
-  if (ORION_ERROR_OK == result)
+  orion_communication_error_t result = orion_memory_allocate(sizeof(orion_communication_t), (void**)me);
+  if (ORION_COM_ERROR_OK == result)
   {
     (*me)->file_descriptor_ = -1;
   }
   return (result);
 }
 
-orion_error_t orion_communication_delete(const orion_communication_t * me)
+orion_communication_error_t orion_communication_delete(const orion_communication_t * me)
 {
   ORION_ASSERT_NOT_NULL(me);
-  orion_error_t result = orion_memory_free((void*)me);
+  orion_communication_error_t result = orion_memory_free((void*)me);
   return (result);
 }
 
-orion_error_t orion_communication_connect(orion_communication_t * me, const char* port_name, const uint32_t baud)
+orion_communication_error_t orion_communication_connect(orion_communication_t * me, const char* port_name, 
+    const uint32_t baud)
 {
     ORION_ASSERT_NOT_NULL(me);
     ORION_ASSERT_NOT_NULL(port_name);
@@ -75,30 +75,30 @@ orion_error_t orion_communication_connect(orion_communication_t * me, const char
 
     if (me->file_descriptor_ < 0) 
     {
-        return (ORION_ERROR_OPENNING_SERIAL_PORT);
+        return (ORION_COM_ERROR_OPENNING_SERIAL_PORT);
     }
 
-    orion_error_t result = set_interface_attributes(me, baud);
+    orion_communication_error_t result = set_interface_attributes(me, baud);
     return (result);
 }
 
-orion_error_t orion_communication_disconnect(orion_communication_t * me)
+orion_communication_error_t orion_communication_disconnect(orion_communication_t * me)
 {
     ORION_ASSERT_NOT_NULL(me);
 
-    orion_error_t result = ORION_ERROR_OK;
+    orion_communication_error_t result = ORION_COM_ERROR_OK;
     if (-1 != me->file_descriptor_) 
     {
         if (0 != close(me->file_descriptor_)) 
         {
-            return (ORION_ERROR_CLOSING_SERIAL_PORT);
+            return (ORION_COM_ERROR_CLOSING_SERIAL_PORT);
         }
     }
-    return (ORION_ERROR_OK);
+    return (ORION_COM_ERROR_OK);
 }
 
-orion_error_t orion_communication_receive_available_buffer(const orion_communication_t * me, uint8_t * buffer, 
-  uint32_t size, size_t * received_size)
+orion_communication_error_t orion_communication_receive_available_buffer(const orion_communication_t * me, 
+  uint8_t * buffer, uint32_t size, size_t * received_size)
 {
     ORION_ASSERT_NOT_NULL(me);
     ORION_ASSERT(-1 != me->file_descriptor_);
@@ -110,14 +110,14 @@ orion_error_t orion_communication_receive_available_buffer(const orion_communica
 
     if (*received_size < 0)
     {
-        return (ORION_ERROR_READING_SERIAL_PORT);
+        return (ORION_COM_ERROR_READING_SERIAL_PORT);
     }
 
-    return (ORION_ERROR_OK);
+    return (ORION_COM_ERROR_OK);
 }
 
-orion_error_t orion_communication_receive_buffer(const orion_communication_t * me, uint8_t * buffer, uint32_t size,
-  uint32_t timeout, size_t * received_size)
+orion_communication_error_t orion_communication_receive_buffer(const orion_communication_t * me, uint8_t * buffer, 
+  uint32_t size, uint32_t timeout, size_t * received_size)
 {
     ORION_ASSERT_NOT_NULL(me);
     ORION_ASSERT(-1 != me->file_descriptor_);
@@ -125,7 +125,7 @@ orion_error_t orion_communication_receive_buffer(const orion_communication_t * m
     fd_set set;
     struct timeval duration;
     int status = -1;
-    orion_error_t result = ORION_ERROR_OK;
+    orion_communication_error_t result = ORION_COM_ERROR_OK;
     *received_size = 0;
 
     FD_ZERO(&set);
@@ -138,7 +138,7 @@ orion_error_t orion_communication_receive_buffer(const orion_communication_t * m
 
     if (-1 == status)
     {
-        result = ORION_ERROR_READING_SERIAL_PORT;
+        result = ORION_COM_ERROR_READING_SERIAL_PORT;
     }
     else if (0 != status)
     {
@@ -161,8 +161,8 @@ bool orion_communication_has_available_buffer(const orion_communication_t * me)
     return false;
 }
 
-orion_error_t orion_communication_send_buffer(const orion_communication_t * me, uint8_t *buffer, uint32_t size, 
-  uint32_t timeout)
+orion_communication_error_t orion_communication_send_buffer(const orion_communication_t * me, uint8_t *buffer, 
+  uint32_t size, uint32_t timeout)
 {
     // Current implementation is select based as PySerial implementation
     // Consider using tcdrain to send packs of bytes without blocking for long in case of bad throughput
@@ -170,7 +170,7 @@ orion_error_t orion_communication_send_buffer(const orion_communication_t * me, 
     ORION_ASSERT_NOT_NULL(me);
     ORION_ASSERT(-1 != me->file_descriptor_);
 
-    orion_error_t result = ORION_ERROR_OK;
+    orion_communication_error_t result = ORION_COM_ERROR_OK;
     orion_timeout_t duration;
     orion_timeout_init(&duration, timeout);
     size_t bytes_to_send = size;
@@ -185,7 +185,7 @@ orion_error_t orion_communication_send_buffer(const orion_communication_t * me, 
         ssize_t write_result = write(me->file_descriptor_, buffer + position, bytes_to_send);
         if (-1 == write_result)
         {
-            result = ORION_ERROR_WRITING_TO_SERIAL_PORT;
+            result = ORION_COM_ERROR_WRITING_TO_SERIAL_PORT;
             break;
         }
 
@@ -203,28 +203,28 @@ orion_error_t orion_communication_send_buffer(const orion_communication_t * me, 
             select_status = select(me->file_descriptor_ + 1, NULL, &set, NULL, &interval);
             if (-1 == select_status)
             {
-                result = ORION_ERROR_WRITING_TO_SERIAL_PORT;
+                result = ORION_COM_ERROR_WRITING_TO_SERIAL_PORT;
                 break;
             }
         }
     }
 
-    if ((ORION_ERROR_OK == result) && (bytes_to_send > 0))
+    if ((ORION_COM_ERROR_OK == result) && (bytes_to_send > 0))
     {
-        result = ORION_ERROR_TIMEOUT;
+        result = ORION_COM_ERROR_TIMEOUT;
     }
 
     return (result);
 }
 
-orion_error_t set_interface_attributes(const orion_communication_t *object, uint32_t speed)
+orion_communication_error_t set_interface_attributes(const orion_communication_t *object, uint32_t speed)
 {
     struct termios tty;
 
     ORION_ASSERT_NOT_NULL(object);
 
     if (tcgetattr(object->file_descriptor_, &tty) < 0) {
-        return (ORION_ERROR_GETTING_TERMINAL_ATTRIBUTES);
+        return (ORION_COM_ERROR_GETTING_TERMINAL_ATTRIBUTES);
     }
 
     cfsetospeed(&tty, (speed_t)speed);
@@ -248,8 +248,8 @@ orion_error_t set_interface_attributes(const orion_communication_t *object, uint
 
     if (0 != tcsetattr(object->file_descriptor_, TCSANOW, &tty)) 
     {
-        return (ORION_ERROR_SETTING_TERMINAL_ATTRIBUTES);
+        return (ORION_COM_ERROR_SETTING_TERMINAL_ATTRIBUTES);
     }
 
-    return (ORION_ERROR_OK);
+    return (ORION_COM_ERROR_OK);
 }

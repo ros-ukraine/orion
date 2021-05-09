@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -21,14 +21,14 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_FRAME_TRANSPORT_H
-#define ORION_PROTOCOL_ORION_FRAME_TRANSPORT_H
+#ifndef ORION_PROTOCOL_ORION_FRAME_TRANSPORT_HPP
+#define ORION_PROTOCOL_ORION_FRAME_TRANSPORT_HPP
 
 #include <stdint.h>
 #include "orion_protocol/orion_circular_buffer.h"
 #include "orion_protocol/orion_communication.hpp"
 #include "orion_protocol/orion_framer.h"
-#include "orion_protocol/orion_transport.h"
+#include "orion_protocol/orion_transport.hpp"
 
 namespace orion
 {
@@ -58,4 +58,4 @@ private:
 
 }  // namespace orion
 
-#endif  // ORION_PROTOCOL_ORION_FRAME_TRANSPORT_H
+#endif  // ORION_PROTOCOL_ORION_FRAME_TRANSPORT_HPP
