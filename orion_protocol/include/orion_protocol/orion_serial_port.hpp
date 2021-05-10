@@ -39,12 +39,12 @@ public:
 
   orion_communication_error_t connect(const char* port_name, const uint32_t baud)
   {
-    return (orion_communication_connect(object_, port_name, baud));
+    return (orion_communication_connect(getObject(), port_name, baud));
   }
 
   orion_communication_error_t disconnect()
   {
-    return (orion_communication_disconnect(object_));
+    return (orion_communication_disconnect(getObject()));
   }
 };
 

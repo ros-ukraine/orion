@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -27,19 +27,24 @@
 #include <stdint.h>
 #include <stddef.h>
 
-namespace orion
-{
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-class Framer
-{
-public:
-  virtual size_t encodePacket(const uint8_t* data, size_t length, uint8_t* packet, size_t buffer_length) = 0;
-  virtual size_t decodePacket(const uint8_t* packet, size_t length, uint8_t* data, size_t buffer_length) = 0;
-  virtual ~Framer() = default;
+#define ORION_FRAMER_FRAME_DELIMETER (0)
 
-  static const uint8_t FRAME_DELIMETER = 0;
-};
+typedef enum {
+    ORION_FRM_ERROR_OK = 0,
+    ORION_FRM_ERROR_DECODING_FAILED
+} orion_framer_error_t;
 
-}  // namespace orion
+orion_framer_error_t orion_framer_encode_packet(const uint8_t* data, size_t length, uint8_t* packet,
+  size_t buffer_length, size_t * encoded_size);
+orion_framer_error_t orion_framer_decode_packet(const uint8_t* packet, size_t length, uint8_t* data,
+  size_t buffer_length, size_t * decoded_size);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // ORION_PROTOCOL_ORION_FRAMER_H

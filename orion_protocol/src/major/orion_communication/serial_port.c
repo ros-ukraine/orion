@@ -38,30 +38,29 @@ struct orion_communication_struct_t
     int file_descriptor_;
 };
 
-struct orion_communication_settings_struct_t
-{
-    char * port_name;
-    uint32_t baud;
-};
-
 static orion_communication_error_t set_interface_attributes(const orion_communication_t * me, uint32_t speed);
 
 orion_communication_error_t orion_communication_new(orion_communication_t ** me)
 {
   ORION_ASSERT_NOT_NULL(me);
-  orion_communication_error_t result = orion_memory_allocate(sizeof(orion_communication_t), (void**)me);
-  if (ORION_COM_ERROR_OK == result)
+  orion_memory_error_t status = orion_memory_allocate(sizeof(orion_communication_t), (void**)me);
+  if (ORION_MEM_ERROR_OK != status)
   {
-    (*me)->file_descriptor_ = -1;
+      return (ORION_COM_ERROR_COULD_NOT_ALLOCATE_MEMORY);
   }
-  return (result);
+  (*me)->file_descriptor_ = -1;
+  return (ORION_COM_ERROR_OK);
 }
 
 orion_communication_error_t orion_communication_delete(const orion_communication_t * me)
 {
   ORION_ASSERT_NOT_NULL(me);
-  orion_communication_error_t result = orion_memory_free((void*)me);
-  return (result);
+  orion_memory_error_t status = orion_memory_free((void*)me);
+  if (ORION_MEM_ERROR_OK != status)
+  {
+      return (ORION_COM_ERROR_COULD_NOT_FREE_MEMORY);
+  }
+  return (ORION_COM_ERROR_OK);
 }
 
 orion_communication_error_t orion_communication_connect(orion_communication_t * me, const char* port_name, 

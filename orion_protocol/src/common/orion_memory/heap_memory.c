@@ -23,10 +23,9 @@
 
 #include <stdlib.h>
 #include "orion_protocol/orion_memory.h"
-#include "orion_protocol/orion_error.h"
 #include "orion_protocol/orion_assert.h"
 
-orion_error_t orion_memory_allocate(size_t size, void ** pointer)
+orion_memory_error_t orion_memory_allocate(size_t size, void ** pointer)
 {
     ORION_ASSERT(size > 0);
 
@@ -34,14 +33,14 @@ orion_error_t orion_memory_allocate(size_t size, void ** pointer)
 
     if (NULL == *pointer)
     {
-        return (ORION_ERROR_COULD_NOT_ALLOCATE_MEMORY);
+        return (ORION_MEM_ERROR_COULD_NOT_ALLOCATE_MEMORY);
     }
 
-    return (ORION_ERROR_OK); 
+    return (ORION_MEM_ERROR_OK); 
 }
 
-orion_error_t orion_memory_free(void * pointer)
+orion_memory_error_t orion_memory_free(void * pointer)
 {
     free(pointer);
-    return (ORION_ERROR_OK);
+    return (ORION_MEM_ERROR_OK);
 }

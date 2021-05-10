@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -25,20 +25,41 @@
 #define ORION_PROTOCOL_ORION_TRANSPORT_H
 
 #include <stdint.h>
-#include <cstdlib>
+#include <stdbool.h>
+#include <stdlib.h>
+#include "orion_protocol/orion_communication.h"
 
-namespace orion
-{
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-class Transport
-{
-public:
-  virtual bool sendPacket(uint8_t *input_buffer, uint32_t input_size, uint32_t timeout) = 0;
-  virtual size_t receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout) = 0;
-  virtual bool hasReceivedPacket() = 0;
-  virtual ~Transport() = default;
-};
+typedef enum {
+    ORION_TRAN_ERROR_OK = 0,
+    ORION_TRAN_ERROR_COULD_NOT_ALLOCATE_MEMORY,
+    ORION_TRAN_ERROR_COULD_NOT_FREE_MEMORY,
+    ORION_TRAN_ERROR_TIMEOUT,
+    ORION_TRAN_ERROR_FAILED_TO_ENCODE_PACKET,
+    ORION_TRAN_ERROR_FAILED_TO_SEND_PACKET,
+    ORION_TRAN_ERROR_FAILED_TO_DECODE_PACKET,
+    ORION_TRAN_ERROR_FAILED_TO_RECEIVE_FULL_PACKET,
+    ORION_TRAN_ERROR_CRC_CHECK_FAILED
+} orion_transport_error_t;
 
-}  // namespace orion
+struct orion_transport_struct_t;
+
+typedef struct orion_transport_struct_t orion_transport_t;
+
+orion_transport_error_t orion_transport_new(orion_transport_t ** me, orion_communication_t * communication);
+orion_transport_error_t orion_transport_delete(const orion_transport_t * me);
+
+orion_transport_error_t orion_transport_send_packet(orion_transport_t * me, uint8_t *input_buffer,
+    uint32_t input_size, uint32_t timeout);
+orion_transport_error_t orion_transport_receive_packet(orion_transport_t * me, uint8_t *output_buffer,
+    uint32_t output_size, uint32_t timeout, size_t * received_size);
+bool orion_transport_has_received_packet(orion_transport_t * me);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // ORION_PROTOCOL_ORION_TRANSPORT_H

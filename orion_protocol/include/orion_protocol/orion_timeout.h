@@ -27,11 +27,14 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
-#include "orion_protocol/orion_error.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef enum {
+    ORION_TOT_ERROR_OK = 0
+} orion_timeout_error_t;
 
 typedef struct
 {
@@ -41,7 +44,7 @@ typedef struct
 /*
   @timeout - time in microseconds
 */
-orion_error_t orion_timeout_init(orion_timeout_t * me, uint32_t timeout);
+orion_timeout_error_t orion_timeout_init(orion_timeout_t * me, uint32_t timeout);
 
 bool orion_timeout_has_time(const orion_timeout_t * me);
 uint32_t orion_timeout_time_left(const orion_timeout_t * me);

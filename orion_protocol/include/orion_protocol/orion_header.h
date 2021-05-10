@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -26,39 +26,42 @@
 
 #include <stdint.h>
 
-namespace orion
-{
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #pragma pack(push, 1)
 
-struct FrameHeader
+typedef struct
 {
   uint16_t crc;
-};
+} orion_frame_header_t;
 
-struct CommonHeader
+typedef struct
 {
   uint8_t message_id;
   uint8_t version;
   uint8_t oldest_compatible_version;
   uint16_t sequence_id;
-};
+} orion_common_header_t;
 
-struct CommandHeader
+typedef struct
 {
-  FrameHeader frame;
-  CommonHeader common;
-};
+  orion_frame_header_t frame;
+  orion_common_header_t common;
+} orion_command_header_t;
 
-struct ResultHeader
+typedef struct
 {
-  FrameHeader frame;
-  CommonHeader common;
+  orion_frame_header_t frame;
+  orion_common_header_t common;
   uint8_t error_code;
-};
+} orion_result_header_t;
 
 #pragma pack(pop)
 
-}  // namespace orion
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // ORION_PROTOCOL_ORION_HEADER_H

@@ -29,12 +29,13 @@ namespace orion
 bool Major::processPacket(const CommandHeader *command_header, const ResultHeader *result_header, Timeout &timeout,
   size_t &size_received)
 {
-  size_received = this->transport_->receivePacket(this->result_buffer_, BUFFER_SIZE, timeout.timeLeft());
+  orion_transport_error_t status = this->transport_->receivePacket(this->result_buffer_, BUFFER_SIZE,
+    timeout.timeLeft(), &size_received);
   ResultHeader *received_header;
   bool same_sequence_id = false;
   do
   {
-    if (size_received >= sizeof(ResultHeader))
+    if ((ORION_TRAN_ERROR_OK == status) && (size_received >= sizeof(ResultHeader)))
     {
       received_header = reinterpret_cast<ResultHeader*>(this->result_buffer_);
       if (command_header->common.sequence_id == received_header->common.sequence_id)
@@ -44,7 +45,7 @@ bool Major::processPacket(const CommandHeader *command_header, const ResultHeade
     }
     if (!same_sequence_id && this->transport_->hasReceivedPacket() && timeout.hasTime())
     {
-      size_received = this->transport_->receivePacket(this->result_buffer_, BUFFER_SIZE, timeout.timeLeft());
+      status = this->transport_->receivePacket(this->result_buffer_, BUFFER_SIZE, timeout.timeLeft(), &size_received);
     }
   }
   while ((false == same_sequence_id) && timeout.hasTime());

@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -21,29 +21,25 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_COBS_FRAMER_H
-#define ORION_PROTOCOL_ORION_COBS_FRAMER_H
+#include "orion_protocol/orion_crc.h"
 
-#include <stdint.h>
-#include <stddef.h>
-#include "orion_protocol/orion_framer.h"
-
-namespace orion
+uint16_t orion_crc_calculate_crc16(const uint8_t *data, size_t length)
 {
-
-class COBSFramer: public Framer
-{
-  size_t encode(const uint8_t *input, size_t length, uint8_t *output);
-  size_t decode(const uint8_t *input, size_t length, uint8_t *output);
-
-public:
-  COBSFramer() = default;
-
-  virtual size_t encodePacket(const uint8_t* data, size_t length, uint8_t* packet, size_t buffer_length);
-  virtual size_t decodePacket(const uint8_t* packet, size_t length, uint8_t* data, size_t buffer_length);
-  virtual ~COBSFramer() = default;
-};
-
-}  // namespace orion
-
-#endif  // ORION_PROTOCOL_ORION_COBS_FRAMER_H
+  uint16_t result = 0xFFFF;
+  for (uint32_t i = 0; i < length; i++)
+  {
+    result ^= (uint16_t)data[i];
+    for (uint8_t j = 0; j < 8; ++j)
+    {
+      if (result & 1)
+      {
+        result = (result >> 1) ^ 0xA001;
+      }
+      else
+      {
+        result = (result >> 1);
+      }
+    }
+  }
+  return result;
+}

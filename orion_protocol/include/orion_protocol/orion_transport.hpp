@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -27,6 +27,8 @@
 #include <stdint.h>
 #include <cstdlib>
 #include "orion_protocol/orion_transport.h"
+#include "orion_protocol/orion_communication.hpp"
+#include "orion_protocol/orion_assert.h"
 
 namespace orion
 {
@@ -34,10 +36,40 @@ namespace orion
 class Transport
 {
 public:
-  virtual bool sendPacket(uint8_t *input_buffer, uint32_t input_size, uint32_t timeout) = 0;
-  virtual size_t receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout) = 0;
-  virtual bool hasReceivedPacket() = 0;
-  virtual ~Transport() = default;
+  Transport(Communication * communication)
+  {
+    ORION_ASSERT_NOT_NULL(communication);
+    orion_transport_new(&object_, communication->getObject());
+  }
+
+  virtual ~Transport()
+  {
+    orion_transport_delete(object_);
+  }
+
+  virtual orion_transport_error_t sendPacket(uint8_t *input_buffer, uint32_t input_size, uint32_t timeout)
+  {
+    return (orion_transport_send_packet(object_, input_buffer, input_size, timeout));
+  }
+
+  virtual orion_transport_error_t receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout,
+    size_t * received_size)
+  {
+    return (orion_transport_receive_packet(object_, output_buffer, output_size, timeout, received_size));
+  }
+
+  virtual bool hasReceivedPacket()
+  {
+    return (orion_transport_has_received_packet(object_));
+  }
+
+  orion_transport_t* getObject()
+  {
+    return object_;
+  }
+
+private:
+  orion_transport_t * object_;  
 };
 
 }  // namespace orion

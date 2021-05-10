@@ -23,10 +23,9 @@ add_library(${PROJECT_NAME}
   src/major/orion_assert/ros_assert.cpp
   src/major/orion_communication/serial_port.c
   src/common/orion_memory/heap_memory.c
-  src/common/orion_framer.cpp
-  src/common/orion_cobs_framer.cpp
-  src/common/orion_crc.cpp
-  src/common/orion_frame_transport.cpp
+  src/common/orion_framer/cobs_framer.c
+  src/common/orion_crc.c
+  src/common/orion_transport/frame_transport.c
   src/common/orion_timeout.c
   src/common/orion_circular_buffer.c
 )

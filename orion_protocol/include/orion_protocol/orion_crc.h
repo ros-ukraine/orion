@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -27,15 +27,14 @@
 #include <stdint.h>
 #include <stddef.h>
 
-namespace orion
-{
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-class CRC
-{
-public:
-  static uint16_t calculateCRC16(const uint8_t *data, size_t length);
-};
+uint16_t orion_crc_calculate_crc16(const uint8_t *data, size_t length);
 
-}  // namespace orion
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // ORION_PROTOCOL_ORION_CRC_H

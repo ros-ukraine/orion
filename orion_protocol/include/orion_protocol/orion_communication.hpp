@@ -65,7 +65,12 @@ public:
     return (orion_communication_send_buffer(object_, buffer, size, timeout));
   }
 
-protected:
+  orion_communication_t* getObject()
+  {
+    return object_;
+  }
+
+private:
   orion_communication_t * object_;
 };
 

@@ -25,7 +25,7 @@
 #define ORION_PROTOCOL_ORION_MAJOR_H
 
 #include "orion_protocol/orion_transport.hpp"
-#include "orion_protocol/orion_header.h"
+#include "orion_protocol/orion_header.hpp"
 #include "orion_protocol/orion_timeout.hpp"
 #include <ros/assert.h>
 #include <stdint.h>
