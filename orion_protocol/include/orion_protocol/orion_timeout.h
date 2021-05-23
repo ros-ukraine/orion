@@ -33,7 +33,7 @@ extern "C" {
 #endif
 
 typedef enum {
-    ORION_TOT_ERROR_OK = 0
+    ORION_TOT_ERROR_NONE = 0
 } orion_timeout_error_t;
 
 typedef struct
