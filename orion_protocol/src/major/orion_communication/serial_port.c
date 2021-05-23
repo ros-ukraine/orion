@@ -93,6 +93,7 @@ orion_communication_error_t orion_communication_disconnect(orion_communication_t
             return (ORION_COM_ERROR_CLOSING_SERIAL_PORT);
         }
     }
+    me->file_descriptor_ = -1;
     return (ORION_COM_ERROR_NONE);
 }
 

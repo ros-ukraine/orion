@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -21,11 +21,33 @@
 *
 */
 
-#include "orion_protocol/orion_framer.h"
+#ifndef ORION_PROTOCOL_ORION_TCP_SERIAL_BRIDGE_HPP
+#define ORION_PROTOCOL_ORION_TCP_SERIAL_BRIDGE_HPP
+
+#include <stdint.h>
+#include <cstdlib>
+#include "orion_protocol/orion_communication.hpp"
+#include "orion_protocol/orion_tcp_serial_bridge.h"
 
 namespace orion
 {
 
-const uint8_t Framer::FRAME_DELIMETER;
+class TCPSerialBridge: public Communication
+{
+public:
+  TCPSerialBridge() : Communication() {};
+
+  orion_communication_error_t connect(const char* hostname, const uint32_t port)
+  {
+    return (orion_communication_connect(getObject(), hostname, port));
+  }
+
+  orion_communication_error_t disconnect()
+  {
+    return (orion_communication_disconnect(getObject()));
+  }
+};
 
 }  // namespace orion
+
+#endif  // ORION_PROTOCOL_ORION_TCP_SERIAL_BRIDGE_HPP

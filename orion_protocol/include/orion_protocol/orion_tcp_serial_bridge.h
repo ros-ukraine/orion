@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -25,29 +25,20 @@
 #define ORION_PROTOCOL_ORION_TCP_SERIAL_BRIDGE_H
 
 #include <stdint.h>
-#include <cstdlib>
+#include <stdbool.h>
+#include <stdlib.h>
 #include "orion_protocol/orion_communication.h"
 
-namespace orion
-{
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-class TCPSerialBridge: public Communication
-{
-public:
-  void connect(const char* hostname, uint32_t port = 8080);
-  void disconnect();
+orion_communication_error_t orion_communication_connect(orion_communication_t * me, const char* hostname,
+  const uint32_t port);
+orion_communication_error_t orion_communication_disconnect(orion_communication_t * me);
 
-  TCPSerialBridge();
-  virtual size_t receiveAvailableBuffer(uint8_t *buffer, uint32_t size);
-  virtual size_t receiveBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout);
-  virtual bool hasAvailableBuffer();
-  virtual bool sendBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout);
-  virtual ~TCPSerialBridge() = default;
-
-private:
-  int socket_descriptor_ = -1;
-};
-
-}  // namespace orion
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // ORION_PROTOCOL_ORION_TCP_SERIAL_BRIDGE_H

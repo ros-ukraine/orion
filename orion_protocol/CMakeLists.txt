@@ -22,6 +22,7 @@ add_library(${PROJECT_NAME}
   src/major/orion_major.cpp
   src/major/orion_assert/ros_assert.cpp
   src/major/orion_communication/serial_port.c
+#  src/major/orion_communication/tcp_serial_bridge.c
   src/common/orion_memory/heap_memory.c
   src/common/orion_framer/cobs_framer.c
   src/common/orion_crc.c
