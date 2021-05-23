@@ -54,7 +54,7 @@ orion_transport_error_t orion_transport_new(orion_transport_t ** me, orion_commu
   }
   (*me)->communication_ = communication;
   orion_circular_buffer_init(&((*me)->circular_queue_), (*me)->queue_buffer_, ORION_FRAME_TRANSPORT_QUEUE_BUFFER_SIZE);
-  return (ORION_TRAN_ERROR_OK);
+  return (ORION_TRAN_ERROR_NONE);
 }
 
 orion_transport_error_t orion_transport_delete(const orion_transport_t * me)
@@ -65,7 +65,7 @@ orion_transport_error_t orion_transport_delete(const orion_transport_t * me)
   {
       return (ORION_TRAN_ERROR_COULD_NOT_FREE_MEMORY);
   }
-  return (ORION_TRAN_ERROR_OK);
+  return (ORION_TRAN_ERROR_NONE);
 }
 
 orion_transport_error_t orion_transport_send_packet(orion_transport_t * me, uint8_t *input_buffer,
@@ -87,9 +87,9 @@ orion_transport_error_t orion_transport_send_packet(orion_transport_t * me, uint
   {
     orion_communication_error_t send_status = orion_communication_send_buffer(me->communication_, me->buffer_, 
       packet_size, orion_timeout_time_left(&duration));
-    if (ORION_COM_ERROR_OK == send_status)
+    if (ORION_COM_ERROR_NONE == send_status)
     {
-      return (ORION_TRAN_ERROR_OK);
+      return (ORION_TRAN_ERROR_NONE);
     }
     return (ORION_TRAN_ERROR_FAILED_TO_SEND_PACKET);
   }
@@ -103,7 +103,7 @@ orion_transport_error_t orion_transport_receive_packet(orion_transport_t * me, u
   orion_timeout_t duration;
   orion_timeout_init(&duration, timeout);
 
-  orion_transport_error_t result = ORION_TRAN_ERROR_OK;
+  orion_transport_error_t result = ORION_TRAN_ERROR_NONE;
 
   *received_size = 0;
   bool decode = orion_transport_has_received_packet(me);
@@ -112,7 +112,7 @@ orion_transport_error_t orion_transport_receive_packet(orion_transport_t * me, u
     size_t size = 0;
     orion_communication_error_t status_received = orion_communication_receive_buffer(me->communication_, me->buffer_, 
       ORION_FRAME_TRANSPORT_BUFFER_SIZE, orion_timeout_time_left(&duration) * 3 / 4, &size); 
-    if ((ORION_COM_ERROR_OK == status_received) && (size > 0))
+    if ((ORION_COM_ERROR_NONE == status_received) && (size > 0))
     {
       orion_circular_buffer_add(&(me->circular_queue_), me->buffer_, size);
 
@@ -167,7 +167,7 @@ bool orion_transport_has_received_packet(orion_transport_t * me)
     size_t received_size = 0;
     orion_communication_error_t status = orion_communication_receive_available_buffer(me->communication_, me->buffer_,
       ORION_FRAME_TRANSPORT_BUFFER_SIZE, &received_size);
-    if (ORION_COM_ERROR_OK == status)
+    if (ORION_COM_ERROR_NONE == status)
     {
       orion_circular_buffer_add(&(me->circular_queue_), me->buffer_, received_size);
       if (orion_transport_has_frame_in_queue(me))

@@ -49,7 +49,7 @@ orion_communication_error_t orion_communication_new(orion_communication_t ** me)
       return (ORION_COM_ERROR_COULD_NOT_ALLOCATE_MEMORY);
   }
   (*me)->file_descriptor_ = -1;
-  return (ORION_COM_ERROR_OK);
+  return (ORION_COM_ERROR_NONE);
 }
 
 orion_communication_error_t orion_communication_delete(const orion_communication_t * me)
@@ -60,7 +60,7 @@ orion_communication_error_t orion_communication_delete(const orion_communication
   {
       return (ORION_COM_ERROR_COULD_NOT_FREE_MEMORY);
   }
-  return (ORION_COM_ERROR_OK);
+  return (ORION_COM_ERROR_NONE);
 }
 
 orion_communication_error_t orion_communication_connect(orion_communication_t * me, const char* port_name, 
@@ -85,7 +85,7 @@ orion_communication_error_t orion_communication_disconnect(orion_communication_t
 {
     ORION_ASSERT_NOT_NULL(me);
 
-    orion_communication_error_t result = ORION_COM_ERROR_OK;
+    orion_communication_error_t result = ORION_COM_ERROR_NONE;
     if (-1 != me->file_descriptor_) 
     {
         if (0 != close(me->file_descriptor_)) 
@@ -93,7 +93,7 @@ orion_communication_error_t orion_communication_disconnect(orion_communication_t
             return (ORION_COM_ERROR_CLOSING_SERIAL_PORT);
         }
     }
-    return (ORION_COM_ERROR_OK);
+    return (ORION_COM_ERROR_NONE);
 }
 
 orion_communication_error_t orion_communication_receive_available_buffer(const orion_communication_t * me, 
@@ -112,7 +112,7 @@ orion_communication_error_t orion_communication_receive_available_buffer(const o
         return (ORION_COM_ERROR_READING_SERIAL_PORT);
     }
 
-    return (ORION_COM_ERROR_OK);
+    return (ORION_COM_ERROR_NONE);
 }
 
 orion_communication_error_t orion_communication_receive_buffer(const orion_communication_t * me, uint8_t * buffer, 
@@ -124,7 +124,7 @@ orion_communication_error_t orion_communication_receive_buffer(const orion_commu
     fd_set set;
     struct timeval duration;
     int status = -1;
-    orion_communication_error_t result = ORION_COM_ERROR_OK;
+    orion_communication_error_t result = ORION_COM_ERROR_NONE;
     *received_size = 0;
 
     FD_ZERO(&set);
@@ -169,7 +169,7 @@ orion_communication_error_t orion_communication_send_buffer(const orion_communic
     ORION_ASSERT_NOT_NULL(me);
     ORION_ASSERT(-1 != me->file_descriptor_);
 
-    orion_communication_error_t result = ORION_COM_ERROR_OK;
+    orion_communication_error_t result = ORION_COM_ERROR_NONE;
     orion_timeout_t duration;
     orion_timeout_init(&duration, timeout);
     size_t bytes_to_send = size;
@@ -208,7 +208,7 @@ orion_communication_error_t orion_communication_send_buffer(const orion_communic
         }
     }
 
-    if ((ORION_COM_ERROR_OK == result) && (bytes_to_send > 0))
+    if ((ORION_COM_ERROR_NONE == result) && (bytes_to_send > 0))
     {
         result = ORION_COM_ERROR_TIMEOUT;
     }
@@ -250,5 +250,5 @@ orion_communication_error_t set_interface_attributes(const orion_communication_t
         return (ORION_COM_ERROR_SETTING_TERMINAL_ATTRIBUTES);
     }
 
-    return (ORION_COM_ERROR_OK);
+    return (ORION_COM_ERROR_NONE);
 }
