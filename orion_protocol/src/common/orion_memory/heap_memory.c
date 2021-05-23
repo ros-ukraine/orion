@@ -36,11 +36,11 @@ orion_memory_error_t orion_memory_allocate(size_t size, void ** pointer)
         return (ORION_MEM_ERROR_COULD_NOT_ALLOCATE_MEMORY);
     }
 
-    return (ORION_MEM_ERROR_OK); 
+    return (ORION_MEM_ERROR_NONE); 
 }
 
 orion_memory_error_t orion_memory_free(void * pointer)
 {
     free(pointer);
-    return (ORION_MEM_ERROR_OK);
+    return (ORION_MEM_ERROR_NONE);
 }

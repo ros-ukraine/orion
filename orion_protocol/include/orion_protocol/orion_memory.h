@@ -32,7 +32,7 @@ extern "C" {
 #endif
 
 typedef enum {
-    ORION_MEM_ERROR_OK = 0,
+    ORION_MEM_ERROR_NONE = 0,
     ORION_MEM_ERROR_COULD_NOT_ALLOCATE_MEMORY
 } orion_memory_error_t;
 

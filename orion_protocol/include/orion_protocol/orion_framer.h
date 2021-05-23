@@ -34,7 +34,7 @@ extern "C" {
 #define ORION_FRAMER_FRAME_DELIMETER (0)
 
 typedef enum {
-    ORION_FRM_ERROR_OK = 0,
+    ORION_FRM_ERROR_NONE = 0,
     ORION_FRM_ERROR_DECODING_FAILED
 } orion_framer_error_t;
 

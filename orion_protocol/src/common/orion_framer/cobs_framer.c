@@ -60,7 +60,7 @@ orion_framer_error_t orion_framer_encode_packet(const uint8_t* data, size_t leng
     packet[(*encoded_size)++] = ORION_FRAMER_FRAME_DELIMETER;
   }
 
-  return ORION_FRM_ERROR_OK;
+  return (ORION_FRM_ERROR_NONE);
 }
 
 // TODO(Andriy): fix parameter description
@@ -81,7 +81,7 @@ orion_framer_error_t orion_framer_decode_packet(const uint8_t* packet, size_t le
     return (ORION_FRM_ERROR_DECODING_FAILED);
   }
   (*decoded_size)--;  // TODO(Andriy): Understand why ?
-  return (ORION_FRM_ERROR_OK);
+  return (ORION_FRM_ERROR_NONE);
 }
 
 size_t encode(const uint8_t *input, size_t length, uint8_t *output)

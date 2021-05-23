@@ -44,7 +44,7 @@ orion_communication_error_t orion_communication_new(orion_communication_t ** me)
 {
   ORION_ASSERT_NOT_NULL(me);
   orion_memory_error_t status = orion_memory_allocate(sizeof(orion_communication_t), (void**)me);
-  if (ORION_MEM_ERROR_OK != status)
+  if (ORION_MEM_ERROR_NONE != status)
   {
       return (ORION_COM_ERROR_COULD_NOT_ALLOCATE_MEMORY);
   }
@@ -56,7 +56,7 @@ orion_communication_error_t orion_communication_delete(const orion_communication
 {
   ORION_ASSERT_NOT_NULL(me);
   orion_memory_error_t status = orion_memory_free((void*)me);
-  if (ORION_MEM_ERROR_OK != status)
+  if (ORION_MEM_ERROR_NONE != status)
   {
       return (ORION_COM_ERROR_COULD_NOT_FREE_MEMORY);
   }

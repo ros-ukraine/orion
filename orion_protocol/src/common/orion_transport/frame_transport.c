@@ -48,7 +48,7 @@ orion_transport_error_t orion_transport_new(orion_transport_t ** me, orion_commu
   ORION_ASSERT_NOT_NULL(me);
   ORION_ASSERT_NOT_NULL(communication);
   orion_memory_error_t status = orion_memory_allocate(sizeof(orion_transport_t), (void**)me);
-  if (ORION_MEM_ERROR_OK != status)
+  if (ORION_MEM_ERROR_NONE != status)
   {
       return (ORION_TRAN_ERROR_COULD_NOT_ALLOCATE_MEMORY);
   }
@@ -61,7 +61,7 @@ orion_transport_error_t orion_transport_delete(const orion_transport_t * me)
 {
   ORION_ASSERT_NOT_NULL(me);
   orion_memory_error_t status = orion_memory_free((void*)me);
-  if (ORION_MEM_ERROR_OK != status)
+  if (ORION_MEM_ERROR_NONE != status)
   {
       return (ORION_TRAN_ERROR_COULD_NOT_FREE_MEMORY);
   }
@@ -83,7 +83,7 @@ orion_transport_error_t orion_transport_send_packet(orion_transport_t * me, uint
   size_t packet_size = 0;
   orion_framer_error_t framer_status = orion_framer_encode_packet(input_buffer, input_size, me->buffer_,
     ORION_FRAME_TRANSPORT_BUFFER_SIZE, &packet_size);
-  if (ORION_FRM_ERROR_OK == framer_status)
+  if (ORION_FRM_ERROR_NONE == framer_status)
   {
     orion_communication_error_t send_status = orion_communication_send_buffer(me->communication_, me->buffer_, 
       packet_size, orion_timeout_time_left(&duration));
@@ -131,7 +131,7 @@ orion_transport_error_t orion_transport_receive_packet(orion_transport_t * me, u
     ORION_ASSERT(status);
     orion_framer_error_t status_decode = orion_framer_decode_packet(me->buffer_, size, output_buffer, output_size,
       received_size);
-    if (ORION_FRM_ERROR_OK != status_decode)
+    if (ORION_FRM_ERROR_NONE != status_decode)
     {
       result = ORION_TRAN_ERROR_FAILED_TO_DECODE_PACKET;
     }
