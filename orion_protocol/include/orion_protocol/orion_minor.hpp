@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -21,41 +21,56 @@
 *
 */
 
-#include "orion_protocol/orion_minor.h"
-#include <assert.h>
+#ifndef ORION_PROTOCOL_ORION_MINOR_HPP
+#define ORION_PROTOCOL_ORION_MINOR_HPP
+
 #include <stdint.h>
 #include <stdbool.h>
+#include "orion_protocol/orion_header.h"
+#include "orion_protocol/orion_minor.h"
+#include "orion_protocol/orion_transport.hpp"
 
 namespace orion
 {
 
-bool Minor::waitAndReceiveCommand(uint8_t * buffer, size_t buffer_size, uint32_t timeout, size_t &size_received)
+class Minor
 {
-    // TODO(Andriy): Implement
-    assert(false);
-    return (false);
-}
+public:
+  Minor(Transport *transport)
+  {
+    ORION_ASSERT_NOT_NULL(transport);
+    orion_minor_new(&object_, transport->getObject());
+  }
 
-bool Minor::receiveCommand(uint8_t * buffer, size_t buffer_size, size_t &size_received)
-{
-    assert(NULL != buffer);
-    assert(0 < buffer_size);
+  virtual ~Minor()
+  {
+    orion_minor_delete(object_);
+  }
 
-    bool result = false;
-    if (transport_->hasReceivedPacket())
-    {
-        size_received = transport_->receivePacket(buffer, buffer_size, 0);
-        result = (size_received > 0);
-    }
-    return (result);
-}
+  virtual ssize_t wait_and_receive_command(uint8_t * buffer, size_t buffer_size, uint32_t timeout)
+  {
+    return (orion_minor_wait_and_receive_command(object_, buffer, buffer_size, timeout));
+  }
 
-void Minor::sendResult(uint8_t * buffer, const size_t size)
-{
-    assert(NULL != buffer);
-    assert(0 < size);
+  virtual ssize_t receive_command(uint8_t * buffer, size_t buffer_size)
+  {
+    return (orion_minor_receive_command(object_, buffer, buffer_size));
+  }
 
-    transport_->sendPacket(buffer, size, 0);
-}
+  virtual orion_minor_error_t send_result(uint8_t * buffer, const size_t size)
+  {
+    return (orion_minor_send_result(object_, buffer, size));
+  }
+
+  orion_minor_t* getObject()
+  {
+    return object_;
+  }
+
+private:
+  orion_minor_t * object_;  
+};
 
 }  // namespace orion
+
+#endif  // ORION_PROTOCOL_ORION_MINOR_HPP

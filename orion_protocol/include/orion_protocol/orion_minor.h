@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -30,24 +30,34 @@
 #include "orion_protocol/orion_header.h"
 #include "orion_protocol/orion_transport.h"
 
-namespace orion
-{
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-class Minor
-{
-public:
-  explicit Minor(Transport *transport) : transport_(transport) {}
+typedef enum {
+    ORION_MINOR_ERROR_NONE = 0,
+    ORION_MINOR_ERROR_COULD_NOT_ALLOCATE_MEMORY = -1,
+    ORION_MINOR_ERROR_COULD_NOT_FREE_MEMORY = -2,
+    ORION_MINOR_ERROR_TIMEOUT = -3,
+    ORION_MINOR_ERROR_RECEIVING_PACKET = -4,
+    ORION_MINOR_ERROR_SENDING_PACKET = -5,
+    ORION_MINOR_ERROR_UNKNOWN = -6
+} orion_minor_error_t;
 
-  bool waitAndReceiveCommand(uint8_t * buffer, size_t buffer_size, uint32_t timeout, size_t &size_received);
+struct orion_minor_struct_t;
 
-  bool receiveCommand(uint8_t * buffer, size_t buffer_size, size_t &size_received);
+typedef struct orion_minor_struct_t orion_minor_t;
 
-  void sendResult(uint8_t * buffer, const size_t size);
+orion_minor_error_t orion_minor_new(orion_minor_t ** me, orion_transport_t * transport);
+orion_minor_error_t orion_minor_delete(const orion_minor_t * me);
 
-private:
-  Transport *transport_;
-};
+ssize_t orion_minor_wait_and_receive_command(const orion_minor_t * me, uint8_t * buffer, size_t buffer_size,
+  uint32_t timeout);
+ssize_t orion_minor_receive_command(const orion_minor_t * me, uint8_t * buffer, size_t buffer_size);
+orion_minor_error_t orion_minor_send_result(const orion_minor_t * me, uint8_t * buffer, const size_t size);
 
-}  // namespace orion
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // ORION_PROTOCOL_ORION_MINOR_H
