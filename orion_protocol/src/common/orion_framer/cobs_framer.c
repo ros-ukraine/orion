@@ -38,29 +38,28 @@ static size_t decode(const uint8_t *input, size_t length, uint8_t *output);
  * @param avail_len[in]		Available len in out buffer.
  * @return Resulting length of encoded data.
  */
-orion_framer_error_t orion_framer_encode_packet(const uint8_t* data, size_t length, uint8_t* packet,
-  size_t buffer_length, size_t * encoded_size)
+ssize_t orion_framer_encode_packet(const uint8_t* data, size_t length, uint8_t* packet, size_t buffer_length)
 {
-  *encoded_size = 0;
-  size_t result = 0;
+  ssize_t result = 0;
+  size_t value = 0;
 
   // Start 0
-  packet[(*encoded_size)++] = ORION_FRAMER_FRAME_DELIMETER;
+  packet[result++] = ORION_FRAMER_FRAME_DELIMETER;
 
-  result = encode(data, length, &packet[*encoded_size]);
-  if (result < 1)
+  value = encode(data, length, &packet[result]);
+  if (value < 1)
   {
-    result = 0;
+    value = 0;
   }
   else
   {
-    *encoded_size += result;
+    result += value;
 
     // End 0
-    packet[(*encoded_size)++] = ORION_FRAMER_FRAME_DELIMETER;
+    packet[result++] = ORION_FRAMER_FRAME_DELIMETER;
   }
 
-  return (ORION_FRM_ERROR_NONE);
+  return (result);
 }
 
 // TODO(Andriy): fix parameter description
@@ -72,16 +71,15 @@ orion_framer_error_t orion_framer_encode_packet(const uint8_t* data, size_t leng
  * @param avail_len[out]	Available size of data buffer
  * @return Length of decoded data
  */
-orion_framer_error_t orion_framer_decode_packet(const uint8_t* packet, size_t length, uint8_t* data, 
-    size_t buffer_length, size_t * decoded_size)
+ssize_t orion_framer_decode_packet(const uint8_t* packet, size_t length, uint8_t* data, size_t buffer_length)
 {
-  *decoded_size = decode(&packet[1], length, data);
-  if (*decoded_size < 1)
+  ssize_t result = decode(&packet[1], length, data);
+  if (result < 1)
   {
     return (ORION_FRM_ERROR_DECODING_FAILED);
   }
-  (*decoded_size)--;  // TODO(Andriy): Understand why ?
-  return (ORION_FRM_ERROR_NONE);
+  result--;  // TODO(Andriy): Understand why ?
+  return (result);
 }
 
 size_t encode(const uint8_t *input, size_t length, uint8_t *output)

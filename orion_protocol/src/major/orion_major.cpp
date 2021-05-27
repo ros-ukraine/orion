@@ -26,33 +26,31 @@
 namespace orion
 {
 
-orion_major_error_t Major::processPacket(const CommandHeader *command_header, const ResultHeader *result_header,
-  Timeout &timeout, size_t &size_received)
+ssize_t Major::processPacket(const CommandHeader *command_header, const ResultHeader *result_header, Timeout &timeout)
 {
-  orion_major_error_t result = ORION_MAJOR_ERROR_UNKNOW;
-  orion_transport_error_t status = this->transport_->receivePacket(this->result_buffer_, BUFFER_SIZE,
-    timeout.timeLeft(), &size_received);
+  ssize_t result = this->transport_->receivePacket(this->result_buffer_, BUFFER_SIZE, timeout.timeLeft());
   ResultHeader *received_header;
+  bool received_same_sequence_id = false;
   do
   {
-    if ((ORION_TRAN_ERROR_NONE == status) && (size_received >= sizeof(ResultHeader)))
+    if (result >= sizeof(ResultHeader))
     {
       received_header = reinterpret_cast<ResultHeader*>(this->result_buffer_);
       if (command_header->common.sequence_id == received_header->common.sequence_id)
       {
-        result = ORION_MAJOR_ERROR_NONE;
+        received_same_sequence_id = true;
       }
     }
-    if ((ORION_MAJOR_ERROR_NONE != result) && this->transport_->hasReceivedPacket() && timeout.hasTime())
+    if (!received_same_sequence_id && this->transport_->hasReceivedPacket() && timeout.hasTime())
     {
-      status = this->transport_->receivePacket(this->result_buffer_, BUFFER_SIZE, timeout.timeLeft(), &size_received);
+      result = this->transport_->receivePacket(this->result_buffer_, BUFFER_SIZE, timeout.timeLeft());
     }
   }
-  while ((ORION_MAJOR_ERROR_NONE != result) && timeout.hasTime());
+  while (!received_same_sequence_id && timeout.hasTime());
 
-  if (ORION_MAJOR_ERROR_NONE != result)
+  if (0 > result)
   {
-    if (ORION_TRAN_ERROR_NONE != status)
+    if (!received_same_sequence_id)
     {
       result = ORION_MAJOR_ERROR_COMMUNICATION_ERROR;
     }

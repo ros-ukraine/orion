@@ -52,10 +52,9 @@ public:
     return (orion_transport_send_packet(object_, input_buffer, input_size, timeout));
   }
 
-  virtual orion_transport_error_t receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout,
-    size_t * received_size)
+  virtual ssize_t receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout)
   {
-    return (orion_transport_receive_packet(object_, output_buffer, output_size, timeout, received_size));
+    return (orion_transport_receive_packet(object_, output_buffer, output_size, timeout));
   }
 
   virtual bool hasReceivedPacket()

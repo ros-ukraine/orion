@@ -26,6 +26,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,13 +36,12 @@ extern "C" {
 
 typedef enum {
     ORION_FRM_ERROR_NONE = 0,
-    ORION_FRM_ERROR_DECODING_FAILED
+    ORION_FRM_ERROR_DECODING_FAILED = -1,
+    ORION_FRM_ERROR_UNKNOWN = -2
 } orion_framer_error_t;
 
-orion_framer_error_t orion_framer_encode_packet(const uint8_t* data, size_t length, uint8_t* packet,
-  size_t buffer_length, size_t * encoded_size);
-orion_framer_error_t orion_framer_decode_packet(const uint8_t* packet, size_t length, uint8_t* data,
-  size_t buffer_length, size_t * decoded_size);
+ssize_t orion_framer_encode_packet(const uint8_t* data, size_t length, uint8_t* packet, size_t buffer_length);
+ssize_t orion_framer_decode_packet(const uint8_t* packet, size_t length, uint8_t* data, size_t buffer_length);
 
 #ifdef __cplusplus
 }

@@ -81,9 +81,8 @@ public:
     ResultHeader *result_header = reinterpret_cast<ResultHeader*>(result);
 
     orion_major_error_t return_value = ORION_MAJOR_ERROR_UNKNOW;
-    orion_major_error_t received_status = ORION_MAJOR_ERROR_UNKNOW;
-    size_t size_received = 0;
-    while ((retry_count > 0) && (ORION_MAJOR_ERROR_NONE != received_status))
+    ssize_t size_received = -1;
+    while ((retry_count > 0) && (size_received < 0))
     {
       Timeout timeout(retry_timeout);
       command_header->common.sequence_id = ++(this->sequence_id_);
@@ -91,11 +90,11 @@ public:
         sizeof(command), retry_timeout);
       if (ORION_TRAN_ERROR_NONE == send_status)
       {
-          received_status = this->processPacket(command_header, result_header, timeout, size_received);
+          size_received = this->processPacket(command_header, result_header, timeout);
       }
       retry_count--;
     }
-    if (ORION_MAJOR_ERROR_NONE != received_status)
+    if (0 > size_received)
     {
       return_value = ORION_MAJOR_ERROR_TIMEOUT;
     }
@@ -113,8 +112,7 @@ public:
   enum Interval { Microsecond = 1, Millisecond = 1000 * Microsecond, Second = 1000 * Millisecond };
 
 private:
-  orion_major_error_t processPacket(const CommandHeader *command_header, const ResultHeader *result_header,
-    Timeout &timeout, size_t &size_received);
+  ssize_t processPacket(const CommandHeader *command_header, const ResultHeader *result_header, Timeout &timeout);
   orion_major_error_t validateResult(const CommandHeader *command_header, const ResultHeader *result_header,
     size_t size_received);
 

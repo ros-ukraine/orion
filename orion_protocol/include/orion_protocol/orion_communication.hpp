@@ -44,15 +44,14 @@ public:
     orion_communication_delete(object_);
   }
 
-  virtual orion_communication_error_t receiveAvailableBuffer(uint8_t *buffer, uint32_t size, size_t * received_size)
+  virtual ssize_t receiveAvailableBuffer(uint8_t *buffer, uint32_t size)
   {
-    return (orion_communication_receive_available_buffer(object_, buffer, size, received_size));
+    return (orion_communication_receive_available_buffer(object_, buffer, size));
   }
 
-  virtual orion_communication_error_t receiveBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout, 
-    size_t * received_size)
+  virtual ssize_t receiveBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout)
   {
-    return (orion_communication_receive_buffer(object_, buffer, size, timeout, received_size));
+    return (orion_communication_receive_buffer(object_, buffer, size, timeout));
   }
 
   virtual bool hasAvailableBuffer()

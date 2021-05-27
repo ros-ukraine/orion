@@ -35,14 +35,15 @@ extern "C" {
 
 typedef enum {
     ORION_TRAN_ERROR_NONE = 0,
-    ORION_TRAN_ERROR_COULD_NOT_ALLOCATE_MEMORY,
-    ORION_TRAN_ERROR_COULD_NOT_FREE_MEMORY,
-    ORION_TRAN_ERROR_TIMEOUT,
-    ORION_TRAN_ERROR_FAILED_TO_ENCODE_PACKET,
-    ORION_TRAN_ERROR_FAILED_TO_SEND_PACKET,
-    ORION_TRAN_ERROR_FAILED_TO_DECODE_PACKET,
-    ORION_TRAN_ERROR_FAILED_TO_RECEIVE_FULL_PACKET,
-    ORION_TRAN_ERROR_CRC_CHECK_FAILED
+    ORION_TRAN_ERROR_COULD_NOT_ALLOCATE_MEMORY = -1,
+    ORION_TRAN_ERROR_COULD_NOT_FREE_MEMORY = -2,
+    ORION_TRAN_ERROR_TIMEOUT = -3,
+    ORION_TRAN_ERROR_FAILED_TO_ENCODE_PACKET = -4,
+    ORION_TRAN_ERROR_FAILED_TO_SEND_PACKET = -5,
+    ORION_TRAN_ERROR_FAILED_TO_DECODE_PACKET = -6,
+    ORION_TRAN_ERROR_FAILED_TO_RECEIVE_FULL_PACKET = -7,
+    ORION_TRAN_ERROR_CRC_CHECK_FAILED = -8,
+    ORION_TRAN_ERROR_UNKNOWN = -9
 } orion_transport_error_t;
 
 struct orion_transport_struct_t;
@@ -53,9 +54,9 @@ orion_transport_error_t orion_transport_new(orion_transport_t ** me, orion_commu
 orion_transport_error_t orion_transport_delete(const orion_transport_t * me);
 
 orion_transport_error_t orion_transport_send_packet(orion_transport_t * me, uint8_t *input_buffer,
-    uint32_t input_size, uint32_t timeout);
-orion_transport_error_t orion_transport_receive_packet(orion_transport_t * me, uint8_t *output_buffer,
-    uint32_t output_size, uint32_t timeout, size_t * received_size);
+  uint32_t input_size, uint32_t timeout);
+ssize_t orion_transport_receive_packet(orion_transport_t * me, uint8_t *output_buffer, uint32_t output_size,
+  uint32_t timeout);
 bool orion_transport_has_received_packet(orion_transport_t * me);
 
 #ifdef __cplusplus

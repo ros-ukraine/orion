@@ -47,17 +47,17 @@ public:
     orion_minor_delete(object_);
   }
 
-  virtual ssize_t wait_and_receive_command(uint8_t * buffer, size_t buffer_size, uint32_t timeout)
+  virtual ssize_t waitAndReceiveCommand(uint8_t * buffer, size_t buffer_size, uint32_t timeout)
   {
     return (orion_minor_wait_and_receive_command(object_, buffer, buffer_size, timeout));
   }
 
-  virtual ssize_t receive_command(uint8_t * buffer, size_t buffer_size)
+  virtual ssize_t receiveCommand(uint8_t * buffer, size_t buffer_size)
   {
     return (orion_minor_receive_command(object_, buffer, buffer_size));
   }
 
-  virtual orion_minor_error_t send_result(uint8_t * buffer, const size_t size)
+  virtual orion_minor_error_t sendResult(uint8_t * buffer, const size_t size)
   {
     return (orion_minor_send_result(object_, buffer, size));
   }

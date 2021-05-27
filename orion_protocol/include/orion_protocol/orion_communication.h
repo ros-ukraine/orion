@@ -34,21 +34,22 @@ extern "C" {
 
 typedef enum {
     ORION_COM_ERROR_NONE = 0,
-    ORION_COM_ERROR_COULD_NOT_ALLOCATE_MEMORY,
-    ORION_COM_ERROR_COULD_NOT_FREE_MEMORY,
-    ORION_COM_ERROR_TIMEOUT,
-    ORION_COM_ERROR_GETTING_TERMINAL_ATTRIBUTES,
-    ORION_COM_ERROR_SETTING_TERMINAL_ATTRIBUTES,
-    ORION_COM_ERROR_OPENNING_SERIAL_PORT,
-    ORION_COM_ERROR_CLOSING_SERIAL_PORT,
-    ORION_COM_ERROR_READING_SERIAL_PORT,
-    ORION_COM_ERROR_WRITING_TO_SERIAL_PORT,
-    ORION_COM_ERROR_CREATE_SOCKET,
-    ORION_COM_ERROR_COULD_NOT_FIND_HOST,
-    ORION_COM_ERROR_COULD_NOT_CONNECT_TO_HOST,
-    ORION_COM_ERROR_CLOSING_SOCKET,
-    ORION_COM_ERROR_READING_SOCKET,
-    ORION_COM_ERROR_WRITING_TO_SOCKET
+    ORION_COM_ERROR_COULD_NOT_ALLOCATE_MEMORY = -1,
+    ORION_COM_ERROR_COULD_NOT_FREE_MEMORY = -2,
+    ORION_COM_ERROR_TIMEOUT = -3,
+    ORION_COM_ERROR_GETTING_TERMINAL_ATTRIBUTES = -4,
+    ORION_COM_ERROR_SETTING_TERMINAL_ATTRIBUTES = -5,
+    ORION_COM_ERROR_OPENNING_SERIAL_PORT = -6,
+    ORION_COM_ERROR_CLOSING_SERIAL_PORT = -7,
+    ORION_COM_ERROR_READING_SERIAL_PORT = -8,
+    ORION_COM_ERROR_WRITING_TO_SERIAL_PORT = -9,
+    ORION_COM_ERROR_CREATE_SOCKET = -10,
+    ORION_COM_ERROR_COULD_NOT_FIND_HOST = -11,
+    ORION_COM_ERROR_COULD_NOT_CONNECT_TO_HOST = -12,
+    ORION_COM_ERROR_CLOSING_SOCKET = -13,
+    ORION_COM_ERROR_READING_SOCKET = -14,
+    ORION_COM_ERROR_WRITING_TO_SOCKET = -15,
+    ORION_COM_ERROR_UNKNOWN = -16
 } orion_communication_error_t;
 
 struct orion_communication_struct_t;
@@ -58,10 +59,9 @@ typedef struct orion_communication_struct_t orion_communication_t;
 orion_communication_error_t orion_communication_new(orion_communication_t ** me);
 orion_communication_error_t orion_communication_delete(const orion_communication_t * me);
 
-orion_communication_error_t orion_communication_receive_available_buffer(const orion_communication_t * me, 
-  uint8_t * buffer, uint32_t size, size_t * received_size);
-orion_communication_error_t orion_communication_receive_buffer(const orion_communication_t * me, uint8_t * buffer, 
-  uint32_t size, uint32_t timeout, size_t * received_size);
+ssize_t orion_communication_receive_available_buffer(const orion_communication_t * me, uint8_t * buffer, uint32_t size);
+ssize_t orion_communication_receive_buffer(const orion_communication_t * me, uint8_t * buffer, uint32_t size,
+  uint32_t timeout);
 bool orion_communication_has_available_buffer(const orion_communication_t * me);
 orion_communication_error_t orion_communication_send_buffer(const orion_communication_t * me, uint8_t *buffer, 
   uint32_t size, uint32_t timeout);
