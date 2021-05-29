@@ -73,10 +73,8 @@ ssize_t orion_minor_receive_command(const orion_minor_t * me, uint8_t * buffer, 
     ssize_t result = 0;
     if (orion_transport_has_received_packet(me->transport_))
     {
-        size_t received_size = 0;
-        orion_transport_error_t status = orion_transport_receive_packet(me->transport_, buffer, buffer_size, 0,
-            &received_size);
-        if (ORION_TRAN_ERROR_NONE != status)
+        ssize_t received_size = orion_transport_receive_packet(me->transport_, buffer, buffer_size, 0);
+        if (0 > received_size)
         {
             result = ORION_MINOR_ERROR_RECEIVING_PACKET;
 
