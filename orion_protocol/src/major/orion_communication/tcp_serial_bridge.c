@@ -115,38 +115,35 @@ orion_communication_error_t orion_communication_disconnect(orion_communication_t
   return (ORION_COM_ERROR_NONE);
 }
 
-orion_communication_error_t orion_communication_receive_available_buffer(const orion_communication_t * me,
-  uint8_t * buffer, uint32_t size, size_t * received_size)
+ssize_t orion_communication_receive_available_buffer(const orion_communication_t * me, uint8_t * buffer, uint32_t size)
 {
 
   ORION_ASSERT_NOT_NULL(me);
   ORION_ASSERT(-1 != me->socket_descriptor_);
 
   fcntl(me->socket_descriptor_, F_SETFL, FNDELAY);
-  *received_size = read(me->socket_descriptor_, buffer, size);
+  ssize_t result = read(me->socket_descriptor_, buffer, size);
 
   fcntl(me->socket_descriptor_, F_SETFL, 0);
 
-  if (*received_size < 0)
+  if (result < 0)
   {
-      return (ORION_COM_ERROR_READING_SOCKET);
+      result = ORION_COM_ERROR_READING_SOCKET;
   }
 
-  return (ORION_COM_ERROR_NONE);
+  return (result);
 }
 
-orion_communication_error_t orion_communication_receive_buffer(const orion_communication_t * me, uint8_t * buffer,
-  uint32_t size, uint32_t timeout, size_t * received_size)
+ssize_t orion_communication_receive_buffer(const orion_communication_t * me, uint8_t * buffer, uint32_t size,
+  uint32_t timeout)
 {
   ORION_ASSERT_NOT_NULL(me);
   ORION_ASSERT(-1 != me->socket_descriptor_);
 
-  orion_communication_error_t result = ORION_COM_ERROR_NONE;
-
   fd_set set;
   struct timeval duration;
   int status = -1;
-  *received_size = 0;
+  ssize_t result = ORION_COM_ERROR_UNKNOWN;
 
   FD_ZERO(&set);
   FD_SET(me->socket_descriptor_, &set);
@@ -162,7 +159,7 @@ orion_communication_error_t orion_communication_receive_buffer(const orion_commu
   }
   else if (0 != status)
   {
-    result = orion_communication_receive_available_buffer(me, buffer, size, received_size);
+    result = orion_communication_receive_available_buffer(me, buffer, size);
   }
   return (result);
 }
