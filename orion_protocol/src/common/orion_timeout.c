@@ -26,15 +26,18 @@
 #include "orion_protocol/orion_memory.h"
 #include "orion_protocol/orion_assert.h"
 
-#define ORION_CLOCKS_PER_MILLISECOND (CLOCKS_PER_SEC / 1000000)
+#define ORION_CLOCKS_PER_MICROSECOND (CLOCKS_PER_SEC / 1000000)
+#define ORION_REVERSED_CLOCKS_PER_MICROSECOND (1000000 / CLOCKS_PER_SEC)
+
+static uint32_t convert_ticks_to_microseconds(const long int value);
+static long int convert_microseconds_to_ticks(const uint32_t value);
 
 orion_timeout_error_t orion_timeout_init(orion_timeout_t * me, uint32_t timeout)
 {
   ORION_ASSERT_NOT_NULL(me);
  
   clock_t time_now = clock();
-  me->till_time_ = (clock_t) (((long int)(time_now) / ORION_CLOCKS_PER_MILLISECOND) + timeout);
-
+  me->till_time_ = (clock_t) ((long int)(time_now) + convert_microseconds_to_ticks(timeout));
   return (ORION_TOT_ERROR_NONE);
 }
 
@@ -55,10 +58,28 @@ uint32_t orion_timeout_time_left(const orion_timeout_t * me)
 
   uint32_t result = 0;
   clock_t time_now = clock();
-  long int difference = (long int) me->till_time_ - (long int) time_now;
+  long int difference = (long int)me->till_time_ - (long int)time_now;
   if (difference > 0)
   {
-    result = difference / ORION_CLOCKS_PER_MILLISECOND;
+	  result = convert_ticks_to_microseconds(difference);
   }
   return (result);
+}
+
+uint32_t convert_ticks_to_microseconds(const long int value)
+{
+  if (0 == ORION_REVERSED_CLOCKS_PER_MICROSECOND)
+  {
+    return ((uint32_t)(value / ORION_CLOCKS_PER_MICROSECOND));
+  }
+  return ((uint32_t)(value * ORION_REVERSED_CLOCKS_PER_MICROSECOND));
+}
+
+long int convert_microseconds_to_ticks(const uint32_t value)
+{
+  if (0 == ORION_REVERSED_CLOCKS_PER_MICROSECOND)
+  {
+    return ((long int)value * ORION_CLOCKS_PER_MICROSECOND);
+  }
+  return ((long int)value / ORION_REVERSED_CLOCKS_PER_MICROSECOND);
 }
