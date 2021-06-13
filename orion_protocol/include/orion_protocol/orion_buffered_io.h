@@ -21,44 +21,25 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_MINOR_H
-#define ORION_PROTOCOL_ORION_MINOR_H
+#ifndef ORION_PROTOCOL_ORION_BUFFERED_IO_H
+#define ORION_PROTOCOL_ORION_BUFFERED_IO_H
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <sys/types.h>
-
-#include "orion_protocol/orion_header.h"
-#include "orion_protocol/orion_transport.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef enum {
-    ORION_MINOR_ERROR_NONE = 0,
-    ORION_MINOR_ERROR_COULD_NOT_ALLOCATE_MEMORY = -1,
-    ORION_MINOR_ERROR_COULD_NOT_FREE_MEMORY = -2,
-    ORION_MINOR_ERROR_TIMEOUT = -3,
-    ORION_MINOR_ERROR_RECEIVING_PACKET = -4,
-    ORION_MINOR_ERROR_SENDING_PACKET = -5,
-    ORION_MINOR_ERROR_UNKNOWN = -6
-} orion_minor_error_t;
+ssize_t orion_buffered_io_read(uint8_t * buffer, uint32_t size);
+bool orion_buffered_io_read_empty();
+bool orion_buffered_io_write(uint8_t * buffer, uint32_t size);
 
-struct orion_minor_struct_t;
-
-typedef struct orion_minor_struct_t orion_minor_t;
-
-orion_minor_error_t orion_minor_new(orion_minor_t ** me, orion_transport_t * transport);
-orion_minor_error_t orion_minor_delete(const orion_minor_t * me);
-
-ssize_t orion_minor_wait_and_receive_command(const orion_minor_t * me, uint8_t * buffer, size_t buffer_size,
-  uint32_t timeout);
-ssize_t orion_minor_receive_command(const orion_minor_t * me, uint8_t * buffer, size_t buffer_size);
-orion_minor_error_t orion_minor_send_result(const orion_minor_t * me, uint8_t * buffer, const size_t size);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // ORION_PROTOCOL_ORION_MINOR_H
+#endif  // ORION_PROTOCOL_ORION_BUFFERED_IO_H

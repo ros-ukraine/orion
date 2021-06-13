@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <sys/types.h>
 #include "orion_protocol/orion_communication.h"
 
 #ifdef __cplusplus
