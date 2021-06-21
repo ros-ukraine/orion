@@ -21,13 +21,17 @@
 *
 */
 
+#ifndef ORION_PROTOCOL_ORION_ASSERT_H
+#define ORION_PROTOCOL_ORION_ASSERT_H
+
 #include <stdbool.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-void orion_assert(bool condition); 
+void orion_assert(bool condition);
 
 #define ORION_ASSERT(cond) orion_assert(cond);
 
@@ -36,3 +40,5 @@ void orion_assert(bool condition);
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* ORION_PROTOCOL_ORION_ASSERT_H */

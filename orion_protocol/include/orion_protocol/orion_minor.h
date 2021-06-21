@@ -32,18 +32,21 @@
 #include "orion_protocol/orion_transport.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-typedef enum {
-    ORION_MINOR_ERROR_NONE = 0,
-    ORION_MINOR_ERROR_COULD_NOT_ALLOCATE_MEMORY = -1,
-    ORION_MINOR_ERROR_COULD_NOT_FREE_MEMORY = -2,
-    ORION_MINOR_ERROR_TIMEOUT = -3,
-    ORION_MINOR_ERROR_RECEIVING_PACKET = -4,
-    ORION_MINOR_ERROR_SENDING_PACKET = -5,
-    ORION_MINOR_ERROR_UNKNOWN = -6
-} orion_minor_error_t;
+typedef enum
+{
+  ORION_MINOR_ERROR_NONE = 0,
+  ORION_MINOR_ERROR_COULD_NOT_ALLOCATE_MEMORY = -1,
+  ORION_MINOR_ERROR_COULD_NOT_FREE_MEMORY = -2,
+  ORION_MINOR_ERROR_TIMEOUT = -3,
+  ORION_MINOR_ERROR_RECEIVING_PACKET = -4,
+  ORION_MINOR_ERROR_SENDING_PACKET = -5,
+  ORION_MINOR_ERROR_UNKNOWN = -6
+}
+orion_minor_error_t;
 
 struct orion_minor_struct_t;
 

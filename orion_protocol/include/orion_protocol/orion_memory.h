@@ -28,13 +28,16 @@
 #include <stddef.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-typedef enum {
-    ORION_MEM_ERROR_NONE = 0,
-    ORION_MEM_ERROR_COULD_NOT_ALLOCATE_MEMORY
-} orion_memory_error_t;
+typedef enum
+{
+  ORION_MEM_ERROR_NONE = 0,
+  ORION_MEM_ERROR_COULD_NOT_ALLOCATE_MEMORY
+}
+orion_memory_error_t;
 
 orion_memory_error_t orion_memory_allocate(size_t size, void ** pointer);
 orion_memory_error_t orion_memory_free(void * pointer);

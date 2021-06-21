@@ -28,7 +28,8 @@
 #include <stddef.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 uint16_t orion_crc_calculate_crc16(const uint8_t *data, size_t length);

@@ -24,21 +24,21 @@
 #ifndef ORION_PROTOCOL_ORION_CIRCULAR_BUFFER_H_
 #define ORION_PROTOCOL_ORION_CIRCULAR_BUFFER_H_
 
+#include <stdint.h>
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <stdint.h>
-#include <stdbool.h>
-
 typedef struct
 {
-    uint8_t * p_buffer;
-    uint32_t buffer_size;
-    uint32_t head_index;
-    uint32_t tail_index;
-    bool is_full;
+  uint8_t * p_buffer;
+  uint32_t buffer_size;
+  uint32_t head_index;
+  uint32_t tail_index;
+  bool is_full;
 }
 orion_circular_buffer_t;
 

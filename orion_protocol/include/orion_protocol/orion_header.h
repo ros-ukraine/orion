@@ -27,7 +27,8 @@
 #include <stdint.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 #pragma pack(push, 1)
@@ -35,7 +36,8 @@ extern "C" {
 typedef struct
 {
   uint16_t crc;
-} orion_frame_header_t;
+}
+orion_frame_header_t;
 
 typedef struct
 {
@@ -43,20 +45,23 @@ typedef struct
   uint8_t version;
   uint8_t oldest_compatible_version;
   uint16_t sequence_id;
-} orion_common_header_t;
+}
+orion_common_header_t;
 
 typedef struct
 {
   orion_frame_header_t frame;
   orion_common_header_t common;
-} orion_command_header_t;
+}
+orion_command_header_t;
 
 typedef struct
 {
   orion_frame_header_t frame;
   orion_common_header_t common;
   uint8_t error_code;
-} orion_result_header_t;
+}
+orion_result_header_t;
 
 #pragma pack(pop)
 

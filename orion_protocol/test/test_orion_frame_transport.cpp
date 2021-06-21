@@ -128,7 +128,7 @@ TEST(TestSuite, receivePacket)
   receive_buffer[0] = ORION_FRAMER_FRAME_DELIMETER;
   receive_buffer[data_size] = ORION_FRAMER_FRAME_DELIMETER;
 
-  EXPECT_GLOBAL_CALL(orion_communication_receive_buffer, orion_communication_receive_buffer(NotNull(), NotNull(), 
+  EXPECT_GLOBAL_CALL(orion_communication_receive_buffer, orion_communication_receive_buffer(NotNull(), NotNull(),
     Gt(data_size), Le(retry_timeout))).WillOnce(
     DoAll(
       SetArrayArgument<1>(receive_buffer, receive_buffer + data_size),

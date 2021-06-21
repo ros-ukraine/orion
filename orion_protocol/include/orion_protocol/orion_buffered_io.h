@@ -30,7 +30,8 @@
 #include <sys/types.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 ssize_t orion_buffered_io_read(uint8_t * buffer, uint32_t size);

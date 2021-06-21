@@ -30,10 +30,11 @@
 #include "orion_protocol/orion_communication.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-orion_communication_error_t orion_communication_connect(orion_communication_t * me, const char* port_name, 
+orion_communication_error_t orion_communication_connect(orion_communication_t * me, const char* port_name,
     const uint32_t baud);
 orion_communication_error_t orion_communication_disconnect(orion_communication_t * me);
 

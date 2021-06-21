@@ -29,17 +29,21 @@
 #include <time.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-typedef enum {
-    ORION_TOT_ERROR_NONE = 0
-} orion_timeout_error_t;
+typedef enum
+{
+  ORION_TOT_ERROR_NONE = 0
+}
+orion_timeout_error_t;
 
 typedef struct
 {
-    clock_t till_time_;
-} orion_timeout_t;
+  clock_t till_time_;
+}
+orion_timeout_t;
 
 /*
   @timeout - time in microseconds
