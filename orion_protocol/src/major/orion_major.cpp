@@ -71,7 +71,7 @@ orion_major_error_t Major::validateResult(const CommandHeader *command_header, c
   ResultHeader *received_header;
   if (size_received < sizeof(ResultHeader))
   {
-    return (ORION_MAJOR_ERROR_WRONG_PACKET_HEADER_SIZE); 
+    return (ORION_MAJOR_ERROR_WRONG_PACKET_HEADER_SIZE);
   }
   received_header = reinterpret_cast<ResultHeader*>(this->result_buffer_);
   if (command_header->common.sequence_id != received_header->common.sequence_id)
@@ -80,7 +80,7 @@ orion_major_error_t Major::validateResult(const CommandHeader *command_header, c
   }
   if (0 != received_header->error_code)
   {
-    //TODO: (Andriy) pass error code to return value
+    // TODO(Andriy): Pass error code to return value
     return (ORION_MAJOR_ERROR_APPLICATION_ERROR_RECEIVED);
   }
   if (result_header->common.message_id != command_header->common.message_id)

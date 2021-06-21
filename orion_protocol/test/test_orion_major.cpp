@@ -79,7 +79,7 @@ MOCK_GLOBAL_FUNC1(orion_transport_delete, orion_transport_error_t(const orion_tr
 class MockTransport: public orion::Transport
 {
 public:
-  MockTransport(orion::Communication * communication) : orion::Transport(communication) {};
+  explicit MockTransport(orion::Communication * communication) : orion::Transport(communication) {}
 
   MOCK_METHOD3(sendPacket, orion_transport_error_t(uint8_t *input_buffer, uint32_t input_size, uint32_t timeout));
   MOCK_METHOD3(receivePacket, ssize_t(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout));
@@ -217,7 +217,7 @@ TEST(TestSuite, errorInReply)
   orion_major_error_t status = main.invoke(command, &result, retry_timeout, retry_count);
   EXPECT_EQ(ORION_MAJOR_ERROR_APPLICATION_ERROR_RECEIVED, status);
 
-  //TODO(Andriy): How to pass error code?
+  // TODO(Andriy): How to pass error code?
   // EXPECT_EQ(12, result.header.error_code);
 }
 

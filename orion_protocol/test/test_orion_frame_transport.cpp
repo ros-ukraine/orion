@@ -48,6 +48,7 @@ MOCK_GLOBAL_FUNC1(orion_communication_new, orion_communication_error_t(orion_com
 MOCK_GLOBAL_FUNC1(orion_communication_delete, orion_communication_error_t(const orion_communication_t * me));
 MOCK_GLOBAL_FUNC4(orion_communication_send_buffer, orion_communication_error_t(const orion_communication_t * me,
   uint8_t *buffer, uint32_t size, uint32_t timeout));
+// NOLINTNEXTLINE(readability/casting)
 MOCK_GLOBAL_FUNC1(orion_communication_has_available_buffer, bool(const orion_communication_t * me));
 MOCK_GLOBAL_FUNC4(orion_communication_receive_buffer, ssize_t(const orion_communication_t * me, uint8_t * buffer,
   uint32_t size, uint32_t timeout));
@@ -81,12 +82,12 @@ TEST(TestSuite, sendPacket)
   char encoded_packet[] = "Encoded Packet";
   uint32_t retry_timeout = orion::Major::Interval::Microsecond * 200;
 
-  EXPECT_GLOBAL_CALL(orion_framer_encode_packet, orion_framer_encode_packet(Eq(packet), Eq(BUFFER_SIZE), _, 
+  EXPECT_GLOBAL_CALL(orion_framer_encode_packet, orion_framer_encode_packet(Eq(packet), Eq(BUFFER_SIZE), _,
     Gt(strlen(encoded_packet) + 1))).WillOnce(DoAll(
       SetArrayArgument<2>(encoded_packet, encoded_packet + strlen(encoded_packet) + 1),
       Return(strlen(encoded_packet) + 1)));
   uint8_t *send_buffer;
-  EXPECT_GLOBAL_CALL(orion_communication_send_buffer, orion_communication_send_buffer(NotNull(), NotNull(), Gt(0), 
+  EXPECT_GLOBAL_CALL(orion_communication_send_buffer, orion_communication_send_buffer(NotNull(), NotNull(), Gt(0),
     Le(retry_timeout))).WillOnce(
     DoAll(
       SaveArg<1>(&send_buffer),
