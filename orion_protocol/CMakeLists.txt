@@ -78,31 +78,21 @@ if (CATKIN_ENABLE_TESTING)
     ${catkin_INCLUDE_DIRS}
   )
 
-  # catkin_add_gmock(${PROJECT_NAME}_test_full_stack_integration
-  #   test/test_full_stack_integration.cpp
-  #   test/communication_stub.cpp
-  #   ${MINOR_FILES}
-  #   ${MAJOR_UTILS_FILES}
-  #   ${MAJOR_FILES}
-  #   ${TRANSPORT_FRAMED_FILES}
-  # )
-  # add_dependencies(${PROJECT_NAME}_test_full_stack_integration ${catkin_EXPORTED_TARGETS})
-  # target_link_libraries(${PROJECT_NAME}_test_full_stack_integration ${catkin_LIBRARIES})
-
   catkin_add_gmock(${PROJECT_NAME}_test_major test/test_orion_major.cpp)
   add_dependencies(${PROJECT_NAME}_test_major ${catkin_EXPORTED_TARGETS})
   target_link_libraries(${PROJECT_NAME}_test_major ${PROJECT_NAME})
 
-  # catkin_add_gmock(${PROJECT_NAME}_test_minor
-  #   test/test_orion_minor.cpp
-  #   ${MINOR_FILES}
-  #   ${MAJOR_UTILS_FILES}
-  #   ${MAJOR_FILES})
-  # add_dependencies(${PROJECT_NAME}_test_minor ${catkin_EXPORTED_TARGETS})
+  catkin_add_gmock(${PROJECT_NAME}_test_minor
+    test/test_orion_minor.cpp
+    ${MINOR_FILES}
+    ${MAJOR_UTILS_FILES}
+    ${MAJOR_FILES})
+  add_dependencies(${PROJECT_NAME}_test_minor ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(${PROJECT_NAME}_test_minor ${catkin_LIBRARIES})
 
-#  catkin_add_gmock(${PROJECT_NAME}_test_cobs_framer test/test_orion_cobs_framer.cpp)
-#  add_dependencies(${PROJECT_NAME}_test_cobs_framer ${catkin_EXPORTED_TARGETS})
-#  target_link_libraries(${PROJECT_NAME}_test_cobs_framer ${PROJECT_NAME})
+  catkin_add_gmock(${PROJECT_NAME}_test_cobs_framer test/test_orion_cobs_framer.cpp)
+  add_dependencies(${PROJECT_NAME}_test_cobs_framer ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(${PROJECT_NAME}_test_cobs_framer ${PROJECT_NAME})
 
   catkin_add_gmock(${PROJECT_NAME}_test_frame_transport test/test_orion_frame_transport.cpp)
   add_dependencies(${PROJECT_NAME}_test_frame_transport ${catkin_EXPORTED_TARGETS})
@@ -112,16 +102,15 @@ if (CATKIN_ENABLE_TESTING)
   add_dependencies(${PROJECT_NAME}_test_circular_buffer ${catkin_EXPORTED_TARGETS})
   target_link_libraries(${PROJECT_NAME}_test_circular_buffer ${PROJECT_NAME})
 
- find_package(rostest REQUIRED)
- add_rostest_gmock(test_tcp_bridge_integration 
-  test/test_tcp_bridge_integration.test
-  test/test_tcp_bridge_integration.cpp
-  ${MAJOR_UTILS_FILES}
-  ${MAJOR_FILES}
-  ${TRANSPORT_FRAMED_FILES}
-  ${COMMUNICATION_TCP_BRIDGE_FILES})
- add_dependencies(test_tcp_bridge_integration ${catkin_EXPORTED_TARGETS})
- target_link_libraries(test_tcp_bridge_integration ${catkin_LIBRARIES})
-
+  find_package(rostest REQUIRED)
+  add_rostest_gmock(test_tcp_bridge_integration 
+    test/test_tcp_bridge_integration.test
+    test/test_tcp_bridge_integration.cpp
+    ${MAJOR_UTILS_FILES}
+    ${MAJOR_FILES}
+    ${TRANSPORT_FRAMED_FILES}
+    ${COMMUNICATION_TCP_BRIDGE_FILES})
+  add_dependencies(test_tcp_bridge_integration ${catkin_EXPORTED_TARGETS})
+  target_link_libraries(test_tcp_bridge_integration ${catkin_LIBRARIES})
 
 endif ()
