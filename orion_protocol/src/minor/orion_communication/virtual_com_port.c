@@ -26,6 +26,7 @@
 #include "orion_protocol/orion_communication.h"
 #include "orion_protocol/orion_buffered_io.h"
 #include "orion_protocol/orion_assert.h"
+#include "orion_protocol/orion_memory.h"
 
 struct orion_communication_struct_t
 {
@@ -35,10 +36,14 @@ struct orion_communication_struct_t
 
 orion_communication_error_t orion_communication_new(orion_communication_t ** me)
 {
-    // No allocation of memory is needed
-    ORION_ASSERT_NOT_NULL(me);
-    me = (orion_communication_t**)(0x12345678);
-    return (ORION_COM_ERROR_NONE);
+  ORION_ASSERT_NOT_NULL(me);
+  orion_memory_error_t status = orion_memory_allocate(sizeof(orion_communication_t), (void**)me);
+  if (ORION_MEM_ERROR_NONE != status)
+  {
+      return (ORION_COM_ERROR_COULD_NOT_ALLOCATE_MEMORY);
+  }
+  (*me)->dummy_ = 0;
+  return (ORION_COM_ERROR_NONE);
 }
 
 orion_communication_error_t orion_communication_delete(const orion_communication_t * me)
