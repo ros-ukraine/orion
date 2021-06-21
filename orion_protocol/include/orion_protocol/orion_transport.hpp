@@ -36,7 +36,7 @@ namespace orion
 class Transport
 {
 public:
-  Transport(Communication * communication)
+  explicit Transport(Communication * communication)
   {
     ORION_ASSERT_NOT_NULL(communication);
     orion_transport_new(&object_, communication->getObject());
@@ -68,7 +68,7 @@ public:
   }
 
 private:
-  orion_transport_t * object_;  
+  orion_transport_t * object_;
 };
 
 }  // namespace orion

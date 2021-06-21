@@ -32,10 +32,10 @@
 namespace orion
 {
 
-class SerialPort : public Communication 
+class SerialPort : public Communication
 {
 public:
-  SerialPort() : Communication() {};
+  SerialPort() : Communication() {}
 
   orion_communication_error_t connect(const char* port_name, const uint32_t baud)
   {

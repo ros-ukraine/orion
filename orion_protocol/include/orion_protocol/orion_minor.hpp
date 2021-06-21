@@ -36,7 +36,7 @@ namespace orion
 class Minor
 {
 public:
-  Minor(Transport *transport)
+  explicit Minor(Transport *transport)
   {
     ORION_ASSERT_NOT_NULL(transport);
     orion_minor_new(&object_, transport->getObject());

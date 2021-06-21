@@ -35,7 +35,7 @@ namespace orion
 class TCPSerialBridge: public Communication
 {
 public:
-  TCPSerialBridge() : Communication() {};
+  TCPSerialBridge() : Communication() {}
 
   orion_communication_error_t connect(const char* hostname, const uint32_t port)
   {

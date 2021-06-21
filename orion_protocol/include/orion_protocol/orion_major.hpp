@@ -32,7 +32,8 @@
 #include <cstring>
 #include <cstdio>
 
-typedef enum {
+typedef enum
+{
   ORION_MAJOR_ERROR_NONE = 0,
   ORION_MAJOR_ERROR_COULD_NOT_ALLOCATE_MEMORY,
   ORION_MAJOR_ERROR_COULD_NOT_FREE_MEMORY,
@@ -44,7 +45,8 @@ typedef enum {
   ORION_MAJOR_ERROR_DIFFERENT_MESSAGE_ID_RECEIVED,
   ORION_MAJOR_ERROR_NOT_COMPATIBLE_PACKET_VERSION,
   ORION_MAJOR_ERROR_UNKNOW
-} orion_major_error_t;
+}
+orion_major_error_t;
 
 namespace orion
 {
