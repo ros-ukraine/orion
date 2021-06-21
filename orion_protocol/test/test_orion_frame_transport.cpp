@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -23,13 +23,14 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include <string>
-#include "orion_protocol/orion_communication.h"
+#include "gmock-global/gmock-global.h"
+#include <string.h>
+#include "orion_protocol/orion_communication.hpp"
 #include "orion_protocol/orion_framer.h"
 #include "orion_protocol/orion_crc.h"
-#include "orion_protocol/orion_header.h"
-#include "orion_protocol/orion_frame_transport.h"
-#include "orion_protocol/orion_major.h"
+#include "orion_protocol/orion_header.hpp"
+#include "orion_protocol/orion_transport.hpp"
+#include "orion_protocol/orion_major.hpp"
 
 using ::testing::Eq;
 using ::testing::Gt;
@@ -38,46 +39,59 @@ using ::testing::NotNull;
 using ::testing::_;
 using ::testing::Invoke;
 using ::testing::Return;
-using ::testing::SetArgPointee;
 using ::testing::SetArrayArgument;
 using ::testing::SaveArg;
+using ::testing::SetArgPointee;
+using ::testing::DoAll;
+
+MOCK_GLOBAL_FUNC1(orion_communication_new, orion_communication_error_t(orion_communication_t ** me));
+MOCK_GLOBAL_FUNC1(orion_communication_delete, orion_communication_error_t(const orion_communication_t * me));
+MOCK_GLOBAL_FUNC4(orion_communication_send_buffer, orion_communication_error_t(const orion_communication_t * me,
+  uint8_t *buffer, uint32_t size, uint32_t timeout));
+// NOLINTNEXTLINE(readability/casting)
+MOCK_GLOBAL_FUNC1(orion_communication_has_available_buffer, bool(const orion_communication_t * me));
+MOCK_GLOBAL_FUNC4(orion_communication_receive_buffer, ssize_t(const orion_communication_t * me, uint8_t * buffer,
+  uint32_t size, uint32_t timeout));
 
 class MockCommunication: public orion::Communication
 {
 public:
-  MOCK_METHOD2(receiveAvailableBuffer, size_t(uint8_t *buffer, uint32_t size));
-  MOCK_METHOD3(receiveBuffer, size_t(uint8_t *buffer, uint32_t size, uint32_t timeout));
+  MOCK_METHOD2(receiveAvailableBuffer, ssize_t(uint8_t *buffer, uint32_t size));
+  MOCK_METHOD3(receiveBuffer, ssize_t(uint8_t *buffer, uint32_t size, uint32_t timeout));
   MOCK_METHOD0(hasAvailableBuffer, bool());
-  MOCK_METHOD3(sendBuffer, bool(uint8_t *buffer, uint32_t size, uint32_t timeout));
+  MOCK_METHOD3(sendBuffer, orion_communication_error_t(uint8_t *buffer, uint32_t size, uint32_t timeout));
 };
 
-class MockFramer: public orion::Framer
-{
-public:
-  MOCK_METHOD4(encodePacket, size_t(const uint8_t* data, size_t length, uint8_t* packet, size_t buffer_length));
-  MOCK_METHOD4(decodePacket, size_t(const uint8_t* packet, size_t length, uint8_t* data, size_t buffer_length));
-};
+MOCK_GLOBAL_FUNC4(orion_framer_encode_packet, ssize_t(const uint8_t* data, size_t length, uint8_t* packet,
+  size_t buffer_length));
+MOCK_GLOBAL_FUNC4(orion_framer_decode_packet, ssize_t(const uint8_t* packet, size_t length, uint8_t* data,
+  size_t buffer_length));
 
 TEST(TestSuite, sendPacket)
 {
+  EXPECT_GLOBAL_CALL(orion_communication_new, orion_communication_new(_)).WillOnce(DoAll(
+    SetArgPointee<0>(reinterpret_cast<orion_communication_struct_t*>(0xBCBCAAAA)),
+    Return(ORION_COM_ERROR_NONE)));
+  EXPECT_GLOBAL_CALL(orion_communication_delete, orion_communication_delete(_)).WillOnce(Return(ORION_COM_ERROR_NONE));
   MockCommunication mock_communication;
-  MockFramer mock_framer;
-  orion::FrameTransport frame_transport(&mock_communication, &mock_framer);
+
+  orion::Transport frame_transport(&mock_communication);
 
   const size_t BUFFER_SIZE = 20;
   uint8_t packet[BUFFER_SIZE];
   char encoded_packet[] = "Encoded Packet";
   uint32_t retry_timeout = orion::Major::Interval::Microsecond * 200;
 
-  EXPECT_CALL(mock_framer, encodePacket(Eq(packet), Eq(BUFFER_SIZE), _, Gt(strlen(encoded_packet) + 1))).WillOnce(
-    DoAll(
+  EXPECT_GLOBAL_CALL(orion_framer_encode_packet, orion_framer_encode_packet(Eq(packet), Eq(BUFFER_SIZE), _,
+    Gt(strlen(encoded_packet) + 1))).WillOnce(DoAll(
       SetArrayArgument<2>(encoded_packet, encoded_packet + strlen(encoded_packet) + 1),
       Return(strlen(encoded_packet) + 1)));
   uint8_t *send_buffer;
-  EXPECT_CALL(mock_communication, sendBuffer(NotNull(), Gt(0), Le(retry_timeout))).WillOnce(
+  EXPECT_GLOBAL_CALL(orion_communication_send_buffer, orion_communication_send_buffer(NotNull(), NotNull(), Gt(0),
+    Le(retry_timeout))).WillOnce(
     DoAll(
-      SaveArg<0>(&send_buffer),
-      Return(true)));
+      SaveArg<1>(&send_buffer),
+      Return(ORION_COM_ERROR_NONE)));
 
   frame_transport.sendPacket(packet, BUFFER_SIZE, retry_timeout);
 
@@ -86,9 +100,13 @@ TEST(TestSuite, sendPacket)
 
 TEST(TestSuite, receivePacket)
 {
+  EXPECT_GLOBAL_CALL(orion_communication_new, orion_communication_new(_)).WillOnce(DoAll(
+    SetArgPointee<0>(reinterpret_cast<orion_communication_struct_t*>(0xBCBCAAAA)),
+    Return(ORION_COM_ERROR_NONE)));
+  EXPECT_GLOBAL_CALL(orion_communication_delete, orion_communication_delete(_)).WillOnce(Return(ORION_COM_ERROR_NONE));
   MockCommunication mock_communication;
-  MockFramer mock_framer;
-  orion::FrameTransport frame_transport(&mock_communication, &mock_framer);
+
+  orion::Transport frame_transport(&mock_communication);
 
   const size_t BUFFER_SIZE = 30;
   uint8_t packet[BUFFER_SIZE];
@@ -96,24 +114,28 @@ TEST(TestSuite, receivePacket)
   size_t decoded_packet_length = strlen(decoded_packet) + 1;
   uint32_t retry_timeout = orion::Major::Interval::Microsecond * 300;
 
-  uint16_t crc = orion::CRC::calculateCRC16(reinterpret_cast<uint8_t*>(decoded_packet + sizeof(orion::FrameHeader)),
+  uint16_t crc = orion_crc_calculate_crc16(reinterpret_cast<uint8_t*>(decoded_packet + sizeof(orion::FrameHeader)),
     decoded_packet_length - sizeof(orion::FrameHeader));
   orion::FrameHeader *header = reinterpret_cast<orion::FrameHeader*>(decoded_packet);
   header->crc = crc;
 
-  EXPECT_CALL(mock_communication, hasAvailableBuffer()).WillOnce(Return(false));
+  EXPECT_GLOBAL_CALL(orion_communication_has_available_buffer, orion_communication_has_available_buffer(
+    NotNull())).WillOnce(Return(false));
 
   char received_message[] = " Received Message";
   uint8_t* receive_buffer = reinterpret_cast<uint8_t*>(received_message);
   size_t data_size = strlen(received_message) + 1;
-  receive_buffer[0] = orion::Framer::FRAME_DELIMETER;
-  receive_buffer[data_size] = orion::Framer::FRAME_DELIMETER;
-  EXPECT_CALL(mock_communication, receiveBuffer(NotNull(), Gt(data_size), Le(retry_timeout))).WillOnce(
+  receive_buffer[0] = ORION_FRAMER_FRAME_DELIMETER;
+  receive_buffer[data_size] = ORION_FRAMER_FRAME_DELIMETER;
+
+  EXPECT_GLOBAL_CALL(orion_communication_receive_buffer, orion_communication_receive_buffer(NotNull(), NotNull(),
+    Gt(data_size), Le(retry_timeout))).WillOnce(
     DoAll(
-      SetArrayArgument<0>(receive_buffer, receive_buffer + data_size),
+      SetArrayArgument<1>(receive_buffer, receive_buffer + data_size),
       Return(data_size)));
 
-  EXPECT_CALL(mock_framer, decodePacket(NotNull(), Eq(data_size), _, Gt(decoded_packet_length))).WillOnce(
+  EXPECT_GLOBAL_CALL(orion_framer_decode_packet, orion_framer_decode_packet(NotNull(), Eq(data_size), _,
+    Gt(decoded_packet_length))).WillOnce(
     DoAll(
       SetArrayArgument<2>(decoded_packet, decoded_packet + decoded_packet_length),
       Return(decoded_packet_length)));

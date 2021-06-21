@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -21,11 +21,25 @@
 *
 */
 
-#include "orion_protocol/orion_framer.h"
+#include "orion_protocol/orion_crc.h"
 
-namespace orion
+uint16_t orion_crc_calculate_crc16(const uint8_t *data, size_t length)
 {
-
-const uint8_t Framer::FRAME_DELIMETER;
-
-}  // namespace orion
+  uint16_t result = 0xFFFF;
+  for (uint32_t i = 0; i < length; i++)
+  {
+    result ^= (uint16_t)data[i];
+    for (uint8_t j = 0; j < 8; ++j)
+    {
+      if (result & 1)
+      {
+        result = (result >> 1) ^ 0xA001;
+      }
+      else
+      {
+        result = (result >> 1);
+      }
+    }
+  }
+  return result;
+}

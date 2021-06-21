@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -26,10 +26,9 @@
 #include <string>
 #include <chrono>  // NOLINT [build/c++11]
 #include <thread>  // NOLINT [build/c++11]
-#include "orion_protocol/orion_tcp_serial_bridge.h"
-#include "orion_protocol/orion_cobs_framer.h"
-#include "orion_protocol/orion_frame_transport.h"
-#include "orion_protocol/orion_major.h"
+#include "orion_protocol/orion_tcp_serial_bridge.hpp"
+#include "orion_protocol/orion_transport.hpp"
+#include "orion_protocol/orion_major.hpp"
 
 #pragma pack(push, 1)
 
@@ -63,8 +62,7 @@ TEST(TestSuite, sucessfulEchoResponse)
 
   orion::TCPSerialBridge bridge;
   bridge.connect("0.0.0.0", 9190);
-  orion::COBSFramer framer;
-  orion::FrameTransport frame_transport(&bridge, &framer);
+  orion::Transport frame_transport(&bridge);
   orion::Major server(&frame_transport);
 
   HandshakeCommand command;

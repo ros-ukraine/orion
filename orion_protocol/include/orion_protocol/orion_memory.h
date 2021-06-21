@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -21,29 +21,29 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_COBS_FRAMER_H
-#define ORION_PROTOCOL_ORION_COBS_FRAMER_H
+#ifndef ORION_PROTOCOL_ORION_MEMORY_H
+#define ORION_PROTOCOL_ORION_MEMORY_H
 
 #include <stdint.h>
 #include <stddef.h>
-#include "orion_protocol/orion_framer.h"
 
-namespace orion
+#ifdef __cplusplus
+extern "C"
 {
+#endif
 
-class COBSFramer: public Framer
+typedef enum
 {
-  size_t encode(const uint8_t *input, size_t length, uint8_t *output);
-  size_t decode(const uint8_t *input, size_t length, uint8_t *output);
+  ORION_MEM_ERROR_NONE = 0,
+  ORION_MEM_ERROR_COULD_NOT_ALLOCATE_MEMORY
+}
+orion_memory_error_t;
 
-public:
-  COBSFramer() = default;
+orion_memory_error_t orion_memory_allocate(size_t size, void ** pointer);
+orion_memory_error_t orion_memory_free(void * pointer);
 
-  virtual size_t encodePacket(const uint8_t* data, size_t length, uint8_t* packet, size_t buffer_length);
-  virtual size_t decodePacket(const uint8_t* packet, size_t length, uint8_t* data, size_t buffer_length);
-  virtual ~COBSFramer() = default;
-};
+#ifdef __cplusplus
+}
+#endif
 
-}  // namespace orion
-
-#endif  // ORION_PROTOCOL_ORION_COBS_FRAMER_H
+#endif  // ORION_PROTOCOL_ORION_MEMORY_H

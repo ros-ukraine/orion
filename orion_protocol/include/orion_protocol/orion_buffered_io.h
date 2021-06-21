@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -21,36 +21,26 @@
 *
 */
 
-#include <chrono>  // NOLINT [build/c++11]
-#include "orion_protocol/orion_timeout.h"
+#ifndef ORION_PROTOCOL_ORION_BUFFERED_IO_H
+#define ORION_PROTOCOL_ORION_BUFFERED_IO_H
 
-using std::chrono::microseconds;
-using std::chrono::steady_clock;
-using std::chrono::duration_cast;
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <sys/types.h>
 
-namespace orion
+#ifdef __cplusplus
+extern "C"
 {
+#endif
 
-Timeout::Timeout(uint32_t timeout)
-{
-  this->till_time_ = steady_clock::now() + microseconds(timeout);
+ssize_t orion_buffered_io_read(uint8_t * buffer, uint32_t size);
+bool orion_buffered_io_read_empty();
+bool orion_buffered_io_write(uint8_t * buffer, uint32_t size);
+
+
+#ifdef __cplusplus
 }
+#endif
 
-bool Timeout::hasTime()
-{
-  return (0 != this->timeLeft());
-}
-
-uint32_t Timeout::timeLeft()
-{
-  steady_clock::time_point time_now = steady_clock::now();
-
-  if (this->till_time_ > time_now)
-  {
-    auto result = duration_cast<microseconds>(this->till_time_ - time_now).count();
-    return static_cast<uint32_t>(result);
-  }
-  return 0;
-}
-
-}  // namespace orion
+#endif  // ORION_PROTOCOL_ORION_BUFFERED_IO_H

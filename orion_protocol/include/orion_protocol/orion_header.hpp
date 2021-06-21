@@ -21,21 +21,20 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_CRC_H
-#define ORION_PROTOCOL_ORION_CRC_H
+#ifndef ORION_PROTOCOL_ORION_HEADER_HPP
+#define ORION_PROTOCOL_ORION_HEADER_HPP
 
 #include <stdint.h>
-#include <stddef.h>
+#include "orion_protocol/orion_header.h"
 
-#ifdef __cplusplus
-extern "C"
+namespace orion
 {
-#endif
 
-uint16_t orion_crc_calculate_crc16(const uint8_t *data, size_t length);
+typedef orion_frame_header_t FrameHeader;
+typedef orion_common_header_t CommonHeader;
+typedef orion_command_header_t CommandHeader;
+typedef orion_result_header_t ResultHeader;
 
-#ifdef __cplusplus
-}
-#endif
+}  // namespace orion
 
-#endif  // ORION_PROTOCOL_ORION_CRC_H
+#endif  // ORION_PROTOCOL_ORION_HEADER_HPP

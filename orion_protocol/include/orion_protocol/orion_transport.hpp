@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -21,41 +21,56 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_FRAME_TRANSPORT_H
-#define ORION_PROTOCOL_ORION_FRAME_TRANSPORT_H
+#ifndef ORION_PROTOCOL_ORION_TRANSPORT_HPP
+#define ORION_PROTOCOL_ORION_TRANSPORT_HPP
 
 #include <stdint.h>
-#include "orion_protocol/orion_circular_buffer.h"
-#include "orion_protocol/orion_communication.h"
-#include "orion_protocol/orion_framer.h"
+#include <cstdlib>
 #include "orion_protocol/orion_transport.h"
+#include "orion_protocol/orion_communication.hpp"
+#include "orion_protocol/orion_assert.h"
 
 namespace orion
 {
 
-class FrameTransport: public Transport
+class Transport
 {
 public:
-  FrameTransport(Communication *communication, Framer *framer);
-  virtual bool sendPacket(uint8_t *input_buffer, uint32_t input_size, uint32_t timeout);
-  virtual size_t receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout);
-  virtual bool hasReceivedPacket();
-  virtual ~FrameTransport() = default;
+  explicit Transport(Communication * communication)
+  {
+    ORION_ASSERT_NOT_NULL(communication);
+    orion_transport_new(&object_, communication->getObject());
+  }
+
+  virtual ~Transport()
+  {
+    orion_transport_delete(object_);
+  }
+
+  virtual orion_transport_error_t sendPacket(uint8_t *input_buffer, uint32_t input_size, uint32_t timeout)
+  {
+    return (orion_transport_send_packet(object_, input_buffer, input_size, timeout));
+  }
+
+  virtual ssize_t receivePacket(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout)
+  {
+    return (orion_transport_receive_packet(object_, output_buffer, output_size, timeout));
+  }
+
+  virtual bool hasReceivedPacket()
+  {
+    return (orion_transport_has_received_packet(object_));
+  }
+
+  orion_transport_t* getObject()
+  {
+    return object_;
+  }
+
 private:
-  bool hasFrameInQueue();
-
-  Framer *framer_;
-  Communication *communication_;
-
-  static const size_t BUFFER_SIZE = 512;
-  uint8_t buffer_[BUFFER_SIZE];
-
-  static const size_t QUEUE_BUFFER_SIZE = 1024;
-  uint8_t queue_buffer_[QUEUE_BUFFER_SIZE];
-
-  orion_circular_buffer_t circular_queue_;
+  orion_transport_t * object_;
 };
 
 }  // namespace orion
 
-#endif  // ORION_PROTOCOL_ORION_FRAME_TRANSPORT_H
+#endif  // ORION_PROTOCOL_ORION_TRANSPORT_HPP

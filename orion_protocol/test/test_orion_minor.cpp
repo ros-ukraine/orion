@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -23,13 +23,11 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include <stdexcept>
-#include <cstring>
-#include <string>
-#include "orion_protocol/orion_transport.h"
-#include "orion_protocol/orion_header.h"
-#include "orion_protocol/orion_major.h"
-#include "orion_protocol/orion_minor.h"
+#include "gmock-global/gmock-global.h"
+#include "orion_protocol/orion_transport.hpp"
+#include "orion_protocol/orion_header.hpp"
+#include "orion_protocol/orion_major.hpp"
+#include "orion_protocol/orion_minor.hpp"
 
 using ::testing::Eq;
 using ::testing::Gt;
@@ -39,6 +37,8 @@ using ::testing::Invoke;
 using ::testing::Return;
 using ::testing::DoAll;
 using ::testing::SaveArg;
+using ::testing::SetArgPointee;
+using ::testing::_;
 
 #pragma pack(push, 1)
 
@@ -66,18 +66,62 @@ struct SimpleResult
 
 #pragma pack(pop)
 
+MOCK_GLOBAL_FUNC1(orion_communication_new, orion_communication_error_t(orion_communication_t ** me));
+MOCK_GLOBAL_FUNC1(orion_communication_delete, orion_communication_error_t(const orion_communication_t * me));
+MOCK_GLOBAL_FUNC4(orion_communication_send_buffer, orion_communication_error_t(const orion_communication_t * me,
+  uint8_t *buffer, uint32_t size, uint32_t timeout));
+// NOLINTNEXTLINE(readability/casting)
+MOCK_GLOBAL_FUNC1(orion_communication_has_available_buffer, bool(const orion_communication_t * me));
+MOCK_GLOBAL_FUNC4(orion_communication_receive_buffer, ssize_t(const orion_communication_t * me, uint8_t * buffer,
+  uint32_t size, uint32_t timeout));
+MOCK_GLOBAL_FUNC3(orion_communication_receive_available_buffer, ssize_t(const orion_communication_t * me,
+  uint8_t * buffer, uint32_t size));
+
+class MockCommunication: public orion::Communication
+{
+public:
+  MOCK_METHOD2(receiveAvailableBuffer, ssize_t(uint8_t *buffer, uint32_t size));
+  MOCK_METHOD3(receiveBuffer, ssize_t(uint8_t *buffer, uint32_t size, uint32_t timeout));
+  MOCK_METHOD0(hasAvailableBuffer, bool());
+  MOCK_METHOD3(sendBuffer, orion_communication_error_t(uint8_t *buffer, uint32_t size, uint32_t timeout));
+};
+
+MOCK_GLOBAL_FUNC2(orion_transport_new, orion_transport_error_t(orion_transport_t ** me,
+  orion_communication_t * communication));
+MOCK_GLOBAL_FUNC1(orion_transport_delete, orion_transport_error_t(const orion_transport_t * me));
+MOCK_GLOBAL_FUNC4(orion_transport_send_packet, orion_transport_error_t(orion_transport_t * me, uint8_t *input_buffer,
+  uint32_t input_size, uint32_t timeout));
+MOCK_GLOBAL_FUNC4(orion_transport_receive_packet, ssize_t(orion_transport_t * me, uint8_t *output_buffer,
+  uint32_t output_size, uint32_t timeout));
+// NOLINTNEXTLINE(readability/casting)
+MOCK_GLOBAL_FUNC1(orion_transport_has_received_packet, bool(orion_transport_t * me));
+
 class MockTransport: public orion::Transport
 {
 public:
-  MOCK_METHOD3(sendPacket, bool(uint8_t *input_buffer, uint32_t input_size, uint32_t timeout));
-  MOCK_METHOD3(receivePacket, size_t(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout));
+  explicit MockTransport(orion::Communication * communication) : orion::Transport(communication) {}
+
+  MOCK_METHOD3(sendPacket, orion_transport_error_t(uint8_t *input_buffer, uint32_t input_size, uint32_t timeout));
+  MOCK_METHOD3(receivePacket, ssize_t(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout));
   MOCK_METHOD0(hasReceivedPacket, bool());
 };
 
 TEST(TestSuite, happyPath)
 {
-  MockTransport mock_outbound_transport;
-  MockTransport mock_inbound_transport;
+  EXPECT_GLOBAL_CALL(orion_communication_new, orion_communication_new(_)).WillOnce(DoAll(
+    SetArgPointee<0>(reinterpret_cast<orion_communication_struct_t*>(0xBCBCAAAA)),
+    Return(ORION_COM_ERROR_NONE)));
+  EXPECT_GLOBAL_CALL(orion_communication_delete, orion_communication_delete(_)).WillOnce(Return(ORION_COM_ERROR_NONE));
+  MockCommunication mock_communication;
+
+  EXPECT_GLOBAL_CALL(orion_transport_new, orion_transport_new(_, _)).WillRepeatedly(DoAll(
+    SetArgPointee<0>(reinterpret_cast<orion_transport_struct_t*>(0xDDDDBBBB)),
+    Return(ORION_TRAN_ERROR_NONE)));
+  EXPECT_GLOBAL_CALL(orion_transport_delete, orion_transport_delete(_)).WillRepeatedly(Return(ORION_TRAN_ERROR_NONE));
+  MockTransport mock_transport(&mock_communication);
+
+  MockTransport mock_outbound_transport(&mock_communication);
+  MockTransport mock_inbound_transport(&mock_communication);
   orion::Major main_obj(&mock_outbound_transport);
   orion::Minor minor_obj(&mock_inbound_transport);
 
@@ -99,14 +143,14 @@ TEST(TestSuite, happyPath)
   uint32_t retry_timeout = orion::Major::Interval::Microsecond * 400;
 
   EXPECT_CALL(mock_outbound_transport, sendPacket(NotNull(), Gt(0), Le(retry_timeout))).WillOnce(
-    DoAll(SaveArg<0>(&p_outbound), SaveArg<1>(&actual_outbound_size), Return(true)));
+    DoAll(SaveArg<0>(&p_outbound), SaveArg<1>(&actual_outbound_size), Return(ORION_TRAN_ERROR_NONE)));
   EXPECT_CALL(mock_outbound_transport, hasReceivedPacket()).Times(0);
 
   // NOLINTNEXTLINE(build/c++11)
-  auto mock_outbound_receive_packet = [&](uint8_t *output_buffer, uint32_t output_size, uint32_t timeout)
+  auto mock_outbound_receive_packet = [&](uint8_t *output_buffer, uint32_t output_size,
+    uint32_t timeout)
     {
-      size_t size_received = 0;
-      minor_obj.receiveCommand(inbound_buffer, INBOUND_BUFFER_SIZE, size_received);
+      ssize_t size_received = minor_obj.receiveCommand(inbound_buffer, INBOUND_BUFFER_SIZE);
 
       size_t size = sizeof(SimpleResult);
       SimpleResult reply_result;
@@ -125,18 +169,21 @@ TEST(TestSuite, happyPath)
   EXPECT_CALL(mock_outbound_transport, receivePacket(NotNull(), Gt(0), Le(retry_timeout))).WillOnce(
     Invoke(mock_outbound_receive_packet));
 
-  EXPECT_CALL(mock_inbound_transport, sendPacket(NotNull(), Gt(0), Le(retry_timeout))).WillOnce(
-    DoAll(SaveArg<0>(&p_inbound), SaveArg<1>(&actual_inbound_size), Return(true)));
-  EXPECT_CALL(mock_inbound_transport, hasReceivedPacket()).WillOnce(Return(true));
+  EXPECT_GLOBAL_CALL(orion_transport_send_packet, orion_transport_send_packet(mock_inbound_transport.getObject(),
+    NotNull(), Gt(0), Le(retry_timeout))).WillOnce(DoAll(SaveArg<1>(&p_inbound), SaveArg<2>(&actual_inbound_size),
+      Return(ORION_TRAN_ERROR_NONE)));
+  EXPECT_GLOBAL_CALL(orion_transport_has_received_packet, orion_transport_has_received_packet(
+    mock_inbound_transport.getObject())).WillOnce(Return(true));
 
   // NOLINTNEXTLINE(build/c++11)
-  auto mock_inbound_receive_packet = [&](uint8_t *output_buffer, uint32_t output_size, uint32_t timeout)
+  auto mock_inbound_receive_packet = [&](orion_transport_t * me, uint8_t *output_buffer, uint32_t output_size,
+    uint32_t timeout)
     {
       std::memcpy(output_buffer, p_outbound, actual_outbound_size);
       return actual_outbound_size;
     };
-  EXPECT_CALL(mock_inbound_transport, receivePacket(NotNull(), Gt(0), Le(retry_timeout))).WillOnce(
-    Invoke(mock_inbound_receive_packet));
+  EXPECT_GLOBAL_CALL(orion_transport_receive_packet, orion_transport_receive_packet(mock_inbound_transport.getObject(),
+    NotNull(), Gt(0), Le(retry_timeout))).WillOnce(Invoke(mock_inbound_receive_packet));
 
   command.data = SAMPLE_DATA;
   main_obj.invoke(command, &result, retry_timeout, retry_count);

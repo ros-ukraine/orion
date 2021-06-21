@@ -21,21 +21,10 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_CRC_H
-#define ORION_PROTOCOL_ORION_CRC_H
+#include <ros/assert.h>
+#include "orion_protocol/orion_assert.h"
 
-#include <stdint.h>
-#include <stddef.h>
-
-#ifdef __cplusplus
-extern "C"
+void orion_assert(bool condition)
 {
-#endif
-
-uint16_t orion_crc_calculate_crc16(const uint8_t *data, size_t length);
-
-#ifdef __cplusplus
+  ROS_ASSERT(condition);
 }
-#endif
-
-#endif  // ORION_PROTOCOL_ORION_CRC_H

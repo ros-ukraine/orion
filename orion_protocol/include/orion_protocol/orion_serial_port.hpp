@@ -21,21 +21,33 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_CRC_H
-#define ORION_PROTOCOL_ORION_CRC_H
+#ifndef ORION_PROTOCOL_ORION_SERIAL_PORT_HPP
+#define ORION_PROTOCOL_ORION_SERIAL_PORT_HPP
 
 #include <stdint.h>
-#include <stddef.h>
+#include <cstdlib>
+#include "orion_protocol/orion_serial_port.h"
+#include "orion_protocol/orion_communication.hpp"
 
-#ifdef __cplusplus
-extern "C"
+namespace orion
 {
-#endif
 
-uint16_t orion_crc_calculate_crc16(const uint8_t *data, size_t length);
+class SerialPort : public Communication
+{
+public:
+  SerialPort() : Communication() {}
 
-#ifdef __cplusplus
-}
-#endif
+  orion_communication_error_t connect(const char* port_name, const uint32_t baud)
+  {
+    return (orion_communication_connect(getObject(), port_name, baud));
+  }
 
-#endif  // ORION_PROTOCOL_ORION_CRC_H
+  orion_communication_error_t disconnect()
+  {
+    return (orion_communication_disconnect(getObject()));
+  }
+};
+
+}  // namespace orion
+
+#endif  // ORION_PROTOCOL_ORION_SERIAL_PORT_HPP

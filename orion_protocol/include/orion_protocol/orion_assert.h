@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -21,30 +21,24 @@
 *
 */
 
-#include "orion_protocol/orion_crc.h"
+#ifndef ORION_PROTOCOL_ORION_ASSERT_H
+#define ORION_PROTOCOL_ORION_ASSERT_H
 
-namespace orion
-{
+#include <stdbool.h>
 
-uint16_t CRC::calculateCRC16(const uint8_t *data, size_t length)
+#ifdef __cplusplus
+extern "C"
 {
-  uint16_t result = 0xFFFF;
-  for (uint32_t i = 0; i < length; i++)
-  {
-    result ^= (uint16_t)data[i];
-    for (uint8_t j = 0; j < 8; ++j)
-    {
-      if (result & 1)
-      {
-        result = (result >> 1) ^ 0xA001;
-      }
-      else
-      {
-        result = (result >> 1);
-      }
-    }
-  }
-  return result;
+#endif
+
+void orion_assert(bool condition);
+
+#define ORION_ASSERT(cond) orion_assert(cond);
+
+#define ORION_ASSERT_NOT_NULL(value) orion_assert(NULL != (value));
+
+#ifdef __cplusplus
 }
+#endif
 
-}  // namespace orion
+#endif /* ORION_PROTOCOL_ORION_ASSERT_H */

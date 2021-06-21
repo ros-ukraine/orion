@@ -21,25 +21,58 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_SERIAL_PORT_H
-#define ORION_PROTOCOL_ORION_SERIAL_PORT_H
+#ifndef ORION_PROTOCOL_ORION_COMMUNICATION_HPP
+#define ORION_PROTOCOL_ORION_COMMUNICATION_HPP
 
 #include <stdint.h>
-#include <stdbool.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include "orion_protocol/orion_communication.h"
 
-#ifdef __cplusplus
-extern "C"
+namespace orion
 {
-#endif
 
-orion_communication_error_t orion_communication_connect(orion_communication_t * me, const char* port_name,
-    const uint32_t baud);
-orion_communication_error_t orion_communication_disconnect(orion_communication_t * me);
+class Communication
+{
+public:
+  Communication()
+  {
+    orion_communication_new(&object_);
+  }
 
-#ifdef __cplusplus
-}
-#endif
+  virtual ~Communication()
+  {
+    orion_communication_delete(object_);
+  }
 
-#endif  // ORION_PROTOCOL_ORION_SERIAL_PORT_H
+  virtual ssize_t receiveAvailableBuffer(uint8_t *buffer, uint32_t size)
+  {
+    return (orion_communication_receive_available_buffer(object_, buffer, size));
+  }
+
+  virtual ssize_t receiveBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout)
+  {
+    return (orion_communication_receive_buffer(object_, buffer, size, timeout));
+  }
+
+  virtual bool hasAvailableBuffer()
+  {
+    return (orion_communication_has_available_buffer(object_));
+  }
+
+  virtual orion_communication_error_t sendBuffer(uint8_t *buffer, uint32_t size, uint32_t timeout)
+  {
+    return (orion_communication_send_buffer(object_, buffer, size, timeout));
+  }
+
+  orion_communication_t* getObject()
+  {
+    return object_;
+  }
+
+private:
+  orion_communication_t * object_;
+};
+
+}  // namespace orion
+
+#endif  // ORION_PROTOCOL_ORION_COMMUNICATION_HPP

@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -21,13 +21,13 @@
 *
 */
 
-#include "orion_protocol/orion_cobs_framer.h"
-
-namespace orion
-{
+#include "orion_protocol/orion_framer.h"
 
 #define StartBlock() (code_ptr = output++, index = 1)
 #define FinishBlock() (*code_ptr = index)
+
+static size_t encode(const uint8_t *input, size_t length, uint8_t *output);
+static size_t decode(const uint8_t *input, size_t length, uint8_t *output);
 
 // TODO(Andriy): fix parameter description
 /**
@@ -38,28 +38,28 @@ namespace orion
  * @param avail_len[in]		Available len in out buffer.
  * @return Resulting length of encoded data.
  */
-size_t COBSFramer::encodePacket(const uint8_t* data, size_t length, uint8_t* packet, size_t buffer_length)
+ssize_t orion_framer_encode_packet(const uint8_t* data, size_t length, uint8_t* packet, size_t buffer_length)
 {
-  size_t send_len = 0;
-  size_t result = 0;
+  ssize_t result = 0;
+  size_t value = 0;
 
   // Start 0
-  packet[send_len++] = Framer::FRAME_DELIMETER;
+  packet[result++] = ORION_FRAMER_FRAME_DELIMETER;
 
-  result = encode(data, length, &packet[send_len]);
-  if (result < 1)
+  value = encode(data, length, &packet[result]);
+  if (value < 1)
   {
-    result = 0;
+    value = 0;
   }
   else
   {
-    send_len += result;
+    result += value;
 
     // End 0
-    packet[send_len++] = Framer::FRAME_DELIMETER;
+    packet[result++] = ORION_FRAMER_FRAME_DELIMETER;
   }
 
-  return send_len;
+  return (result);
 }
 
 // TODO(Andriy): fix parameter description
@@ -71,18 +71,18 @@ size_t COBSFramer::encodePacket(const uint8_t* data, size_t length, uint8_t* pac
  * @param avail_len[out]	Available size of data buffer
  * @return Length of decoded data
  */
-size_t COBSFramer::decodePacket(const uint8_t* packet, size_t length, uint8_t* data, size_t buffer_length)
+ssize_t orion_framer_decode_packet(const uint8_t* packet, size_t length, uint8_t* data, size_t buffer_length)
 {
-  size_t result = decode(&packet[1], length, data);
+  ssize_t result = decode(&packet[1], length, data);
   if (result < 1)
   {
-    return 0;
+    return (ORION_FRM_ERROR_DECODING_FAILED);
   }
   result--;  // TODO(Andriy): Understand why ?
-  return result;
+  return (result);
 }
 
-size_t COBSFramer::encode(const uint8_t *input, size_t length, uint8_t *output)
+size_t encode(const uint8_t *input, size_t length, uint8_t *output)
 {
   const uint8_t *start = output;
   const uint8_t *end = input + length;
@@ -95,7 +95,7 @@ size_t COBSFramer::encode(const uint8_t *input, size_t length, uint8_t *output)
     if (0xFF != index)
     {
       uint8_t symbol = *input++;
-      if (Framer::FRAME_DELIMETER != symbol)
+      if (ORION_FRAMER_FRAME_DELIMETER != symbol)
       {
         *output++ = symbol;
         index++;
@@ -117,7 +117,7 @@ size_t COBSFramer::encode(const uint8_t *input, size_t length, uint8_t *output)
  * Returns the length of the decoded data
  * (which is guaranteed to be <= length).
  */
-size_t COBSFramer::decode(const uint8_t *input, size_t length, uint8_t *output)
+size_t decode(const uint8_t *input, size_t length, uint8_t *output)
 {
   const uint8_t *start = output;
   const uint8_t *end = input + length;
@@ -134,7 +134,7 @@ size_t COBSFramer::decode(const uint8_t *input, size_t length, uint8_t *output)
     {
       if (0xFF != index)
       {
-        *output++ = Framer::FRAME_DELIMETER;
+        *output++ = ORION_FRAMER_FRAME_DELIMETER;
       }
       index = *input++;
       inverse_index = index;
@@ -148,5 +148,3 @@ size_t COBSFramer::decode(const uint8_t *input, size_t length, uint8_t *output)
   }
   return output - start;
 }
-
-}  // namespace orion

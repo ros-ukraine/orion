@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -21,39 +21,42 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_EXCEPTION_H
-#define ORION_PROTOCOL_ORION_EXCEPTION_H
+#ifndef ORION_PROTOCOL_ORION_TIMEOUT_HPP
+#define ORION_PROTOCOL_ORION_TIMEOUT_HPP
 
-#include <utility>
-#include <string>
-#include <cstdio>
+#include <stdint.h>
+#include "orion_protocol/orion_timeout.h"
 
 namespace orion
 {
 
-namespace exception
+class Timeout
 {
-
-template <class ExceptionType, typename ...Args>
-void raise(const char* format, Args && ...args)
-{
-    auto size = std::snprintf(nullptr, 0, format, std::forward<Args>(args)...);
-    std::string message(size + 1, '\0');
-    std::snprintf(&message[0], size + 1, format, std::forward<Args>(args)...);
-    throw ExceptionType(message);
-}
-
-template <class ExceptionType, typename ...Args>
-void raiseIf(bool condition, const char* format, Args && ...args)
-{
-  if (condition)
+public:
+  /*
+    @timeout - time in microseconds
+  */
+  explicit Timeout(uint32_t timeout)
   {
-    raise<ExceptionType>(format, std::forward<Args>(args)...);
+    orion_timeout_init(&timeout_, timeout);
   }
-}
 
-}  // namespace exception
+  bool hasTime()
+  {
+    bool result = orion_timeout_has_time(&timeout_);
+    return (result);
+  }
+
+  uint32_t timeLeft()
+  {
+    uint32_t result = orion_timeout_time_left(&timeout_);
+    return (result);
+  }
+
+private:
+  orion_timeout_t timeout_;
+};
 
 }  // namespace orion
 
-#endif  // ORION_PROTOCOL_ORION_EXCEPTION_H
+#endif  // ORION_PROTOCOL_ORION_TIMEOUT_HPP

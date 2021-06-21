@@ -21,21 +21,26 @@
 *
 */
 
-#ifndef ORION_PROTOCOL_ORION_CRC_H
-#define ORION_PROTOCOL_ORION_CRC_H
+#include <stdlib.h>
+#include "orion_protocol/orion_memory.h"
+#include "orion_protocol/orion_assert.h"
 
-#include <stdint.h>
-#include <stddef.h>
-
-#ifdef __cplusplus
-extern "C"
+orion_memory_error_t orion_memory_allocate(size_t size, void ** pointer)
 {
-#endif
+    ORION_ASSERT(size > 0);
 
-uint16_t orion_crc_calculate_crc16(const uint8_t *data, size_t length);
+    *pointer = malloc(size);
 
-#ifdef __cplusplus
+    if (NULL == *pointer)
+    {
+        return (ORION_MEM_ERROR_COULD_NOT_ALLOCATE_MEMORY);
+    }
+
+    return (ORION_MEM_ERROR_NONE); 
 }
-#endif
 
-#endif  // ORION_PROTOCOL_ORION_CRC_H
+orion_memory_error_t orion_memory_free(void * pointer)
+{
+    free(pointer);
+    return (ORION_MEM_ERROR_NONE);
+}

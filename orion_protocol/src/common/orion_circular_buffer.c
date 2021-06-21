@@ -236,7 +236,7 @@ bool find_word(const orion_circular_buffer_t * p_this, uint32_t * p_start_index,
     return (result);
 }
 
-bool orion_circular_buffer_has_word(orion_circular_buffer_t * p_this, uint8_t delimeter)
+bool orion_circular_buffer_has_word(const orion_circular_buffer_t * p_this, uint8_t delimeter)
 {
     uint32_t start_index = 0;
     uint32_t end_index = 0;

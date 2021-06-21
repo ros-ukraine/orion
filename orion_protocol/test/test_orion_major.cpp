@@ -1,5 +1,5 @@
 /**
-* Copyright 2020 ROS Ukraine
+* Copyright 2021 ROS Ukraine
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"),
@@ -23,16 +23,16 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include <stdexcept>
-#include <cstring>
-#include <string>
-#include "orion_protocol/orion_transport.h"
-#include "orion_protocol/orion_header.h"
-#include "orion_protocol/orion_major.h"
+#include "gmock-global/gmock-global.h"
+#include "orion_protocol/orion_transport.hpp"
+#include "orion_protocol/orion_communication.hpp"
+#include "orion_protocol/orion_header.hpp"
+#include "orion_protocol/orion_major.hpp"
 
 using ::testing::Eq;
 using ::testing::Gt;
 using ::testing::Le;
+using ::testing::_;
 using ::testing::NotNull;
 using ::testing::Invoke;
 using ::testing::Return;
@@ -60,17 +60,42 @@ struct HandshakeResult
 
 #pragma pack(pop)
 
+MOCK_GLOBAL_FUNC1(orion_communication_new, orion_communication_error_t(orion_communication_t ** me));
+MOCK_GLOBAL_FUNC1(orion_communication_delete, orion_communication_error_t(const orion_communication_t * me));
+
+class MockCommunication: public orion::Communication
+{
+public:
+  MOCK_METHOD2(receiveAvailableBuffer, ssize_t(uint8_t *buffer, uint32_t size));
+  MOCK_METHOD3(receiveBuffer, ssize_t(uint8_t *buffer, uint32_t size, uint32_t timeout));
+  MOCK_METHOD0(hasAvailableBuffer, bool());
+  MOCK_METHOD3(sendBuffer, orion_communication_error_t(uint8_t *buffer, uint32_t size, uint32_t timeout));
+};
+
+MOCK_GLOBAL_FUNC2(orion_transport_new, orion_transport_error_t(orion_transport_t ** me,
+  orion_communication_t * communication));
+MOCK_GLOBAL_FUNC1(orion_transport_delete, orion_transport_error_t(const orion_transport_t * me));
+
 class MockTransport: public orion::Transport
 {
 public:
-  MOCK_METHOD3(sendPacket, bool(uint8_t *input_buffer, uint32_t input_size, uint32_t timeout));
-  MOCK_METHOD3(receivePacket, size_t(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout));
+  explicit MockTransport(orion::Communication * communication) : orion::Transport(communication) {}
+
+  MOCK_METHOD3(sendPacket, orion_transport_error_t(uint8_t *input_buffer, uint32_t input_size, uint32_t timeout));
+  MOCK_METHOD3(receivePacket, ssize_t(uint8_t *output_buffer, uint32_t output_size, uint32_t timeout));
   MOCK_METHOD0(hasReceivedPacket, bool());
 };
 
 TEST(TestSuite, sendPacketTimeoutExpiredException)
 {
-  MockTransport mock_transport;
+  EXPECT_GLOBAL_CALL(orion_communication_new, orion_communication_new(_)).WillOnce(Return(ORION_COM_ERROR_NONE));
+  EXPECT_GLOBAL_CALL(orion_communication_delete, orion_communication_delete(_)).WillOnce(Return(ORION_COM_ERROR_NONE));
+  MockCommunication mock_communication;
+
+  EXPECT_GLOBAL_CALL(orion_transport_new, orion_transport_new(_, _)).WillOnce(Return(ORION_TRAN_ERROR_NONE));
+  EXPECT_GLOBAL_CALL(orion_transport_delete, orion_transport_delete(_)).WillOnce(Return(ORION_TRAN_ERROR_NONE));
+  MockTransport mock_transport(&mock_communication);
+
   orion::Major main(&mock_transport);
 
   HandshakeCommand command;
@@ -79,28 +104,25 @@ TEST(TestSuite, sendPacketTimeoutExpiredException)
   uint8_t retry_count = 3;
   uint32_t retry_timeout = orion::Major::Interval::Microsecond * 200;
 
-  EXPECT_CALL(mock_transport, sendPacket(NotNull(), Gt(0), Eq(retry_timeout))).WillRepeatedly(Return(false));
+  EXPECT_CALL(mock_transport, sendPacket(NotNull(), Gt(0), Eq(retry_timeout))).WillRepeatedly(Return(
+    ORION_TRAN_ERROR_TIMEOUT));
   EXPECT_CALL(mock_transport, hasReceivedPacket()).Times(0);
   EXPECT_CALL(mock_transport, receivePacket(NotNull(), Gt(0), Le(retry_timeout))).Times(0);
 
-  try
-  {
-    main.invoke(command, &result, retry_timeout, retry_count);
-    FAIL() << "Expected std::runtime_error";
-  }
-  catch(std::runtime_error const & err)
-  {
-    EXPECT_EQ(err.what(), std::string("Timeout expired but result was not received"));
-  }
-  catch(...)
-  {
-    FAIL() << "Expected std::runtime_error";
-  }
+  orion_major_error_t status = main.invoke(command, &result, retry_timeout, retry_count);
+  EXPECT_EQ(ORION_MAJOR_ERROR_TIMEOUT, status);
 }
 
 TEST(TestSuite, happyPath)
 {
-  MockTransport mock_transport;
+  EXPECT_GLOBAL_CALL(orion_communication_new, orion_communication_new(_)).WillOnce(Return(ORION_COM_ERROR_NONE));
+  EXPECT_GLOBAL_CALL(orion_communication_delete, orion_communication_delete(_)).WillOnce(Return(ORION_COM_ERROR_NONE));
+  MockCommunication mock_communication;
+
+  EXPECT_GLOBAL_CALL(orion_transport_new, orion_transport_new(_, _)).WillOnce(Return(ORION_TRAN_ERROR_NONE));
+  EXPECT_GLOBAL_CALL(orion_transport_delete, orion_transport_delete(_)).WillOnce(Return(ORION_TRAN_ERROR_NONE));
+  MockTransport mock_transport(&mock_communication);
+
   orion::Major main(&mock_transport);
 
   HandshakeCommand command;
@@ -109,7 +131,7 @@ TEST(TestSuite, happyPath)
   uint8_t retry_count = 5;
   uint32_t retry_timeout = orion::Major::Interval::Microsecond * 400;
 
-  EXPECT_CALL(mock_transport, sendPacket(NotNull(), Gt(0), Le(retry_timeout))).WillOnce(Return(true));
+  EXPECT_CALL(mock_transport, sendPacket(NotNull(), Gt(0), Le(retry_timeout))).WillOnce(Return(ORION_TRAN_ERROR_NONE));
   EXPECT_CALL(mock_transport, hasReceivedPacket()).Times(0);
   auto mock_receive_packet = [](uint8_t *output_buffer, uint32_t output_size, uint32_t timeout)
     {
@@ -127,7 +149,14 @@ TEST(TestSuite, happyPath)
 
 TEST(TestSuite, incompatibleVersion)
 {
-  MockTransport mock_transport;
+  EXPECT_GLOBAL_CALL(orion_communication_new, orion_communication_new(_)).WillOnce(Return(ORION_COM_ERROR_NONE));
+  EXPECT_GLOBAL_CALL(orion_communication_delete, orion_communication_delete(_)).WillOnce(Return(ORION_COM_ERROR_NONE));
+  MockCommunication mock_communication;
+
+  EXPECT_GLOBAL_CALL(orion_transport_new, orion_transport_new(_, _)).WillOnce(Return(ORION_TRAN_ERROR_NONE));
+  EXPECT_GLOBAL_CALL(orion_transport_delete, orion_transport_delete(_)).WillOnce(Return(ORION_TRAN_ERROR_NONE));
+  MockTransport mock_transport(&mock_communication);
+
   orion::Major main(&mock_transport);
 
   HandshakeCommand command;
@@ -138,7 +167,7 @@ TEST(TestSuite, incompatibleVersion)
   uint8_t retry_count = 2;
   uint32_t retry_timeout = orion::Major::Interval::Microsecond * 300;
 
-  EXPECT_CALL(mock_transport, sendPacket(NotNull(), Gt(0), Le(retry_timeout))).WillOnce(Return(true));
+  EXPECT_CALL(mock_transport, sendPacket(NotNull(), Gt(0), Le(retry_timeout))).WillOnce(Return(ORION_TRAN_ERROR_NONE));
   EXPECT_CALL(mock_transport, hasReceivedPacket()).Times(0);
   auto mock_receive_packet = [](uint8_t *output_buffer, uint32_t output_size, uint32_t timeout)
     {
@@ -151,24 +180,20 @@ TEST(TestSuite, incompatibleVersion)
       return size;
     };
   EXPECT_CALL(mock_transport, receivePacket(NotNull(), Gt(0), Le(retry_timeout))).WillOnce(Invoke(mock_receive_packet));
-  try
-  {
-    main.invoke(command, &result, retry_timeout, retry_count);
-    FAIL() << "Expected std::range_error";
-  }
-  catch(std::range_error const &err)
-  {
-    EXPECT_EQ(err.what(), std::string("Received reply version is not compatible with existing one"));
-  }
-  catch(...)
-  {
-    FAIL() << "Expected std::range_error";
-  }
+  orion_major_error_t status = main.invoke(command, &result, retry_timeout, retry_count);
+  EXPECT_EQ(ORION_MAJOR_ERROR_NOT_COMPATIBLE_PACKET_VERSION, status);
 }
 
 TEST(TestSuite, errorInReply)
 {
-  MockTransport mock_transport;
+  EXPECT_GLOBAL_CALL(orion_communication_new, orion_communication_new(_)).WillOnce(Return(ORION_COM_ERROR_NONE));
+  EXPECT_GLOBAL_CALL(orion_communication_delete, orion_communication_delete(_)).WillOnce(Return(ORION_COM_ERROR_NONE));
+  MockCommunication mock_communication;
+
+  EXPECT_GLOBAL_CALL(orion_transport_new, orion_transport_new(_, _)).WillOnce(Return(ORION_TRAN_ERROR_NONE));
+  EXPECT_GLOBAL_CALL(orion_transport_delete, orion_transport_delete(_)).WillOnce(Return(ORION_TRAN_ERROR_NONE));
+  MockTransport mock_transport(&mock_communication);
+
   orion::Major main(&mock_transport);
 
   HandshakeCommand command;
@@ -177,7 +202,7 @@ TEST(TestSuite, errorInReply)
   uint8_t retry_count = 2;
   uint32_t retry_timeout = orion::Major::Interval::Microsecond * 500;
 
-  EXPECT_CALL(mock_transport, sendPacket(NotNull(), Gt(0), Eq(retry_timeout))).WillOnce(Return(true));
+  EXPECT_CALL(mock_transport, sendPacket(NotNull(), Gt(0), Eq(retry_timeout))).WillOnce(Return(ORION_TRAN_ERROR_NONE));
   EXPECT_CALL(mock_transport, hasReceivedPacket()).Times(0);
   auto mock_receive_packet = [](uint8_t *output_buffer, uint32_t output_size, uint32_t timeout)
     {
@@ -189,19 +214,11 @@ TEST(TestSuite, errorInReply)
       return size;
     };
   EXPECT_CALL(mock_transport, receivePacket(NotNull(), Gt(0), Le(retry_timeout))).WillOnce(Invoke(mock_receive_packet));
-  try
-  {
-    main.invoke(command, &result, retry_timeout, retry_count);
-    FAIL() << "Expected std::runtime_error";
-  }
-  catch(std::runtime_error const & err)
-  {
-    EXPECT_EQ(err.what(), std::string("Error code: 12 detected in return packet"));
-  }
-  catch(...)
-  {
-    FAIL() << "Expected std::runtime_error";
-  }
+  orion_major_error_t status = main.invoke(command, &result, retry_timeout, retry_count);
+  EXPECT_EQ(ORION_MAJOR_ERROR_APPLICATION_ERROR_RECEIVED, status);
+
+  // TODO(Andriy): How to pass error code?
+  // EXPECT_EQ(12, result.header.error_code);
 }
 
 int main(int argc, char **argv)
