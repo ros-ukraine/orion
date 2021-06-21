@@ -68,7 +68,7 @@ public:
   }
 
 private:
-  orion_minor_t * object_;  
+  orion_minor_t * object_;
 };
 
 }  // namespace orion
